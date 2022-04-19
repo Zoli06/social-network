@@ -1,5 +1,35 @@
 {
   "dependencies": {
-    "graphql": "^16.3.0"
-  }
+    "@graphql-tools/graphql-file-loader": "^7.3.10",
+    "@graphql-tools/load": "^7.5.9",
+    "@graphql-tools/schema": "^8.3.9",
+    "cors": "^2.8.5",
+    "express": "^4.17.3",
+    "express-graphql": "^0.12.0",
+    "graphql": "^16.3.0",
+    "graphql-import": "^1.0.2",
+    "graphql-tag": "^2.12.6",
+    "lodash.snakecase": "^4.1.1",
+    "mysql": "^2.18.1",
+    "mysql2": "^2.3.3",
+    "nodemon": "^2.0.15"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "live": "nodemon server.js"
+  },
+  "name": "server",
+  "version": "1.0.0",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zoli06/Social-network.git"
+  },
+  "author": "Zoli06",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Zoli06/Social-network/issues"
+  },
+  "homepage": "https://github.com/Zoli06/Social-network#readme",
+  "description": ""
 }

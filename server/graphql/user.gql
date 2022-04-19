@@ -1,0 +1,17 @@
+type User {
+  id: ID!,
+  firstName: String!,
+  lastName: String!,
+  middleName: String,
+  userName: String!,
+  mobileNumber: String,
+  email: String!,
+  registratedAt: Int!,
+  lastLogin: Int!,
+  intro: String,
+  friends: [User]
+}
+
+type Query {
+  user(id: ID!): User
+}
