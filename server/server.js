@@ -1,19 +1,29 @@
-const express = require('express');
-const app = express();
-let cors = require('cors');
-const { graphqlHTTP } = require('express-graphql');
-const { makeExecutableSchema } = require('@graphql-tools/schema');
+const { ApolloServer } = require('apollo-server')
 const { fieldResolver, resolvers } = require('./graphql/resolvers.js');
-const typeDefs = require('./graphql/types.js');
+const typeDefs = require('./graphql/typeDefs.js');
+const jwt = require('jsonwebtoken');
 
-app.use(cors());
+const getUser = token => {
+  try {
+    if (token) {
+      return jwt.verify(token, process.env.JWT_SECRET);
+    }
+    return null
+  } catch (error) {
+    return null
+  }
+}
 
-const schema = makeExecutableSchema({typeDefs, resolvers});
-
-app.use('/api', graphqlHTTP({
+const server = new ApolloServer({
   fieldResolver,
-  schema,
-  graphiql: true
-}));
+  typeDefs,
+  resolvers,
+  context: ({ req }) => {
+    const token = req.get('Authorization') || ''
+    return { user: getUser(token.replace('Bearer', ''))}
+  },
+  introspection: true,
+  playground: true
+})
 
-app.listen(3000, () => console.log('Server running on port 3000'));
+server.listen(3000, () => console.log('Server running on port 3000'));

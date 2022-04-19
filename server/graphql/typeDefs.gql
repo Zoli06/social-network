@@ -1,0 +1,36 @@
+type User {
+  userId: ID!
+  firstName: String!
+  lastName: String!
+  middleName: String
+  userName: String!
+  mobileNumber: String
+  email: String!
+  registratedAt: Int!
+  lastLogin: Int!
+  intro: String
+  friends: [User]
+}
+
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
+type Query {
+  user(userId: ID!): User
+  me: User
+}
+
+type Mutation {
+  register(
+    firstName: String!
+    lastName: String!
+    middleName: String
+    userName: String!
+    mobileNumber: String
+    email: String!
+    password: String!
+  ): AuthPayload!
+  login(email: String!, password: String!): AuthPayload!
+}
