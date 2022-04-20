@@ -3,6 +3,10 @@ const snakeCase = require('lodash.snakecase');
 const jsonwebtoken = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
+const authenticate = user => {
+  if (!user) throw new Error('You are not authenticated!')
+}
+
 const resolvers = {
   User: {
     async friends(parent) {
@@ -21,7 +25,7 @@ const resolvers = {
   },
   Query: {
     async user(_, { userId }, context) {
-      if (!context.user) throw new Error('You are not authenticated!')
+      authenticate(context.user)
       return (await connection.promise().query(`SELECT * FROM users WHERE user_id = ?`, [userId]))[0][0];
     },
     async me(_, __, { user }) {
@@ -30,7 +34,7 @@ const resolvers = {
     }
   },
   Mutation: {
-    async register(_, {
+    async register(_, { input: {
       firstName,
       lastName,
       middleName,
@@ -38,7 +42,7 @@ const resolvers = {
       mobileNumber,
       email,
       password
-    }) {
+    } }) {
       const userId = (await connection.promise().query(
         `INSERT INTO users (first_name, last_name, middle_name, user_name, mobile_number, email, password)
           VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -69,6 +73,17 @@ const resolvers = {
       return {
         token, user
       }
+    },
+    updateUser(_, { input: { userId, firstName, lastName, middleName, userName, mobileNumber, email, password } }, { user }) {
+      authenticate(user)
+      return (
+        connection.promise().query(
+          `UPDATE users
+          SET first_name = ?, last_name = ?, middle_name = ?, user_name = ?, mobile_number = ?, email = ?, password = ?
+          WHERE user_id = ?`,
+          [firstName, lastName, middleName, userName, mobileNumber, email, password, userId]
+        )
+      );
     }
   }
 }
