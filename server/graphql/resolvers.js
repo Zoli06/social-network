@@ -44,7 +44,7 @@ const resolvers = {
           VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [firstName, lastName, middleName, userName, mobileNumber, email, await bcrypt.hash(password, 10)]
       ))[0].insertId;
-      const user = await resolvers.Query.user({}, { userId });
+      const user = await resolvers.Query.user({}, { userId }, { user: { userId } });
       const token = jsonwebtoken.sign(
         { id: user.userId, userId: user.user_id },
         process.env.JWT_SECRET,
