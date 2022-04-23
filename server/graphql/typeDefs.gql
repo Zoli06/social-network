@@ -1,3 +1,5 @@
+scalar Date
+
 type User {
   userId: ID!
   firstName: String!
@@ -6,8 +8,8 @@ type User {
   userName: String!
   mobileNumber: String
   email: String!
-  registratedAt: Int!
-  lastLogin: Int!
+  registratedAt: Date!
+  lastLogin: Date!
   intro: String
   friends: [User]
 }
@@ -28,9 +30,32 @@ type AuthPayload {
   user: User!
 }
 
+type Channel {
+  channelId: ID!
+  createdByUser: User!
+  createdAt: Date!
+  updatedAt: Date!
+  name: String!
+  channelType: String!
+  members: [User]!
+  messages: [Message]!
+}
+
+type Message {
+  messageId: ID!
+  channelId: ID!
+  userId: User!
+  createdAt: Date!
+  updatedAt: Date!
+  text: String!
+  responeToActivityId: ID
+}
+
 type Query {
   user(userId: ID!): User
   me: User
+  channel(channelId: ID): Channel
+  message(messageId: ID): Message
 }
 
 type Mutation {

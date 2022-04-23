@@ -2,12 +2,14 @@ const connection = require('../db/sql_connect.js');
 const snakeCase = require('lodash.snakecase');
 const jsonwebtoken = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+var GraphQLDate = require('graphql-date');
 
 const authenticate = user => {
   if (!user) throw new Error('You are not authenticated!')
 }
 
 const resolvers = {
+  Date: GraphQLDate,
   User: {
     async friends(parent) {
       return (
@@ -23,14 +25,49 @@ const resolvers = {
       )[0];
     }
   },
+  Channel: {
+    async messages(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.promise().query(
+          `SELECT * FROM messages
+          WHERE channel_id = :id`,
+          { id: parent.channel_id }
+        )
+      )[0];
+    },
+    async createdByUser(parent, _, { user }) {
+      authenticate(user);
+      return await resolvers.Query.user({}, { userId: parent.created_by_user_id }, { user });
+    }
+  },
+  Message: {
+    async userId(parent) {
+      return (
+        await connection.promise().query(
+          `SELECT * FROM users
+          WHERE user_id = :id`,
+          { id: parent.user_id }
+        )
+      )[0][0];
+    }
+  },
   Query: {
     async user(_, { userId }, context) {
       authenticate(context.user)
       return (await connection.promise().query(`SELECT * FROM users WHERE user_id = ?`, [userId]))[0][0];
     },
     async me(_, __, { user }) {
-      if (!user) throw new Error('You are not authenticated!')
-      return await resolvers.Query.user(_, { userId: user.userId }, { user: user });
+      authenticate(user)
+      return await resolvers.Query.user(_, { userId: user.id }, { user });
+    },
+    async channel(_, { channelId }, { user }) {
+      authenticate(user)
+      return (await connection.promise().query(`SELECT * FROM channels WHERE channel_id = ?`, [channelId]))[0][0];
+    },
+    async message(_, { messageId }, { user }) {
+      authenticate(user)
+      return (await connection.promise().query(`SELECT * FROM messages WHERE message_id = ?`, [messageId]))[0][0];
     }
   },
   Mutation: {
@@ -50,7 +87,7 @@ const resolvers = {
       ))[0].insertId;
       const user = await resolvers.Query.user({}, { userId }, { user: { userId } });
       const token = jsonwebtoken.sign(
-        { id: user.userId, userId: user.user_id },
+        { id: user.userId },
         process.env.JWT_SECRET,
         { expiresIn: '1y' }
       );
@@ -66,7 +103,7 @@ const resolvers = {
         throw new Error('Incorrect password')
       }
       const token = jsonwebtoken.sign(
-        { id: user.id, userId: user.user_id },
+        { id: user.id },
         process.env.JWT_SECRET,
         { expiresIn: '1d' }
       )
