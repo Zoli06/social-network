@@ -7,9 +7,8 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   host: process.env.DB_HOST,
+  namedPlaceholders: true
 });
-
-
 
 module.exports.connection = {
   query: async (query, args) => {
