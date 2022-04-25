@@ -29,4 +29,5 @@ const server = new ApolloServer({
   playground: true
 })
 
-server.listen(process.env.PORT || PORT, () => console.log('Server running on port 3000'));
+
+server.listen(process.env.PORT || PORT, () => console.log('Server running on port ' + process.env.PORT || PORT));
