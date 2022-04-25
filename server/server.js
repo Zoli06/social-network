@@ -4,6 +4,7 @@ const { ApolloServer } = require('apollo-server')
 const { fieldResolver, resolvers } = require('./graphql/resolvers.js');
 const typeDefs = require('./graphql/typeDefs.js');
 const jwt = require('jsonwebtoken');
+const PORT = 8080;
 
 const getUser = token => {
   try {
@@ -28,4 +29,4 @@ const server = new ApolloServer({
   playground: true
 })
 
-server.listen(3000, () => console.log('Server running on port 3000'));
+server.listen(process.env.PORT || PORT, () => console.log('Server running on port 3000'));
