@@ -1,2 +1,6 @@
 **/node_modules
 server/.env
+heroku-social-network-key
+heroku-social-network-key.pub
+heroku-social-network-key-aron
+heroku-social-network-key-aron.pub
