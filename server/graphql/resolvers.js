@@ -1,4 +1,4 @@
-const connection = require('../db/sql_connect.js');
+const { connection } = require('../db/sql_connect.js');
 const snakeCase = require('lodash.snakecase');
 const jsonwebtoken = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
@@ -13,7 +13,7 @@ const resolvers = {
   User: {
     async friends(parent) {
       return (
-        await connection.promise().query(
+        await connection.query(
           `SELECT * FROM user_user_relationship_history
           JOIN users
           ON user_id = initiating_user_id OR user_id = target_user_id
@@ -29,7 +29,7 @@ const resolvers = {
     async messages(parent, _, { user }) {
       authenticate(user);
       return (
-        await connection.promise().query(
+        await connection.query(
           `SELECT * FROM messages
           WHERE channel_id = :id`,
           { id: parent.channel_id }
@@ -44,7 +44,7 @@ const resolvers = {
   Message: {
     async userId(parent) {
       return (
-        await connection.promise().query(
+        await connection.query(
           `SELECT * FROM users
           WHERE user_id = :id`,
           { id: parent.user_id }
@@ -55,7 +55,7 @@ const resolvers = {
   Query: {
     async user(_, { userId }, context) {
       authenticate(context.user)
-      return (await connection.promise().query(`SELECT * FROM users WHERE user_id = ?`, [userId]))[0][0];
+      return (await connection.query(`SELECT * FROM users WHERE user_id = ?`, [userId]))[0][0];
     },
     async me(_, __, { user }) {
       authenticate(user)
@@ -63,11 +63,11 @@ const resolvers = {
     },
     async channel(_, { channelId }, { user }) {
       authenticate(user)
-      return (await connection.promise().query(`SELECT * FROM channels WHERE channel_id = ?`, [channelId]))[0][0];
+      return (await connection.query(`SELECT * FROM channels WHERE channel_id = ?`, [channelId]))[0][0];
     },
     async message(_, { messageId }, { user }) {
       authenticate(user)
-      return (await connection.promise().query(`SELECT * FROM messages WHERE message_id = ?`, [messageId]))[0][0];
+      return (await connection.query(`SELECT * FROM messages WHERE message_id = ?`, [messageId]))[0][0];
     }
   },
   Mutation: {
@@ -80,7 +80,7 @@ const resolvers = {
       email,
       password
     } }) {
-      const userId = (await connection.promise().query(
+      const userId = (await connection.query(
         `INSERT INTO users (first_name, last_name, middle_name, user_name, mobile_number, email, password)
           VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [firstName, lastName, middleName, userName, mobileNumber, email, await bcrypt.hash(password, 10)]
@@ -94,7 +94,7 @@ const resolvers = {
       return { token, user };
     },
     async login(_, { email, password }) {
-      const user = (await connection.promise().query(`SELECT * FROM users WHERE email = ?`, [email]))[0][0]
+      const user = (await connection.query(`SELECT * FROM users WHERE email = ?`, [email]))[0][0]
       if (!user) {
         throw new Error('No user with that email')
       }
@@ -114,7 +114,7 @@ const resolvers = {
     updateUser(_, { input: { userId, firstName, lastName, middleName, userName, mobileNumber, email, password } }, { user }) {
       authenticate(user)
       return (
-        connection.promise().query(
+        connection.query(
           `UPDATE users
           SET first_name = ?, last_name = ?, middle_name = ?, user_name = ?, mobile_number = ?, email = ?, password = ?
           WHERE user_id = ?`,
