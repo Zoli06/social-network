@@ -1,3 +1,5 @@
+console.log("Hello world");
+
 const { ApolloServer } = require('apollo-server')
 const { fieldResolver, resolvers } = require('./graphql/resolvers.js');
 const typeDefs = require('./graphql/typeDefs.js');
