@@ -1,5 +1,6 @@
 scalar Date
 
+# User things
 type User {
   userId: ID!
   firstName: String!
@@ -30,6 +31,7 @@ type AuthPayload {
   user: User!
 }
 
+# Communication
 type Channel {
   channelId: ID!
   createdByUser: User!
@@ -38,19 +40,37 @@ type Channel {
   name: String!
   channelType: String!
   members: [User]!
-  messages: [Message]!
+  messages: [Message!]!
 }
 
 type Message {
   messageId: ID!
   channelId: ID!
-  userId: User!
+  user: User!
   createdAt: Date!
   updatedAt: Date!
   text: String!
   responeToActivityId: ID
+  reactions: [Reaction!]!
+  votes: [Vote!]!
+  mentionedUsers: [User!]!
 }
 
+type Reaction {
+  user: User!
+  createdAt: Date!
+  updatedAt: Date!
+  type: Int!
+}
+
+type Vote {
+  user: User!
+  createdAt: Date!
+  updatedAt: Date!
+  type: Boolean!
+}
+
+# Query, Mutation, Subscription
 type Query {
   user(userId: ID!): User
   me: User

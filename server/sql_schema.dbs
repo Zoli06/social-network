@@ -2,22 +2,6 @@
 <project name="Social network_mysql_create (3).sql" id="Project-a6f" database="MySql" >
 	<schema name="information_schema" />
 	<schema name="social_network" >
-		<table name="activity_medias" generator_rows="337" spec="" >
-			<column name="media_id" type="INT" jt="4" mandatory="y" />
-			<column name="message_id" prior="activity_id" type="INT" jt="4" mandatory="y" />
-			<index name="pk_activity_medias" unique="PRIMARY_KEY" >
-				<column name="media_id" />
-			</index>
-			<index name="activity_medias_fk1" unique="NORMAL" >
-				<column name="message_id" />
-			</index>
-			<fk name="activity_medias_fk0" to_schema="social_network" to_table="medias" options="" >
-				<fk_column name="media_id" pk="media_id" />
-			</fk>
-			<fk name="activity_medias_fk1" to_schema="social_network" to_table="messages" options="" >
-				<fk_column name="message_id" pk="message_id" />
-			</fk>
-		</table>
 		<table name="channel_details" >
 			<column name="channel_id" type="INT" jt="4" mandatory="y" />
 			<column name="detail" type="VARCHAR" length="255" jt="12" mandatory="y" />
@@ -59,12 +43,15 @@
 				<fk_column name="channel_id" pk="channel_id" />
 			</fk>
 		</table>
-		<table name="channel_user_relationship_history" prior="channel_user_relationships" generator_rows="337" spec="" >
+		<table name="channel_user_relationships" prior="channel_user_relationship_history" generator_rows="337" spec="" >
 			<column name="channel_id" type="INT" jt="4" mandatory="y" />
 			<column name="user_id" type="INT" jt="4" mandatory="y" />
 			<column name="operator_user_id" type="INT" jt="4" mandatory="y" />
 			<column name="permission" type="INT" jt="4" mandatory="y" />
 			<column name="created_at" type="DATETIME" jt="93" mandatory="y" >
+				<defo><![CDATA[CURRENT_TIMESTAMP]]></defo>
+			</column>
+			<column name="updated_at" type="DATETIME" jt="93" mandatory="y" >
 				<defo><![CDATA[CURRENT_TIMESTAMP]]></defo>
 			</column>
 			<index name="pk_group_user_relationships" unique="PRIMARY_KEY" >
@@ -111,31 +98,6 @@
 				<fk_column name="created_by_user_id" pk="user_id" />
 			</fk>
 		</table>
-		<table name="likes" prior="tbl_0" generator_rows="337" >
-			<column name="message_id" prior="activity_id" type="INT" jt="4" mandatory="y" />
-			<column name="user_id" type="INT" jt="4" mandatory="y" />
-			<column name="created_at" type="DATETIME" jt="93" mandatory="y" >
-				<defo><![CDATA[CURRENT_TIMESTAMP]]></defo>
-			</column>
-			<column name="updated_at" type="DATETIME" jt="93" mandatory="y" >
-				<defo><![CDATA[CURRENT_TIMESTAMP]]></defo>
-			</column>
-			<column name="type" type="INT" jt="4" mandatory="y" />
-			<index name="pk_likes" unique="PRIMARY_KEY" >
-				<column name="message_id" />
-				<column name="user_id" />
-			</index>
-			<index name="likes_fk1" unique="NORMAL" >
-				<column name="user_id" />
-			</index>
-			<fk name="likes_fk0" to_schema="social_network" to_table="messages" >
-				<fk_column name="message_id" pk="message_id" />
-			</fk>
-			<fk name="likes_fk1" to_schema="social_network" to_table="users" >
-				<fk_column name="user_id" pk="user_id" />
-			</fk>
-			<options><![CDATA[engine=InnoDB]]></options>
-		</table>
 		<table name="medias" generator_rows="100" spec="" >
 			<column name="media_id" type="INT" jt="4" mandatory="y" >
 				<identity><![CDATA[AUTO_INCREMENT]]></identity>
@@ -172,6 +134,23 @@
 			<fk name="mentioned_users_fk1" to_schema="social_network" to_table="messages" options="" >
 				<fk_column name="message_id" pk="message_id" />
 			</fk>
+		</table>
+		<table name="message_medias" spec="" >
+			<column name="media_id" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="message_id" type="INT" length="11" jt="4" mandatory="y" />
+			<index name="pk_message_medias" unique="PRIMARY_KEY" >
+				<column name="media_id" />
+			</index>
+			<index name="activity_medias_fk1" unique="NORMAL" >
+				<column name="message_id" />
+			</index>
+			<fk name="activity_medias_fk0" to_schema="social_network" to_table="medias" >
+				<fk_column name="media_id" pk="media_id" />
+			</fk>
+			<fk name="activity_medias_fk1_0" to_schema="social_network" to_table="messages" >
+				<fk_column name="message_id" pk="message_id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8]]></options>
 		</table>
 		<table name="messages" prior="activities" generator_rows="225" spec="" >
 			<column name="message_id" prior="activity_id" type="INT" jt="4" mandatory="y" >
@@ -210,7 +189,6 @@
 			</fk>
 		</table>
 		<table name="reactions" generator_rows="337" spec="" >
-			<column name="target_message_id" prior="target_activity_id" type="INT" jt="4" mandatory="y" />
 			<column name="user_id" type="INT" jt="4" mandatory="y" />
 			<column name="created_at" type="DATETIME" jt="93" mandatory="y" >
 				<defo><![CDATA[CURRENT_TIMESTAMP]]></defo>
@@ -219,25 +197,29 @@
 				<defo><![CDATA[CURRENT_TIMESTAMP]]></defo>
 			</column>
 			<column name="type" prior="reaction" type="INT" jt="4" mandatory="y" />
-			<index name="pk_reactions" unique="PRIMARY_KEY" >
-				<column name="target_message_id" />
-				<column name="user_id" />
-			</index>
+			<column name="message_id" type="INT" length="11" jt="4" mandatory="y" />
 			<index name="reactions_fk1" unique="NORMAL" >
 				<column name="user_id" />
 			</index>
+			<index name="pk_reactions" unique="PRIMARY_KEY" >
+				<column name="message_id" />
+				<column name="user_id" />
+			</index>
 			<fk name="reactions_fk0" to_schema="social_network" to_table="messages" options="" >
-				<fk_column name="target_message_id" pk="message_id" />
+				<fk_column name="message_id" pk="message_id" />
 			</fk>
 			<fk name="reactions_fk1" to_schema="social_network" to_table="users" options="" >
 				<fk_column name="user_id" pk="user_id" />
 			</fk>
 		</table>
-		<table name="user_user_relationship_history" prior="user_user_relationships" generator_rows="150" spec="" >
+		<table name="user_user_relationships" prior="user_user_relationship_history" generator_rows="150" spec="" >
 			<column name="initiating_user_id" type="INT" jt="4" mandatory="y" />
 			<column name="target_user_id" type="INT" jt="4" mandatory="y" />
-			<column name="relationship_type" type="INT" jt="4" mandatory="y" />
 			<column name="created_at" prior="updated_at" type="DATETIME" jt="93" mandatory="y" >
+				<defo><![CDATA[CURRENT_TIMESTAMP]]></defo>
+			</column>
+			<column name="type" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="updated_at" type="DATETIME" jt="93" mandatory="y" >
 				<defo><![CDATA[CURRENT_TIMESTAMP]]></defo>
 			</column>
 			<index name="pk_user_user_relationships" unique="PRIMARY_KEY" >
@@ -276,22 +258,48 @@
 				<column name="user_id" />
 			</index>
 		</table>
+		<table name="votes" prior="likes" generator_rows="337" >
+			<column name="message_id" prior="activity_id" type="INT" jt="4" mandatory="y" />
+			<column name="user_id" type="INT" jt="4" mandatory="y" />
+			<column name="created_at" type="DATETIME" jt="93" mandatory="y" >
+				<defo><![CDATA[CURRENT_TIMESTAMP]]></defo>
+			</column>
+			<column name="updated_at" type="DATETIME" jt="93" mandatory="y" >
+				<defo><![CDATA[CURRENT_TIMESTAMP]]></defo>
+			</column>
+			<column name="type" type="TINYINT" length="1" jt="-6" mandatory="y" />
+			<index name="pk_likes" unique="PRIMARY_KEY" >
+				<column name="message_id" />
+				<column name="user_id" />
+			</index>
+			<index name="likes_fk1" unique="NORMAL" >
+				<column name="user_id" />
+			</index>
+			<fk name="likes_fk0" to_schema="social_network" to_table="messages" >
+				<fk_column name="message_id" pk="message_id" />
+			</fk>
+			<fk name="likes_fk1" to_schema="social_network" to_table="users" >
+				<fk_column name="user_id" pk="user_id" />
+			</fk>
+			<options><![CDATA[engine=InnoDB]]></options>
+		</table>
 	</schema>
-	<connector name="MySql" database="MySql" driver_class="com.mysql.jdbc.Driver" driver_jar="mysql-connector-java-8.0.28.jar" driver_desc="Standard" host="localhost" port="3306" instance="public" user="root" passwd="Wm9saTk0NjMxNzgy" />
+	<connector name="MySql" database="MySql" driver_class="com.mysql.jdbc.Driver" driver_jar="mysql-connector-java-8.0.28.jar" driver_desc="Standard" host="eu-cdbr-west-02.cleardb.net" port="3306" instance="heroku_19d62b397341425" user="b1c9a57a03bc3c" passwd="OTNkMGY5OTI=" schema_mapping="social_network:heroku_19d62b397341425" />
 	<connector name="MySql" database="MySql" driver_class="com.mysql.jdbc.Driver" driver_jar="mysql-connector-java-8.0.28.jar" driver_desc="Standard" host="localhost" port="3306" instance="social_network" user="social_network" passwd="Z3JvdmVzdHJlZXRmYW1pbGllcw==" schema_mapping="public:social_network" />
+	<connector name="MySql" database="MySql" driver_class="com.mysql.jdbc.Driver" driver_jar="mysql-connector-java-8.0.28.jar" driver_desc="Standard" host="localhost" port="3306" instance="public" user="root" passwd="Wm9saTk0NjMxNzgy" />
 	<layout name="Layout" id="Layout-2435" show_relation="columns" >
-		<entity schema="social_network" name="activity_medias" color="BED3F4" x="2128" y="64" />
 		<entity schema="social_network" name="channel_details" color="C1D8EE" x="64" y="128" />
 		<entity schema="social_network" name="channel_followers" color="C7F4BE" x="48" y="336" />
-		<entity schema="social_network" name="channel_user_relationship_history" color="C7F4BE" x="48" y="528" />
+		<entity schema="social_network" name="channel_user_relationships" color="C7F4BE" x="48" y="528" />
 		<entity schema="social_network" name="channels" color="C7F4BE" x="496" y="304" />
-		<entity schema="social_network" name="likes" color="C1D8EE" x="1696" y="400" />
 		<entity schema="social_network" name="medias" color="BED3F4" x="2480" y="176" />
-		<entity schema="social_network" name="mentioned_users" color="BED3F4" x="1696" y="752" />
+		<entity schema="social_network" name="mentioned_users" color="BED3F4" x="1680" y="960" />
+		<entity schema="social_network" name="message_medias" color="3986C1" x="1872" y="176" />
 		<entity schema="social_network" name="messages" color="BED3F4" x="1216" y="48" />
-		<entity schema="social_network" name="reactions" color="BED3F4" x="1696" y="576" />
-		<entity schema="social_network" name="user_user_relationship_history" color="C7F4BE" x="832" y="832" />
+		<entity schema="social_network" name="reactions" color="BED3F4" x="1680" y="560" />
+		<entity schema="social_network" name="user_user_relationships" color="C7F4BE" x="832" y="832" />
 		<entity schema="social_network" name="users" color="C7F4BE" x="832" y="320" />
+		<entity schema="social_network" name="votes" color="C1D8EE" x="1696" y="400" />
 		<script name="SQL_Editor" id="Editor-1056" language="SQL" >
 			<string><![CDATA[rails db:schema:load;]]></string>
 		</script>
@@ -465,7 +473,6 @@ ALTER TABLE `private_messages` ADD CONSTRAINT `private_messages_fk2` FOREIGN KEY
 ALTER TABLE `reactions` ADD CONSTRAINT `reactions_fk0` FOREIGN KEY (`target_activity_id`) REFERENCES `activities`(`activity_id`);
 
 ALTER TABLE `reactions` ADD CONSTRAINT `reactions_fk1` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`);
-
 
 
 

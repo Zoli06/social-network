@@ -11,10 +11,11 @@ const authenticate = user => {
 const resolvers = {
   Date: GraphQLDate,
   User: {
-    async friends(parent) {
+    async friends(parent, _, { user }) {
+      authenticate(user);
       return (
         await connection.query(
-          `SELECT * FROM user_user_relationship_history
+          `SELECT * FROM user_user_relationships
           JOIN users
           ON user_id = initiating_user_id OR user_id = target_user_id
           WHERE (initiating_user_id = :id OR target_user_id = :id)
@@ -42,12 +43,70 @@ const resolvers = {
     }
   },
   Message: {
-    async userId(parent) {
+    async user(parent, _, { user }) {
+      authenticate(user);
       return (
         await connection.query(
           `SELECT * FROM users
-          WHERE user_id = :id`,
-          { id: parent.user_id }
+          WHERE user_id = ?`,
+          [ parent.user_id ]
+        )
+      )[0][0];
+    },
+    async reactions(parent, _, { user }) {
+      authenticate(user);
+      console.log(parent.message_id)
+      return (
+        await connection.query(
+          `SELECT * FROM reactions
+          WHERE message_id = ?`,
+          [ parent.message_id ]
+        )
+      )[0];
+    },
+    async votes(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM votes
+          WHERE message_id = ?`,
+          [ parent.message_id ]
+        )
+      )[0];
+    },
+    async mentionedUsers(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM mentioned_users
+          JOIN users
+          USING(user_id)
+          WHERE message_id = 1`,
+          [ parent.message_id ]
+        )
+      )[0];
+    }
+  },
+  Reaction: {
+    async user(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM users
+          WHERE user_id = ?`,
+          [ parent.user_id ]
+        )
+      )[0][0];
+    }
+  },
+  Vote: {
+    async user(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM users
+          WHERE user_id = ?`,
+          [parent.user_id]
         )
       )[0][0];
     }
