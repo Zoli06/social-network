@@ -12,7 +12,10 @@ type User {
   registratedAt: Date!
   lastLogin: Date!
   intro: String
-  friends: [User]
+  friends: [User!]!
+  incomingFriendRequests: [User!]!
+  outgoingFriendRequests: [User!]!
+  blockedUsers: [User!]!
 }
 
 input UserInput {
@@ -73,7 +76,7 @@ type Vote {
 # Query, Mutation, Subscription
 type Query {
   user(userId: ID!): User
-  me: User
+  me: User!
   channel(channelId: ID): Channel
   message(messageId: ID): Message
 }

@@ -19,9 +19,46 @@ const resolvers = {
           JOIN users
           ON user_id = initiating_user_id OR user_id = target_user_id
           WHERE (initiating_user_id = :id OR target_user_id = :id)
-            AND relationship_type = 2
+            AND type = 2
             AND user_id != :id`,
           { id: parent.user_id }
+        )
+      )[0];
+    },
+    async incomingFriendRequests(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM user_user_relationships
+          JOIN users
+          ON user_id = initiating_user_id
+          WHERE target_user_id = ? AND type = 1`,
+          [parent.user_id]
+        )
+      )[0];
+    },
+    async outgoingFriendRequests(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM user_user_relationships
+          JOIN users
+          ON user_id = target_user_id
+          WHERE initiating_user_id = ? AND type = 1`,
+          [parent.user_id]
+        )
+      )[0];
+    },
+    async blockedUsers(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM user_user_relationships
+          JOIN users
+          ON user_id = target_user_id
+          WHERE initiating_user_id = ?
+            AND type = 0`,
+            [parent.user_id]
         )
       )[0];
     }
@@ -55,7 +92,6 @@ const resolvers = {
     },
     async reactions(parent, _, { user }) {
       authenticate(user);
-      console.log(parent.message_id)
       return (
         await connection.query(
           `SELECT * FROM reactions
@@ -162,7 +198,7 @@ const resolvers = {
         throw new Error('Incorrect password')
       }
       const token = jsonwebtoken.sign(
-        { id: user.id },
+        { id: user.user_id },
         process.env.JWT_SECRET,
         { expiresIn: '1d' }
       )
@@ -170,14 +206,14 @@ const resolvers = {
         token, user
       }
     },
-    updateUser(_, { input: { userId, firstName, lastName, middleName, userName, mobileNumber, email, password } }, { user }) {
+    updateUser(_, { input: { firstName, lastName, middleName, userName, mobileNumber, email, password } }, { user }) {
       authenticate(user)
       return (
         connection.query(
           `UPDATE users
           SET first_name = ?, last_name = ?, middle_name = ?, user_name = ?, mobile_number = ?, email = ?, password = ?
           WHERE user_id = ?`,
-          [firstName, lastName, middleName, userName, mobileNumber, email, password, userId]
+          [firstName, lastName, middleName, userName, mobileNumber, email, password, user.userId]
         )
       );
     }
