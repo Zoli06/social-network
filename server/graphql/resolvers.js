@@ -213,7 +213,7 @@ const resolvers = {
           `UPDATE users
           SET first_name = ?, last_name = ?, middle_name = ?, user_name = ?, mobile_number = ?, email = ?, password = ?
           WHERE user_id = ?`,
-          [firstName, lastName, middleName, userName, mobileNumber, email, password, user.userId]
+          [firstName, lastName, middleName, userName, mobileNumber, email, password, user.id]
         )
       );
     }
