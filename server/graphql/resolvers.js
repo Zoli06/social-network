@@ -19,7 +19,7 @@ const resolvers = {
           JOIN users
           ON user_id = initiating_user_id OR user_id = target_user_id
           WHERE (initiating_user_id = :id OR target_user_id = :id)
-            AND type = 2
+            AND type = 'friend'
             AND user_id != :id`,
           { id: parent.user_id }
         )
@@ -32,7 +32,7 @@ const resolvers = {
           `SELECT * FROM user_user_relationships
           JOIN users
           ON user_id = initiating_user_id
-          WHERE target_user_id = ? AND type = 1`,
+          WHERE target_user_id = ? AND type = 'friend_request'`,
           [parent.user_id]
         )
       )[0];
@@ -44,7 +44,7 @@ const resolvers = {
           `SELECT * FROM user_user_relationships
           JOIN users
           ON user_id = target_user_id
-          WHERE initiating_user_id = ? AND type = 1`,
+          WHERE initiating_user_id = ? AND type = 'friend_request'`,
           [parent.user_id]
         )
       )[0];
@@ -57,20 +57,20 @@ const resolvers = {
           JOIN users
           ON user_id = target_user_id
           WHERE initiating_user_id = ?
-            AND type = 0`,
+            AND type = 'blocked'`,
             [parent.user_id]
         )
       )[0];
     }
   },
-  Channel: {
+  Group: {
     async messages(parent, _, { user }) {
       authenticate(user);
       return (
         await connection.query(
           `SELECT * FROM messages
-          WHERE channel_id = :id`,
-          { id: parent.channel_id }
+          WHERE group_id = :id`,
+          { id: parent.group_id }
         )
       )[0];
     },
@@ -156,9 +156,9 @@ const resolvers = {
       authenticate(user)
       return await resolvers.Query.user(_, { userId: user.id }, { user });
     },
-    async channel(_, { channelId }, { user }) {
+    async group(_, { groupId }, { user }) {
       authenticate(user)
-      return (await connection.query(`SELECT * FROM channels WHERE channel_id = ?`, [channelId]))[0][0];
+      return (await connection.query(`SELECT * FROM groups WHERE group_id = ?`, [groupId]))[0][0];
     },
     async message(_, { messageId }, { user }) {
       authenticate(user)

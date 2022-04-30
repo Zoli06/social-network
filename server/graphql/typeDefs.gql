@@ -35,20 +35,19 @@ type AuthPayload {
 }
 
 # Communication
-type Channel {
-  channelId: ID!
+type Group {
+  groupId: ID!
   createdByUser: User!
   createdAt: Date!
   updatedAt: Date!
   name: String!
-  channelType: String!
   members: [User]!
   messages: [Message!]!
 }
 
 type Message {
   messageId: ID!
-  channelId: ID!
+  groupId: ID!
   user: User!
   createdAt: Date!
   updatedAt: Date!
@@ -66,18 +65,23 @@ type Reaction {
   type: Int!
 }
 
+enum VoteType {
+  up
+  down
+}
+
 type Vote {
   user: User!
   createdAt: Date!
   updatedAt: Date!
-  type: Boolean!
+  type: VoteType! # enum
 }
 
 # Query, Mutation, Subscription
 type Query {
   user(userId: ID!): User
   me: User!
-  channel(channelId: ID): Channel
+  group(groupId: ID): Group
   message(messageId: ID): Message
 }
 
