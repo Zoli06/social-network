@@ -15,12 +15,14 @@ const resolvers = {
       authenticate(user);
       return (
         await connection.query(
-          `SELECT * FROM user_user_relationships
+          `SELECT * FROM user_user_relationship_history AS uurh
           JOIN users
           ON user_id = initiating_user_id OR user_id = target_user_id
           WHERE (initiating_user_id = :id OR target_user_id = :id)
             AND type = 'friend'
-            AND user_id != :id`,
+            AND user_id != :id
+          ORDER BY uurh.created_at DESC
+          LIMIT 1`,
           { id: parent.user_id }
         )
       )[0];
@@ -29,10 +31,12 @@ const resolvers = {
       authenticate(user);
       return (
         await connection.query(
-          `SELECT * FROM user_user_relationships
+          `SELECT * FROM user_user_relationship_history AS uurh
           JOIN users
           ON user_id = initiating_user_id
-          WHERE target_user_id = ? AND type = 'friend_request'`,
+          WHERE target_user_id = ? AND type = 'friend_request'
+          ORDER BY uurh.created_at DESC
+          LIMIT 1`,
           [parent.user_id]
         )
       )[0];
@@ -41,10 +45,12 @@ const resolvers = {
       authenticate(user);
       return (
         await connection.query(
-          `SELECT * FROM user_user_relationships
+          `SELECT * FROM user_user_relationship_history AS uurh
           JOIN users
           ON user_id = target_user_id
-          WHERE initiating_user_id = ? AND type = 'friend_request'`,
+          WHERE initiating_user_id = ? AND type = 'friend_request'
+          ORDER BY uurh.created_at DESC
+          LIMIT 1`,
           [parent.user_id]
         )
       )[0];
@@ -53,12 +59,14 @@ const resolvers = {
       authenticate(user);
       return (
         await connection.query(
-          `SELECT * FROM user_user_relationships
+          `SELECT * FROM user_user_relationship_history AS uurh
           JOIN users
           ON user_id = target_user_id
           WHERE initiating_user_id = ?
-            AND type = 'blocked'`,
-            [parent.user_id]
+            AND type = 'blocked'
+          ORDER BY uurh.created_at DESC
+          LIMIT 1`,
+          [parent.user_id]
         )
       )[0];
     }
@@ -69,14 +77,92 @@ const resolvers = {
       return (
         await connection.query(
           `SELECT * FROM messages
-          WHERE group_id = :id`,
-          { id: parent.group_id }
+          WHERE group_id = ?`,
+          [parent.group_id]
         )
       )[0];
     },
     async createdByUser(parent, _, { user }) {
       authenticate(user);
       return await resolvers.Query.user({}, { userId: parent.created_by_user_id }, { user });
+    },
+    async members(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM group_user_relationship_history AS gurh
+          JOIN users
+          USING (user_id)
+          WHERE group_id = ? AND type = 'member'
+          ORDER BY gurh.created_at DESC
+          LIMIT 1`,
+          [parent.group_id]
+        )
+      )[0];
+    },
+    async memberRequests(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM group_user_relationship_history AS gurh
+          JOIN users
+          USING (user_id)
+          WHERE group_id = ? AND type = 'member_request'
+          ORDER BY gurh.created_at DESC
+          LIMIT 1`,
+          [parent.group_id]
+        )
+      )[0];
+    },
+    async blockedUsers(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM group_user_relationship_history AS gurh
+          JOIN users
+          USING (user_id)
+          WHERE group_id = ? AND type = 'blocked'
+          ORDER BY gurh.created_at DESC
+          LIMIT 1`,
+          [parent.group_id]
+        )
+      )[0];
+    },
+    async admins(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM group_user_relationship_history AS gurh
+          JOIN users
+          USING (user_id)
+          WHERE group_id = ? AND type = 'admin'
+          ORDER BY gurh.created_at DESC
+          LIMIT 1`,
+          [parent.group_id]
+        )
+      )[0];
+    },
+    async notificationFrequency(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT notification_frequency FROM group_user_relationship_history AS gurh
+          WHERE group_id = ? AND user_id = ?
+          ORDER BY gurh.created_at DESC
+          LIMIT 1`,
+          [parent.group_id, user.id]
+        )
+      )[0][0].notification_frequency;
+    },
+    async details(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM group_details
+          WHERE group_id = ?`,
+          [parent.group_id]
+        )
+      )[0];
     }
   },
   Message: {
@@ -86,7 +172,7 @@ const resolvers = {
         await connection.query(
           `SELECT * FROM users
           WHERE user_id = ?`,
-          [ parent.user_id ]
+          [parent.user_id]
         )
       )[0][0];
     },
@@ -96,7 +182,7 @@ const resolvers = {
         await connection.query(
           `SELECT * FROM reactions
           WHERE message_id = ?`,
-          [ parent.message_id ]
+          [parent.message_id]
         )
       )[0];
     },
@@ -106,7 +192,7 @@ const resolvers = {
         await connection.query(
           `SELECT * FROM votes
           WHERE message_id = ?`,
-          [ parent.message_id ]
+          [parent.message_id]
         )
       )[0];
     },
@@ -118,7 +204,19 @@ const resolvers = {
           JOIN users
           USING(user_id)
           WHERE message_id = 1`,
-          [ parent.message_id ]
+          [parent.message_id]
+        )
+      )[0];
+    },
+    async medias(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM message_medias
+          JOIN medias
+          USING(media_id)
+          WHERE message_id = ?`,
+          [parent.message_id]
         )
       )[0];
     }
@@ -130,7 +228,7 @@ const resolvers = {
         await connection.query(
           `SELECT * FROM users
           WHERE user_id = ?`,
-          [ parent.user_id ]
+          [parent.user_id]
         )
       )[0][0];
     }
@@ -143,6 +241,20 @@ const resolvers = {
           `SELECT * FROM users
           WHERE user_id = ?`,
           [parent.user_id]
+        )
+      )[0][0];
+    }
+  },
+  Media: {
+    async user(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM medias
+          JOIN users
+          USING(user_id)
+          WHERE media_id = ?`,
+          [parent.media_id]
         )
       )[0][0];
     }

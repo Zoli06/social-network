@@ -1,6 +1,22 @@
 scalar Date
 
 # User things
+input UserInput {
+  firstName: String!
+  lastName: String!
+  middleName: String
+  userName: String!
+  mobileNumber: String
+  email: String!
+  intro: String
+  password: String!
+}
+
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
 type User {
   userId: ID!
   firstName: String!
@@ -18,31 +34,66 @@ type User {
   blockedUsers: [User!]!
 }
 
-input UserInput {
-  firstName: String!
-  lastName: String!
-  middleName: String
-  userName: String!
-  mobileNumber: String
-  email: String!
-  intro: String
-  password: String!
+# Communication
+enum NotificationFrequency {
+  off
+  low
+  frequent
 }
 
-type AuthPayload {
-  token: String!
+enum VoteType {
+  up
+  down
+}
+
+enum Visibility {
+  visible,
+  hidden
+}
+
+type Reaction {
+  user: User!
+  createdAt: Date!
+  updatedAt: Date!
+  type: Int!
+}
+
+type Vote {
+  user: User!
+  createdAt: Date!
+  updatedAt: Date!
+  type: VoteType!
+}
+
+type Media {
+  mediaId: ID!
+  createdAt: Date!
+  updatedAt: Date!
+  url: String!
   user: User!
 }
 
-# Communication
+type Detail {
+  detail: String!
+  value: String
+  createdAt: Date!
+  updatedAt: Date!
+}
+
 type Group {
   groupId: ID!
   createdByUser: User!
   createdAt: Date!
   updatedAt: Date!
   name: String!
-  members: [User]!
   messages: [Message!]!
+  members: [User!]!
+  memberRequests: [User!]!
+  blockedUsers: [User!]!
+  admins: [User!]!
+  notificationFrequency: NotificationFrequency!
+  details: [Detail!]!
+  visibility: Visibility!
 }
 
 type Message {
@@ -56,25 +107,7 @@ type Message {
   reactions: [Reaction!]!
   votes: [Vote!]!
   mentionedUsers: [User!]!
-}
-
-type Reaction {
-  user: User!
-  createdAt: Date!
-  updatedAt: Date!
-  type: Int!
-}
-
-enum VoteType {
-  up
-  down
-}
-
-type Vote {
-  user: User!
-  createdAt: Date!
-  updatedAt: Date!
-  type: VoteType! # enum
+  medias: [Media!]! # urls of the medias
 }
 
 # Query, Mutation, Subscription
