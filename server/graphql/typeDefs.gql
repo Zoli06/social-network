@@ -12,6 +12,20 @@ input UserInput {
   password: String!
 }
 
+enum UserUserRelationshipType {
+  friend
+  incoming_friend_request
+  outgoing_friend_request
+  blocked
+}
+
+type UserUserRelationship {
+  user: User!
+  type: UserUserRelationshipType!
+  createdAt: Date!
+  updatedAt: Date!
+}
+
 type AuthPayload {
   token: String!
   user: User!
@@ -28,10 +42,11 @@ type User {
   registratedAt: Date!
   lastLogin: Date!
   intro: String
-  friends: [User!]!
-  incomingFriendRequests: [User!]!
-  outgoingFriendRequests: [User!]!
-  blockedUsers: [User!]!
+  friends: [UserUserRelationship!]!
+  incomingFriendRequests: [UserUserRelationship!]!
+  outgoingFriendRequests: [UserUserRelationship!]!
+  blockedUsers: [UserUserRelationship!]!
+  userRelationships: [UserUserRelationship!]! # all relationships
 }
 
 # Communication

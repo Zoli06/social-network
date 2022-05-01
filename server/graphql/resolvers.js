@@ -11,64 +11,97 @@ const authenticate = user => {
 const resolvers = {
   Date: GraphQLDate,
   User: {
+    async userRelationships(parent, _, { user }) {
+      authenticate(user);
+
+      return [
+        ...await this.friends(parent, _, { user }),
+        ...await this.incomingFriendRequests(parent, _, { user }),
+        ...await this.outgoingFriendRequests(parent, _, { user }),
+        ...await this.blockedUsers(parent, _, { user })
+      ];
+    },
     async friends(parent, _, { user }) {
       authenticate(user);
-      return (
-        await connection.query(
-          `SELECT * FROM user_user_relationship_history AS uurh
-          JOIN users
-          ON user_id = initiating_user_id OR user_id = target_user_id
-          WHERE (initiating_user_id = :id OR target_user_id = :id)
-            AND type = 'friend'
-            AND user_id != :id
-          ORDER BY uurh.created_at DESC
-          LIMIT 1`,
-          { id: parent.user_id }
-        )
-      )[0];
+      return ((await connection.query(
+        `SELECT users.*, uur1.*, LEAST(uur1.created_at, uur2.created_at) AS real_created_at, GREATEST(uur1.updated_at, uur2.updated_at) AS real_updated_at
+        FROM user_user_relationships AS uur1
+        JOIN user_user_relationships AS uur2
+        ON uur1.initiating_user_id = uur2.target_user_id AND uur1.target_user_id = uur2.initiating_user_id
+        JOIN users
+        ON user_id = uur1.initiating_user_id
+        WHERE 
+          uur1.type = 'friend'
+          AND (uur1.initiating_user_id = :id OR uur1.target_user_id = :id)
+          AND user_id != :id
+        GROUP BY user_id`,
+        { id: parent.user_id }
+      ))[0].map(record => ({
+        user: record,
+        type: record.type,
+        created_at: record.real_created_at,
+        updated_at: record.real_updated_at
+      })));
     },
     async incomingFriendRequests(parent, _, { user }) {
       authenticate(user);
       return (
         await connection.query(
-          `SELECT * FROM user_user_relationship_history AS uurh
+          `SELECT *
+          FROM user_user_relationships AS uur1
           JOIN users
-          ON user_id = initiating_user_id
-          WHERE target_user_id = ? AND type = 'friend_request'
-          ORDER BY uurh.created_at DESC
-          LIMIT 1`,
-          [parent.user_id]
+          ON user_id = uur1.initiating_user_id
+          WHERE
+            uur1.type = 'friend'
+            AND uur1.target_user_id = :id
+            AND NOT EXISTS(SELECT * FROM user_user_relationships AS uur2 WHERE uur1.initiating_user_id = uur2.target_user_id AND uur1.target_user_id = uur2.initiating_user_id) AND user_id != :id`,
+          { id: parent.user_id }
         )
-      )[0];
+      )[0].map(record => ({
+        user: record,
+        type: 'incoming_friend_request',
+        created_at: record.created_at,
+        updated_at: record.updated_at
+      }));
     },
     async outgoingFriendRequests(parent, _, { user }) {
       authenticate(user);
       return (
         await connection.query(
-          `SELECT * FROM user_user_relationship_history AS uurh
+          `SELECT *
+          FROM user_user_relationships AS uur1
           JOIN users
-          ON user_id = target_user_id
-          WHERE initiating_user_id = ? AND type = 'friend_request'
-          ORDER BY uurh.created_at DESC
-          LIMIT 1`,
-          [parent.user_id]
+          ON user_id = uur1.target_user_id
+          WHERE
+            uur1.type = 'friend'
+            AND uur1.initiating_user_id = :id
+            AND NOT EXISTS(SELECT * FROM user_user_relationships AS uur2 WHERE uur1.initiating_user_id = uur2.target_user_id AND uur1.target_user_id = uur2.initiating_user_id) AND user_id != :id`,
+          { id: parent.user_id }
         )
-      )[0];
+      )[0].map(record => ({
+        user: record,
+        type: 'outgoing_friend_request',
+        created_at: record.created_at,
+        updated_at: record.updated_at
+      }));
     },
     async blockedUsers(parent, _, { user }) {
       authenticate(user);
       return (
         await connection.query(
-          `SELECT * FROM user_user_relationship_history AS uurh
+          `SELECT *
+          FROM user_user_relationships
           JOIN users
           ON user_id = target_user_id
-          WHERE initiating_user_id = ?
-            AND type = 'blocked'
-          ORDER BY uurh.created_at DESC
-          LIMIT 1`,
+          WHERE type = 'blocked' AND initiating_user_id = 45`,
           [parent.user_id]
         )
-      )[0];
+      )[0].map(record => ({
+        user: record,
+        type: record.type,
+        created_at: record.created_at,
+        updated_at: record.updated_at
+      }));
     }
   },
   Group: {
@@ -90,12 +123,10 @@ const resolvers = {
       authenticate(user);
       return (
         await connection.query(
-          `SELECT * FROM group_user_relationship_history AS gurh
+          `SELECT * FROM group_user_relationships
           JOIN users
           USING (user_id)
-          WHERE group_id = ? AND type = 'member'
-          ORDER BY gurh.created_at DESC
-          LIMIT 1`,
+          WHERE group_id = ? AND type = 'member'`,
           [parent.group_id]
         )
       )[0];
@@ -104,12 +135,10 @@ const resolvers = {
       authenticate(user);
       return (
         await connection.query(
-          `SELECT * FROM group_user_relationship_history AS gurh
+          `SELECT * FROM group_user_relationships
           JOIN users
           USING (user_id)
-          WHERE group_id = ? AND type = 'member_request'
-          ORDER BY gurh.created_at DESC
-          LIMIT 1`,
+          WHERE group_id = ? AND type = 'member_request'`,
           [parent.group_id]
         )
       )[0];
@@ -118,12 +147,10 @@ const resolvers = {
       authenticate(user);
       return (
         await connection.query(
-          `SELECT * FROM group_user_relationship_history AS gurh
+          `SELECT * FROM group_user_relationships
           JOIN users
           USING (user_id)
-          WHERE group_id = ? AND type = 'blocked'
-          ORDER BY gurh.created_at DESC
-          LIMIT 1`,
+          WHERE group_id = ? AND type = 'blocked'`,
           [parent.group_id]
         )
       )[0];
@@ -132,12 +159,10 @@ const resolvers = {
       authenticate(user);
       return (
         await connection.query(
-          `SELECT * FROM group_user_relationship_history AS gurh
+          `SELECT * FROM group_user_relationships
           JOIN users
           USING (user_id)
-          WHERE group_id = ? AND type = 'admin'
-          ORDER BY gurh.created_at DESC
-          LIMIT 1`,
+          WHERE group_id = ? AND type = 'admin'`,
           [parent.group_id]
         )
       )[0];
@@ -146,10 +171,8 @@ const resolvers = {
       authenticate(user);
       return (
         await connection.query(
-          `SELECT notification_frequency FROM group_user_relationship_history AS gurh
-          WHERE group_id = ? AND user_id = ?
-          ORDER BY gurh.created_at DESC
-          LIMIT 1`,
+          `SELECT notification_frequency FROM group_user_relationships
+          WHERE group_id = ? AND user_id = ?`,
           [parent.group_id, user.id]
         )
       )[0][0].notification_frequency;
