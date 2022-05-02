@@ -32,6 +32,7 @@ const resolvers = {
         ON user_id = uur1.initiating_user_id
         WHERE 
           uur1.type = 'friend'
+          AND uur2.type = 'friend'
           AND (uur1.initiating_user_id = :id OR uur1.target_user_id = :id)
           AND user_id != :id
         GROUP BY user_id`,
