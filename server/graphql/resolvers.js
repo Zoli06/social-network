@@ -50,12 +50,15 @@ const resolvers = {
         await connection.query(
           `SELECT *
           FROM user_user_relationships AS uur1
+          LEFT JOIN user_user_relationships AS uur2
+          ON uur1.initiating_user_id = uur2.target_user_id AND uur1.target_user_id = uur2.initiating_user_id
           JOIN users
           ON user_id = uur1.initiating_user_id
           WHERE
             uur1.type = 'friend'
+            AND ((uur2.type != 'friend' AND uur2.type != 'blocked' AND uur1.updated_at > uur2.updated_at) OR uur2.type IS NULL)
             AND uur1.target_user_id = :id
-            AND NOT EXISTS(SELECT * FROM user_user_relationships AS uur2 WHERE uur1.initiating_user_id = uur2.target_user_id AND uur1.target_user_id = uur2.initiating_user_id) AND user_id != :id`,
+            AND user_id != :id`,
           { id: parent.user_id }
         )
       )[0].map(record => ({
@@ -71,12 +74,15 @@ const resolvers = {
         await connection.query(
           `SELECT *
           FROM user_user_relationships AS uur1
+          LEFT JOIN user_user_relationships AS uur2
+          ON uur1.initiating_user_id = uur2.target_user_id AND uur1.target_user_id = uur2.initiating_user_id
           JOIN users
           ON user_id = uur1.target_user_id
           WHERE
             uur1.type = 'friend'
+            AND ((uur2.type != 'friend' AND uur2.type != 'blocked' AND uur1.updated_at > uur2.updated_at) OR uur2.type IS NULL)
             AND uur1.initiating_user_id = :id
-            AND NOT EXISTS(SELECT * FROM user_user_relationships AS uur2 WHERE uur1.initiating_user_id = uur2.target_user_id AND uur1.target_user_id = uur2.initiating_user_id) AND user_id != :id`,
+            AND user_id != :id`,
           { id: parent.user_id }
         )
       )[0].map(record => ({
