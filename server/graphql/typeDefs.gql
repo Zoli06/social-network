@@ -1,17 +1,6 @@
 scalar Date
 
 # User things
-input UserInput {
-  firstName: String!
-  lastName: String!
-  middleName: String
-  userName: String!
-  mobileNumber: String
-  email: String!
-  intro: String
-  password: String!
-}
-
 enum UserUserRelationshipType {
   friend
   incoming_friend_request
@@ -47,6 +36,18 @@ type User {
   outgoingFriendRequests: [UserUserRelationship!]!
   blockedUsers: [UserUserRelationship!]!
   userRelationships: [UserUserRelationship!]! # all relationships
+  # TODO: profile picture
+}
+
+input UserInput {
+  firstName: String!
+  lastName: String!
+  middleName: String
+  userName: String!
+  mobileNumber: String
+  email: String!
+  intro: String
+  password: String!
 }
 
 # Communication
@@ -88,13 +89,6 @@ type Media {
   user: User!
 }
 
-type Detail {
-  detail: String!
-  value: String
-  createdAt: Date!
-  updatedAt: Date!
-}
-
 type Group {
   groupId: ID!
   createdByUser: User!
@@ -104,16 +98,23 @@ type Group {
   messages: [Message!]!
   members: [User!]!
   memberRequests: [User!]!
-  blockedUsers: [User!]!
+  bannedUsers: [User!]!
+  invitedUsers: [User!]!
   admins: [User!]!
   notificationFrequency: NotificationFrequency!
-  details: [Detail!]!
+  description: String
+  visibility: Visibility!
+}
+
+input GroupInput {
+  name: String!
+  description: String
   visibility: Visibility!
 }
 
 type Message {
   messageId: ID!
-  groupId: ID!  # TODO: change this to group not groupId
+  group: Group!
   user: User!
   createdAt: Date!
   updatedAt: Date!
@@ -135,7 +136,9 @@ type Query {
 }
 
 type Mutation {
-  register(input: UserInput): AuthPayload!
+  register(input: UserInput!): AuthPayload!
   login(email: String!, password: String!): AuthPayload!
-  updateUser(input: UserInput): User! # user only can update his/her own profile
+  updateUser(input: UserInput!): User! # user only can update his/her own profile
+
+  createGroup(input: GroupInput!): Group!
 }

@@ -150,14 +150,26 @@ const resolvers = {
         )
       )[0];
     },
-    async blockedUsers(parent, _, { user }) {
+    async bannedUsers(parent, _, { user }) {
       authenticate(user);
       return (
         await connection.query(
           `SELECT * FROM group_user_relationships
           JOIN users
           USING (user_id)
-          WHERE group_id = ? AND type = 'blocked'`,
+          WHERE group_id = ? AND type = 'banned'`,
+          [parent.group_id]
+        )
+      )[0];
+    },
+    async invitedUsers(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM group_user_relationships
+          JOIN users
+          USING (user_id)
+          WHERE group_id = ? AND type = 'invited'`,
           [parent.group_id]
         )
       )[0];
@@ -183,16 +195,6 @@ const resolvers = {
           [parent.group_id, user.id]
         )
       )[0][0].notification_frequency;
-    },
-    async details(parent, _, { user }) {
-      authenticate(user);
-      return (
-        await connection.query(
-          `SELECT * FROM group_details
-          WHERE group_id = ?`,
-          [parent.group_id]
-        )
-      )[0];
     }
   },
   Message: {
@@ -203,6 +205,16 @@ const resolvers = {
           `SELECT * FROM users
           WHERE user_id = ?`,
           [parent.user_id]
+        )
+      )[0][0];
+    },
+    async group(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM groups
+          WHERE group_id = ?`,
+          [parent.group_id]
         )
       )[0][0];
     },
@@ -349,6 +361,7 @@ const resolvers = {
       if (!isValid) {
         throw new Error('Incorrect password')
       }
+      await connection.query(`UPDATE users SET last_login = DEFAULT WHERE user_id = ?`, [user.user_id])
       const token = jsonwebtoken.sign(
         { id: user.user_id },
         process.env.JWT_SECRET,
@@ -358,17 +371,28 @@ const resolvers = {
         token, user
       }
     },
-    updateUser(_, { input: { firstName, lastName, middleName, userName, mobileNumber, email, password } }, { user }) {
+    async updateUser(_, { input: { firstName, lastName, middleName, userName, mobileNumber, email, password } }, { user }) {
       authenticate(user)
       return (
-        connection.query(
+        await connection.query(
           `UPDATE users
-          SET first_name = ?, last_name = ?, middle_name = ?, user_name = ?, mobile_number = ?, email = ?, password = ?
+          SET first_name = ?, last_name = ?, middle_name = ?, user_name = ?, mobile_number = ?, email = ?, password = ?, updated_at = DEFAULT
           WHERE user_id = ?`,
           [firstName, lastName, middleName, userName, mobileNumber, email, password, user.id]
         )
       );
-    }
+
+      // TODO: return updated user
+    },
+    async createGroup(_, { input: { name, visibility, description } }, { user }) {
+      authenticate(user)
+      await connection.query(
+        `INSERT INTO groups (created_by_user_id, name, visibility, description) VALUES (?, ?, ?, ?)`,
+        [user.id, name, visibility, description]
+      );
+
+      // TODO: return updated group
+    },
   }
 }
 
