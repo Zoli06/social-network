@@ -100,7 +100,7 @@ const resolvers = {
           FROM user_user_relationships
           JOIN users
           ON user_id = target_user_id
-          WHERE type = 'blocked' AND initiating_user_id = 45`,
+          WHERE type = 'blocked' AND initiating_user_id = ?`,
           [parent.user_id]
         )
       )[0].map(record => ({
@@ -109,7 +109,7 @@ const resolvers = {
         created_at: record.created_at,
         updated_at: record.updated_at
       }));
-    }
+    },
   },
   Group: {
     async messages(parent, _, { user }) {
