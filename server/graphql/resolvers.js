@@ -109,7 +109,7 @@ const resolvers = {
         created_at: record.created_at,
         updated_at: record.updated_at
       }));
-    },
+    }
   },
   Group: {
     async messages(parent, _, { user }) {
@@ -216,15 +216,25 @@ const resolvers = {
         )
       )[0];
     },
-    async votes(parent, _, { user }) {
+    async upVotes(parent, _, { user }) {
       authenticate(user);
       return (
         await connection.query(
-          `SELECT * FROM votes
-          WHERE message_id = ?`,
+          `SELECT COUNT(*) FROM votes
+          WHERE message_id = ? AND type = 'up'`,
           [parent.message_id]
         )
-      )[0];
+      )[0][0]['COUNT(*)'];
+    },
+    async downVotes(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT COUNT(*) FROM votes
+          WHERE message_id = ? AND type = 'down'`,
+          [parent.message_id]
+        )
+      )[0][0]['COUNT(*)'];
     },
     async mentionedUsers(parent, _, { user }) {
       authenticate(user);

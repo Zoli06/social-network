@@ -113,14 +113,15 @@ type Group {
 
 type Message {
   messageId: ID!
-  groupId: ID!
+  groupId: ID!  # TODO: change this to group not groupId
   user: User!
   createdAt: Date!
   updatedAt: Date!
   text: String!
   responeToActivityId: ID
   reactions: [Reaction!]!
-  votes: [Vote!]!
+  upVotes: Int!
+  downVotes: Int!
   mentionedUsers: [User!]!
   medias: [Media!]! # urls of the medias
 }
