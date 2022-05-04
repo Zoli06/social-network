@@ -63,7 +63,7 @@ enum VoteType {
 }
 
 enum Visibility {
-  visible,
+  visible
   hidden
 }
 
@@ -87,6 +87,12 @@ type Media {
   updatedAt: Date!
   url: String!
   user: User!
+  caption: String
+}
+
+input MediaInput {
+  url: String!
+  caption: String
 }
 
 type Group {
@@ -119,26 +125,45 @@ type Message {
   createdAt: Date!
   updatedAt: Date!
   text: String!
-  responeToActivityId: ID
+  responseToMessage: Message
   reactions: [Reaction!]!
+  reaction: Reaction
   upVotes: Int!
   downVotes: Int!
+  vote: Vote
   mentionedUsers: [User!]!
   medias: [Media!]! # urls of the medias
+}
+
+input MessageInput {
+  text: String!
+  responseToMessageId: ID
+  mentionedUserIds: [ID!]
+  mediaIds: [String!]
 }
 
 # Query, Mutation, Subscription
 type Query {
   user(userId: ID!): User
-  me: User!
+  me: User
   group(groupId: ID): Group
   message(messageId: ID): Message
+  reaction(messageId: ID!, userId: ID!): Reaction
+  media(mediaId: ID!): Media
 }
 
 type Mutation {
-  register(input: UserInput!): AuthPayload!
-  login(email: String!, password: String!): AuthPayload!
-  updateUser(input: UserInput!): User! # user only can update his/her own profile
-
-  createGroup(input: GroupInput!): Group!
+  register(user: UserInput!): AuthPayload
+  login(email: String!, password: String!): AuthPayload
+  updateUser(user: UserInput!): User # user only can update his/her own profile
+  createGroup(group: GroupInput!): Group
+  updateGroup(groupId: ID!, group: GroupInput!): Group
+  deleteGroup(groupId: ID!): ID
+  sendMessage(groupId: ID!, message: MessageInput!): Message
+  editMessage(messageId: ID!, message: MessageInput!): Message
+  deleteMessage(messageId: ID!): ID
+  createReaction(messageId: ID!, type: Int): Reaction # also can be used to delete and update
+  createVote(messageId: ID!, type: VoteType): VoteType # also can be used to delete and update
+  createMedia(media: MediaInput!): Media # image will be uploaded to a cdn by the client, so we just need the url
+  deleteMedia(mediaId: ID!): ID
 }
