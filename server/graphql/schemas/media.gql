@@ -1,0 +1,8 @@
+type Query {
+  media(mediaId: ID!): Media
+}
+
+type Mutation {
+  createMedia(media: MediaInput!): Media # image will be uploaded to a cdn by the client, so we just need the url
+  deleteMedia(mediaId: ID!): ID
+}

@@ -1,0 +1,230 @@
+const connection = require('../../db/sql_connect.js');
+
+const resolvers = {
+  Message: {
+    async user(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM users
+          WHERE user_id = ?`,
+          [parent.user_id]
+        )
+      )[0][0];
+    },
+    async group(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM groups
+          WHERE group_id = ?`,
+          [parent.group_id]
+        )
+      )[0][0];
+    },
+    async reactions(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM reactions
+          WHERE message_id = ? AND type IS NOT NULL`,
+          [parent.message_id]
+        )
+      )[0];
+    },
+    async reaction(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM reactions
+          WHERE message_id = ? AND user_id = ? AND type IS NOT NULL`,
+          [parent.message_id, user.id]
+        )
+      )[0][0];
+    },
+    async upVotes(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT COUNT(*) FROM votes
+          WHERE message_id = ? AND type = 'up'`,
+          [parent.message_id]
+        )
+      )[0][0]['COUNT(*)'];
+    },
+    async downVotes(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT COUNT(*) FROM votes
+          WHERE message_id = ? AND type = 'down'`,
+          [parent.message_id]
+        )
+      )[0][0]['COUNT(*)'];
+    },
+    async mentionedUsers(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM mentioned_users
+          JOIN users
+          USING(user_id)
+          WHERE message_id = ?`,
+          [parent.message_id]
+        )
+      )[0];
+    },
+    async medias(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM message_medias
+          JOIN medias
+          USING(media_id)
+          WHERE message_id = ?`,
+          [parent.message_id]
+        )
+      )[0];
+    },
+    async responseToMessage(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM messages
+          WHERE message_id = ?`,
+          [parent.response_to_message_id]
+        )
+      )[0][0];
+    }
+  },
+  Reaction: {
+    async user(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM users
+          WHERE user_id = ?`,
+          [parent.user_id]
+        )
+      )[0][0];
+    },
+  },
+  Vote: {
+    async user(parent, _, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(
+          `SELECT * FROM users
+          WHERE user_id = ?`,
+          [parent.user_id]
+        )
+      )[0][0];
+    },
+  },
+  Query: {
+    async message(_, { messageId }, { user }) {
+      authenticate(user);
+      return (
+        await connection.query(`SELECT * FROM messages WHERE message_id = ?`, [
+          messageId,
+        ])
+      )[0][0];
+    }
+  },
+  Mutation: {
+    async sendMessage(
+      _,
+      {
+        message: { text, responseToMessageId, mentionedUserIds, mediaIds },
+        groupId,
+      },
+      { user }
+    ) {
+      authenticate(user);
+      const messageId = (
+        await connection.query(
+          `INSERT INTO messages (user_id, text, response_to_message_id, group_id) VALUES (?, ?, ?, ?)`,
+          [user.id, text, responseToMessageId, groupId]
+        )
+      )[0].insertId;
+      if (mentionedUserIds) {
+        await connection.query(
+          `INSERT INTO mentioned_users (message_id, user_id) VALUES ?`,
+          [mentionedUserIds.map((userId) => [messageId, userId])]
+        );
+      }
+      if (mediaIds) {
+        await connection.query(
+          `INSERT INTO message_medias (message_id, media_id) VALUES ?`,
+          [mediaIds.map((mediaId) => [messageId, mediaId])]
+        );
+      }
+      return await resolvers.Query.message({}, { messageId }, { user });
+    },
+    async editMessage(_, { message: { text, responseToMessageId, mentionedUserIds, mediaIds }, messageId, }, { user }) {
+      authenticate(user);
+      await connection.query(
+        `UPDATE messages
+          SET text = ?, response_to_message_id = ?, updated_at = DEFAULT
+          WHERE message_id = ?`,
+        [text, responseToMessageId, messageId]
+      );
+      await connection.query(
+        `DELETE FROM mentioned_users WHERE message_id = ?`,
+        [messageId]
+      );
+      await connection.query(
+        `INSERT INTO mentioned_users (message_id, user_id) VALUES ?`,
+        [mentionedUserIds.map((userId) => [messageId, userId])]
+      );
+      await connection.query(
+        `DELETE FROM message_medias WHERE message_id = ?`,
+        [messageId]
+      );
+      await connection.query(
+        `INSERT INTO message_medias (message_id, media_id) VALUES ?`,
+        [mediaIds.map((mediaId) => [messageId, mediaId])]
+      );
+      return await resolvers.Query.message({}, { messageId }, { user });
+    },
+    async deleteMessage(_, { messageId }, { user }) {
+      authenticate(user);
+      await connection.query(
+        `DELETE FROM mentioned_users WHERE message_id = ?`,
+        [messageId]
+      );
+      await connection.query(
+        `DELETE FROM message_medias WHERE message_id = ?`,
+        [messageId]
+      );
+      await connection.query(`DELETE FROM messages WHERE message_id = ?`, [
+        messageId,
+      ]);
+      return messageId;
+    },
+    async createReaction(_, { messageId, type }, { user }) {
+      authenticate(user);
+      await connection.query(
+        `INSERT INTO reactions (user_id, message_id, type) VALUES (:userId, :messageId, :type)
+        ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,
+        { userId: user.id, messageId, type }
+      );
+      return await resolvers.Query.reaction(
+        {},
+        { messageId, userId: user.id },
+        { user }
+      );
+    },
+    async createVote(_, { messageId, type }, { user }) {
+      authenticate(user);
+      await connection.query(
+        `INSERT INTO votes (user_id, message_id, type) VALUES (:userId, :messageId, :type)
+        ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,
+        { userId: user.id, messageId, type }
+      );
+      return type;  // TODO: return actual updated vote
+    }
+  }
+}
+
+module.exports = resolvers;

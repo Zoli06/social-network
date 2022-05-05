@@ -1,0 +1,43 @@
+enum NotificationFrequency {
+  off
+  low
+  frequent
+}
+
+enum Visibility {
+  visible
+  hidden
+}
+
+type Group {
+  groupId: ID!
+  createdByUser: User!
+  createdAt: Date!
+  updatedAt: Date!
+  name: String!
+  messages: [Message!]!
+  members: [User!]!
+  memberRequests: [User!]!
+  bannedUsers: [User!]!
+  invitedUsers: [User!]!
+  admins: [User!]!
+  notificationFrequency: NotificationFrequency!
+  description: String
+  visibility: Visibility!
+}
+
+input GroupInput {
+  name: String!
+  description: String
+  visibility: Visibility!
+}
+
+type Query {
+  group(groupId: ID): Group
+}
+
+type Mutation {
+  createGroup(group: GroupInput!): Group
+  updateGroup(groupId: ID!, group: GroupInput!): Group
+  deleteGroup(groupId: ID!): ID
+}

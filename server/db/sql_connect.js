@@ -10,7 +10,7 @@ const pool = mysql.createPool({
   namedPlaceholders: true
 });
 
-module.exports.connection = {
+module.exports = {
   query: async (query, args) => {
     const connection = await pool.promise().getConnection();
     result = connection.query(query, args);

@@ -1,0 +1,68 @@
+enum VoteType {
+  up
+  down
+}
+
+type Reaction {
+  user: User!
+  createdAt: Date!
+  updatedAt: Date!
+  type: Int!
+}
+
+type Vote {
+  user: User!
+  createdAt: Date!
+  updatedAt: Date!
+  type: VoteType!
+}
+
+type Media {
+  mediaId: ID!
+  createdAt: Date!
+  updatedAt: Date!
+  url: String!
+  user: User!
+  caption: String
+}
+
+input MediaInput {
+  url: String!
+  caption: String
+}
+
+type Message {
+  messageId: ID!
+  group: Group!
+  user: User!
+  createdAt: Date!
+  updatedAt: Date!
+  text: String!
+  responseToMessage: Message
+  reactions: [Reaction!]!
+  reaction: Reaction
+  upVotes: Int!
+  downVotes: Int!
+  vote: Vote
+  mentionedUsers: [User!]!
+  medias: [Media!]! # urls of the medias
+}
+
+input MessageInput {
+  text: String!
+  responseToMessageId: ID
+  mentionedUserIds: [ID!]
+  mediaIds: [String!]
+}
+
+type Query {
+  message(messageId: ID): Message
+}
+
+type Mutation {
+  sendMessage(groupId: ID!, message: MessageInput!): Message
+  editMessage(messageId: ID!, message: MessageInput!): Message
+  deleteMessage(messageId: ID!): ID
+  createReaction(messageId: ID!, type: Int): Reaction # also can be used to delete and update
+  createVote(messageId: ID!, type: VoteType): VoteType # also can be used to delete and update
+}

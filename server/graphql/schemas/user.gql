@@ -1,0 +1,69 @@
+enum UserUserRelationshipType {
+  friend
+  incoming_friend_request
+  outgoing_friend_request
+  blocked_by_current_user
+  blocked_by_other_user
+  none
+}
+
+enum UserUserRelationshipInputType {
+  friend
+  blocked
+}
+
+type UserUserRelationship {
+  user: User!
+  type: UserUserRelationshipType!
+  createdAt: Date!
+  updatedAt: Date!
+}
+
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
+type User {
+  userId: ID!
+  firstName: String!
+  lastName: String!
+  middleName: String
+  userName: String!
+  mobileNumber: String
+  email: String!
+  registratedAt: Date!
+  lastLogin: Date!
+  intro: String
+  friends: [UserUserRelationship!]!
+  incomingFriendRequests: [UserUserRelationship!]!
+  outgoingFriendRequests: [UserUserRelationship!]!
+  blockedUsers: [UserUserRelationship!]!
+  userRelationships: [UserUserRelationship!]! # all relationships
+  myRelationshipWithUser: UserUserRelationship
+  profileImageMediaId: ID
+}
+
+input UserInput {
+  firstName: String!
+  lastName: String!
+  middleName: String
+  userName: String!
+  mobileNumber: String
+  email: String!
+  intro: String
+  password: String!
+  profileImageMediaId: ID
+}
+
+type Query {
+  user(userId: ID!): User
+  me: User
+}
+
+type Mutation {
+  register(user: UserInput!): AuthPayload
+  login(email: String!, password: String!): AuthPayload
+  updateUser(user: UserInput!): User # user only can update his/her own profile
+  createUserUserRelationship(userId: ID!, type: UserUserRelationshipInputType): UserUserRelationship # also can be used to delete and update
+}
