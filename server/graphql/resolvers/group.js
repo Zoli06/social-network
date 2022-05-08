@@ -1,9 +1,32 @@
-const connection = require('../../db/sql_connect.js');
+const { Query: { user: getUser } } = require('./user.js');
 
-const resolvers = {
+const isGroupCreator = async (userId, groupId) => {
+  const group = await connection.query(
+    `SELECT * FROM groups
+    WHERE group_id = ?`,
+    [groupId]
+  )[0][0];
+
+  return group.created_by_user_id === userId;
+}
+
+const isGroupAdmin = async (userId, groupId) => {
+  const relationship = await connection.query(
+    `SELECT * FROM group_user_relationships
+    WHERE group_id = ? AND user_id = ?`,
+    [groupId, userId]
+  )[0][0];
+
+  if (relationship) {
+    return relationship.permission === 'admin';
+  }
+  return false;
+}
+
+module.exports = {
   Group: {
-    async messages(parent, _, { user }) {
-      authenticate(user);
+    async messages(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM messages
@@ -12,16 +35,16 @@ const resolvers = {
         )
       )[0];
     },
-    async createdByUser(parent, _, { user }) {
-      authenticate(user);
-      return await resolvers.Query.user(
+    async createdByUser(parent, _, { user, connection }) {
+      user.authenticate();
+      return await getUser(
         {},
         { userId: parent.created_by_user_id },
-        { user }
+        { user, connection }
       );
     },
-    async members(parent, _, { user }) {
-      authenticate(user);
+    async members(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM group_user_relationships
@@ -32,8 +55,8 @@ const resolvers = {
         )
       )[0];
     },
-    async memberRequests(parent, _, { user }) {
-      authenticate(user);
+    async memberRequests(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM group_user_relationships
@@ -44,8 +67,8 @@ const resolvers = {
         )
       )[0];
     },
-    async bannedUsers(parent, _, { user }) {
-      authenticate(user);
+    async bannedUsers(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM group_user_relationships
@@ -56,8 +79,8 @@ const resolvers = {
         )
       )[0];
     },
-    async invitedUsers(parent, _, { user }) {
-      authenticate(user);
+    async invitedUsers(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM group_user_relationships
@@ -68,8 +91,8 @@ const resolvers = {
         )
       )[0];
     },
-    async admins(parent, _, { user }) {
-      authenticate(user);
+    async admins(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM group_user_relationships
@@ -80,20 +103,20 @@ const resolvers = {
         )
       )[0];
     },
-    async notificationFrequency(parent, _, { user }) {
-      authenticate(user);
+    async notificationFrequency(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT notification_frequency FROM group_user_relationships
           WHERE group_id = ? AND user_id = ?`,
           [parent.group_id, user.id]
         )
-      )[0][0].notification_frequency;
+      )[0][0];
     }
   },
   Query: {
-    async group(_, { groupId }, { user }) {
-      authenticate(user);
+    async group(_, { groupId }, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(`SELECT * FROM groups WHERE group_id = ?`, [
           groupId,
@@ -105,34 +128,33 @@ const resolvers = {
     async createGroup(
       _,
       { group: { name, visibility, description } },
-      { user }
+      { user, connection }
     ) {
-      authenticate(user);
+      user.authenticate();
       const groupId = (
         await connection.query(
           `INSERT INTO groups (created_by_user_id, name, visibility, description) VALUES (?, ?, ?, ?)`,
           [user.id, name, visibility, description]
         )
       )[0].insertId;
-
-      return await resolvers.Query.group({}, { groupId }, { user });
+      return await module.exports.Query.group({}, { groupId }, { user, connection });
     },
     async updateGroup(
       _,
       { group: { name, visibility, description }, groupId },
-      { user }
+      { user, connection }
     ) {
-      authenticate(user);
+      user.authenticate();
       await connection.query(
         `UPDATE groups
           SET name = ?, visibility = ?, description = ?, updated_at = DEFAULT
           WHERE group_id = ?`,
         [name, visibility, description, groupId]
       );
-      return await resolvers.Query.group({}, { groupId }, { user });
+      return await module.exports.Query.group({}, { groupId }, { user, connection });
     },
-    async deleteGroup(_, { groupId }, { user }) {
-      authenticate(user);
+    async deleteGroup(_, { groupId }, { user, connection }) {
+      user.authenticate();
       await connection.query(
         `DELETE FROM groups WHERE group_id = ?`,
         [groupId]
@@ -141,5 +163,3 @@ const resolvers = {
     }
   }
 }
-
-module.exports = resolvers;

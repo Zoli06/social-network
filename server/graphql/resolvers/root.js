@@ -1,7 +1,5 @@
 const GraphQLDate = require('graphql-date');
 
-const resolvers = {
+module.exports = {
   Date: GraphQLDate
 }
-
-module.exports = resolvers;

@@ -21,7 +21,7 @@ type Group {
   bannedUsers: [User!]!
   invitedUsers: [User!]!
   admins: [User!]!
-  notificationFrequency: NotificationFrequency!
+  notificationFrequency: NotificationFrequency
   description: String
   visibility: Visibility!
 }

@@ -1,9 +1,7 @@
-const connection = require('../../db/sql_connect.js');
-
-const resolvers = {
+module.exports = {
   Media: {
-    async user(parent, _, { user }) {
-      authenticate(user);
+    async user(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM medias
@@ -16,8 +14,8 @@ const resolvers = {
     },
   },
   Query: {
-    async media(_, { mediaId }, { user }) {
-      authenticate(user);
+    async media(_, { mediaId }, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(`SELECT * FROM medias WHERE media_id = ?`, [
           mediaId,
@@ -26,22 +24,20 @@ const resolvers = {
     }
   },
   Mutation: {
-    async createMedia(_, { media: { url, caption } }, { user }) {
-      authenticate(user);
+    async createMedia(_, { media: { url, caption } }, { user, connection }) {
+      user.authenticate();
       const mediaId = (
         await connection.query(
           `INSERT INTO medias (user_id, url, caption) VALUES (?, ?, ?)`,
           [user.id, url, caption]
         )
       )[0].insertId;
-      return await resolvers.Query.media({}, { mediaId }, { user });
+      return await module.exports.Query.media({}, { mediaId }, { user, connection });
     },
-    async deleteMedia(_, { mediaId }, { user }) {
-      authenticate(user);
+    async deleteMedia(_, { mediaId }, { user, connection }) {
+      user.authenticate();
       await connection.query(`DELETE FROM medias WHERE media_id = ?`, [mediaId]);
       return mediaId;
     }
   }
 }
-
-module.exports = resolvers;

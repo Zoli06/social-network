@@ -1,24 +1,23 @@
 const jsonwebtoken = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const connection = require('../../db/sql_connect.js');
 
 const authenticate = (user) => {
   if (!user) throw new Error('You are not authenticated!');
 };
 
-const resolvers = {
+module.exports = {
   Query: {
-    async user(_, { userId }, { user }) {
-      authenticate(user);
+    async user(_, { userId }, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(`SELECT * FROM users WHERE user_id = ?`, [
           userId,
         ])
       )[0][0];
     },
-    async me(_, __, { user }) {
-      authenticate(user);
-      return await resolvers.Query.user(_, { userId: user.id }, { user });
+    async me(_, __, { user, connection }) {
+      user.authenticate();
+      return await module.exports.Query.user(_, { userId: user.id }, { user, connection });
     }
   },
   Mutation: {
@@ -36,7 +35,8 @@ const resolvers = {
           intro,
           profileImageMediaId
         },
-      }
+      },
+      { connection }
     ) {
       const userId = (
         await connection.query(
@@ -55,7 +55,7 @@ const resolvers = {
           ]
         )
       )[0].insertId;
-      const user = await resolvers.Query.user(
+      const user = await module.exports.Query.user(
         {},
         { userId },
         { user: { userId } }
@@ -67,7 +67,7 @@ const resolvers = {
       );
       return { token, user };
     },
-    async login(_, { email, password }) {
+    async login(_, { email, password }, { connection }) {
       const user = (
         await connection.query(`SELECT * FROM users WHERE email = ?`, [email])
       )[0][0];
@@ -107,9 +107,9 @@ const resolvers = {
           profileImageMediaId,
         },
       },
-      { user }
+      { user, connection }
     ) {
-      authenticate(user);
+      user.authenticate();
       await connection.query(
         `UPDATE users
           SET first_name = ?, last_name = ?, middle_name = ?, user_name = ?, mobile_number = ?, email = ?, password = ?, updated_at = DEFAULT, intro = ?, profile_image_media_id = ?
@@ -121,41 +121,41 @@ const resolvers = {
           userName,
           mobileNumber,
           email,
-          password,
+          await bcrypt.hash(password, 10),
           intro,
           profileImageMediaId,
           user.id,
         ]
       );
-      return await resolvers.Query.user({}, { userId: user.id }, { user });
+      return await module.exports.Query.user({}, { userId: user.id }, { user, connection });
     },
-    async createUserUserRelationship(_, { userId, type }, { user }) {
-      authenticate(user);
+    async createUserUserRelationship(_, { userId, type }, { user, connection }) {
+      user.authenticate();
       await connection.query(
         `INSERT INTO user_user_relationships (initiating_user_id, target_user_id, type) VALUES (?, ?, ?)
         ON DUPLICATE KEY UPDATE type = ?, updated_at = DEFAULT`,
         [user.id, userId, type, type]
       );
-      return await resolvers.User.myRelationshipWithUser(
+      return await module.exports.User.myRelationshipWithUser(
         { user_id: userId },
         {},
-        { user }
+        { user, connection }
       );
     }
   },
   User: {
-    async userRelationships(parent, _, { user }) {
-      authenticate(user);
+    async userRelationships(parent, _, { user, connection }) {
+      user.authenticate();
 
       return [
-        ...(await this.friends(parent, _, { user })),
-        ...(await this.incomingFriendRequests(parent, _, { user })),
-        ...(await this.outgoingFriendRequests(parent, _, { user })),
-        ...(await this.blockedUsers(parent, _, { user })),
+        ...(await this.friends(parent, _, { user, connection })),
+        ...(await this.incomingFriendRequests(parent, _, { user, connection })),
+        ...(await this.outgoingFriendRequests(parent, _, { user, connection })),
+        ...(await this.blockedUsers(parent, _, { user, connection })),
       ];
     },
-    async friends(parent, _, { user }) {
-      authenticate(user);
+    async friends(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT users.*, uur1.*, LEAST(uur1.created_at, uur2.created_at) AS real_created_at, GREATEST(uur1.updated_at, uur2.updated_at) AS real_updated_at
@@ -179,8 +179,8 @@ const resolvers = {
         updated_at: record.real_updated_at,
       }));
     },
-    async incomingFriendRequests(parent, _, { user }) {
-      authenticate(user);
+    async incomingFriendRequests(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT *
@@ -203,8 +203,8 @@ const resolvers = {
         updated_at: record.updated_at,
       }));
     },
-    async outgoingFriendRequests(parent, _, { user }) {
-      authenticate(user);
+    async outgoingFriendRequests(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT *
@@ -227,8 +227,8 @@ const resolvers = {
         updated_at: record.updated_at,
       }));
     },
-    async blockedUsers(parent, _, { user }) {
-      authenticate(user);
+    async blockedUsers(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT *
@@ -245,8 +245,8 @@ const resolvers = {
         updated_at: record.updated_at,
       }));
     },
-    async myRelationshipWithUser(parent, _, { user }) {
-      authenticate(user);
+    async myRelationshipWithUser(parent, _, { user, connection }) {
+      user.authenticate();
       const relationship1 = (await connection.query(
         `SELECT *
       FROM user_user_relationships
@@ -261,53 +261,28 @@ const resolvers = {
       ))[0][0];
       const type1 = relationship1?.type;
       const type2 = relationship2?.type;
-      const created_at = Math.min(relationship1?.created_at, relationship2?.created_at);
-      const updated_at = Math.max(relationship1?.updated_at, relationship2?.updated_at);
+
+      let type;
       if (type1 === 'friend' && type2 === 'friend') {
-        return {
-          type: 'friend',
-          created_at,
-          updated_at,
-          user: resolvers.Query.user({}, { userId: parent.user_id }, { user }),
-        };
+        type = 'friend';
       } else if (type2 === 'blocked') {
-        return {
-          type: 'blocked_by_other_user',
-          created_at,
-          updated_at,
-          user: resolvers.Query.user({}, { userId: parent.user_id }, { user }),
-        };
+        type = 'blocked_by_other_user';
       } else if (type1 === 'blocked') {
-        return {
-          type: 'blocked_by_current_user',
-          created_at,
-          updated_at,
-          user: resolvers.Query.user({}, { userId: parent.user_id }, { user }),
-        };
+        type = 'blocked_by_current_user';
       } else if (type1 === 'friend' && type2 !== 'blocked') {
-        return {
-          type: 'outgoing_friend_request',
-          created_at,
-          updated_at,
-          user: resolvers.Query.user({}, { userId: parent.user_id }, { user }),
-        };
+        type = 'outgoing_friend_request';
       } else if (type2 === 'friend' && type1 !== 'blocked') {
-        return {
-          type: 'incoming_friend_request',
-          created_at,
-          updated_at,
-          user: resolvers.Query.user({}, { userId: parent.user_id }, { user }),
-        };
+        type = 'incoming_friend_request';
       } else {
-        return {
-          type: 'none',
-          created_at,
-          updated_at,
-          user: resolvers.Query.user({}, { userId: parent.user_id }, { user }),
-        }
+        type = 'none';
+      }
+
+      return {
+        type,
+        created_at: Math.min(relationship1?.created_at, relationship2?.created_at),
+        updated_at: Math.max(relationship1?.updated_at, relationship2?.updated_at),
+        user: module.exports.Query.user({}, { userId: parent.user_id }, { user, connection }),
       }
     }
   }
 }
-
-module.exports = resolvers;

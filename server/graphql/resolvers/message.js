@@ -1,19 +1,13 @@
-const connection = require('../../db/sql_connect.js');
+const { Query: { user: getUser } } = require('./user.js');
 
-const resolvers = {
+module.exports = {
   Message: {
-    async user(parent, _, { user }) {
-      authenticate(user);
-      return (
-        await connection.query(
-          `SELECT * FROM users
-          WHERE user_id = ?`,
-          [parent.user_id]
-        )
-      )[0][0];
+    async user(parent, _, { user, connection }) {
+      user.authenticate();
+      return await getUser({}, { userId: parent.user_id }, { user, connection });
     },
-    async group(parent, _, { user }) {
-      authenticate(user);
+    async group(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM groups
@@ -22,8 +16,8 @@ const resolvers = {
         )
       )[0][0];
     },
-    async reactions(parent, _, { user }) {
-      authenticate(user);
+    async reactions(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM reactions
@@ -32,8 +26,8 @@ const resolvers = {
         )
       )[0];
     },
-    async reaction(parent, _, { user }) {
-      authenticate(user);
+    async reaction(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM reactions
@@ -42,8 +36,8 @@ const resolvers = {
         )
       )[0][0];
     },
-    async upVotes(parent, _, { user }) {
-      authenticate(user);
+    async upVotes(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT COUNT(*) FROM votes
@@ -52,8 +46,8 @@ const resolvers = {
         )
       )[0][0]['COUNT(*)'];
     },
-    async downVotes(parent, _, { user }) {
-      authenticate(user);
+    async downVotes(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT COUNT(*) FROM votes
@@ -62,8 +56,8 @@ const resolvers = {
         )
       )[0][0]['COUNT(*)'];
     },
-    async mentionedUsers(parent, _, { user }) {
-      authenticate(user);
+    async mentionedUsers(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM mentioned_users
@@ -74,8 +68,8 @@ const resolvers = {
         )
       )[0];
     },
-    async medias(parent, _, { user }) {
-      authenticate(user);
+    async medias(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM message_medias
@@ -86,8 +80,8 @@ const resolvers = {
         )
       )[0];
     },
-    async responseToMessage(parent, _, { user }) {
-      authenticate(user);
+    async responseToMessage(parent, _, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM messages
@@ -98,32 +92,20 @@ const resolvers = {
     }
   },
   Reaction: {
-    async user(parent, _, { user }) {
-      authenticate(user);
-      return (
-        await connection.query(
-          `SELECT * FROM users
-          WHERE user_id = ?`,
-          [parent.user_id]
-        )
-      )[0][0];
+    async user(parent, _, { user, connection }) {
+      user.authenticate();
+      return await getUser({}, { userId: parent.user_id }, { user, connection });
     },
   },
   Vote: {
-    async user(parent, _, { user }) {
-      authenticate(user);
-      return (
-        await connection.query(
-          `SELECT * FROM users
-          WHERE user_id = ?`,
-          [parent.user_id]
-        )
-      )[0][0];
+    async user(parent, _, { user, connection }) {
+      user.authenticate();
+      return await getUser({}, { userId: parent.user_id }, { user, connection });
     },
   },
   Query: {
-    async message(_, { messageId }, { user }) {
-      authenticate(user);
+    async message(_, { messageId }, { user, connection }) {
+      user.authenticate();
       return (
         await connection.query(`SELECT * FROM messages WHERE message_id = ?`, [
           messageId,
@@ -138,9 +120,9 @@ const resolvers = {
         message: { text, responseToMessageId, mentionedUserIds, mediaIds },
         groupId,
       },
-      { user }
+      { user, connection }
     ) {
-      authenticate(user);
+      user.authenticate();
       const messageId = (
         await connection.query(
           `INSERT INTO messages (user_id, text, response_to_message_id, group_id) VALUES (?, ?, ?, ?)`,
@@ -159,10 +141,10 @@ const resolvers = {
           [mediaIds.map((mediaId) => [messageId, mediaId])]
         );
       }
-      return await resolvers.Query.message({}, { messageId }, { user });
+      return await module.exports.Query.message({}, { messageId }, { user, connection });
     },
-    async editMessage(_, { message: { text, responseToMessageId, mentionedUserIds, mediaIds }, messageId, }, { user }) {
-      authenticate(user);
+    async editMessage(_, { message: { text, responseToMessageId, mentionedUserIds, mediaIds }, messageId, }, { user, connection }) {
+      user.authenticate();
       await connection.query(
         `UPDATE messages
           SET text = ?, response_to_message_id = ?, updated_at = DEFAULT
@@ -185,10 +167,10 @@ const resolvers = {
         `INSERT INTO message_medias (message_id, media_id) VALUES ?`,
         [mediaIds.map((mediaId) => [messageId, mediaId])]
       );
-      return await resolvers.Query.message({}, { messageId }, { user });
+      return await module.exports.Query.message({}, { messageId }, { user, connection });
     },
-    async deleteMessage(_, { messageId }, { user }) {
-      authenticate(user);
+    async deleteMessage(_, { messageId }, { user, connection }) {
+      user.authenticate();
       await connection.query(
         `DELETE FROM mentioned_users WHERE message_id = ?`,
         [messageId]
@@ -202,21 +184,21 @@ const resolvers = {
       ]);
       return messageId;
     },
-    async createReaction(_, { messageId, type }, { user }) {
-      authenticate(user);
+    async createReaction(_, { messageId, type }, { user, connection }) {
+      user.authenticate();
       await connection.query(
         `INSERT INTO reactions (user_id, message_id, type) VALUES (:userId, :messageId, :type)
         ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,
         { userId: user.id, messageId, type }
       );
-      return await resolvers.Query.reaction(
+      return await module.exports.Message.reaction(
+        { message_id: messageId },
         {},
-        { messageId, userId: user.id },
-        { user }
+        { user, connection }
       );
     },
-    async createVote(_, { messageId, type }, { user }) {
-      authenticate(user);
+    async createVote(_, { messageId, type }, { user, connection }) {
+      user.authenticate();
       await connection.query(
         `INSERT INTO votes (user_id, message_id, type) VALUES (:userId, :messageId, :type)
         ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,
@@ -226,5 +208,3 @@ const resolvers = {
     }
   }
 }
-
-module.exports = resolvers;
