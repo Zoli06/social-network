@@ -3,7 +3,7 @@ console.log("Hello world");
 const { ApolloServer } = require('apollo-server')
 const { fieldResolver, resolvers } = require('./graphql/resolvers.js');
 const connection = require('./db/sql_connect.js');
-const typeDefs = require('./graphql/type-defs.js');
+const typeDefs = require('./graphql/typeDefs.js');
 const jwt = require('jsonwebtoken');
 const PORT = 8080;
 
