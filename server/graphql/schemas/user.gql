@@ -34,6 +34,7 @@ type User {
   email: String!
   registratedAt: Date!
   lastLogin: Date!
+  updatedAt: Date!
   intro: String
   friends: [UserUserRelationship!]!
   incomingFriendRequests: [UserUserRelationship!]!
