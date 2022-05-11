@@ -33,7 +33,7 @@ type User {
   mobileNumber: String
   email: String!
   registratedAt: Date!
-  lastLogin: Date!
+  lastLoginAt: Date!
   updatedAt: Date!
   intro: String
   friends: [UserUserRelationship!]!
