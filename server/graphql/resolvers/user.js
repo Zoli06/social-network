@@ -1,10 +1,6 @@
 const jsonwebtoken = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-const authenticate = (user) => {
-  if (!user) throw new Error('You are not authenticated!');
-};
-
 module.exports = {
   Query: {
     async user(_, { userId }, { user, connection }) {
@@ -41,7 +37,7 @@ module.exports = {
       const userId = (
         await connection.query(
           `INSERT INTO users (first_name, last_name, middle_name, user_name, mobile_number, email, password, intro, profile_image_media_id)
-          VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             firstName,
             lastName,
@@ -58,7 +54,7 @@ module.exports = {
       const user = await module.exports.Query.user(
         {},
         { userId },
-        { user: { userId } }
+        { user: { userId, authenticate: () => true }, connection }
       );
       const token = jsonwebtoken.sign(
         { id: user.user_id },
@@ -131,6 +127,7 @@ module.exports = {
     },
     async createUserUserRelationship(_, { userId, type }, { user, connection }) {
       user.authenticate();
+      if (type === "none") type = null;
       await connection.query(
         `INSERT INTO user_user_relationships (initiating_user_id, target_user_id, type) VALUES (?, ?, ?)
         ON DUPLICATE KEY UPDATE type = ?, updated_at = DEFAULT`,
@@ -235,7 +232,7 @@ module.exports = {
         FROM user_user_relationships
         JOIN users
         ON user_id = target_user_id
-        WHERE type = 'blocked_by_current_user' AND initiating_user_id = ?`,
+        WHERE type = 'outgoing_blocking' AND initiating_user_id = ?`,
           [parent.user_id]
         )
       )[0].map((record) => ({
@@ -261,17 +258,19 @@ module.exports = {
       ))[0][0];
       const type1 = relationship1?.type;
       const type2 = relationship2?.type;
+      const updated_at1 = relationship1?.updated_at;
+      const updated_at2 = relationship2?.updated_at;
 
       let type;
       if (type1 === 'friend' && type2 === 'friend') {
         type = 'friend';
       } else if (type2 === 'blocked') {
-        type = 'blocked_by_other_user';
+        type = 'incoming_blocking';
       } else if (type1 === 'blocked') {
-        type = 'blocked_by_current_user';
-      } else if (type1 === 'friend' && type2 !== 'blocked') {
+        type = 'outgoing_blocking';
+      } else if (type1 === 'friend' && type2 !== 'blocked' && (updated_at1 > updated_at2 || updated_at2 === undefined)) {
         type = 'outgoing_friend_request';
-      } else if (type2 === 'friend' && type1 !== 'blocked') {
+      } else if (type2 === 'friend' && type1 !== 'blocked' && (updated_at2 > updated_at1 || updated_at1 === undefined)) {
         type = 'incoming_friend_request';
       } else {
         type = 'none';

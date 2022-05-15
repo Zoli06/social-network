@@ -2,14 +2,15 @@ enum UserUserRelationshipType {
   friend
   incoming_friend_request
   outgoing_friend_request
-  blocked_by_current_user
-  blocked_by_other_user
+  incoming_blocking
+  outgoing_blocking
   none
 }
 
 enum UserUserRelationshipInputType {
   friend
   blocked
+  none
 }
 
 type UserUserRelationship {

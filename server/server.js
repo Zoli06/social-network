@@ -8,6 +8,7 @@ const jwt = require('jsonwebtoken');
 const PORT = 8080;
 
 const getUser = token => {
+  console.log(token);
   try {
     if (token) {
       if (token === process.env.DEV_ADMIN_TOKEN && process.env.NODE_ENV === 'development') return { id: 81 };
@@ -25,7 +26,7 @@ const server = new ApolloServer({
   resolvers,
   context: ({ req }) => {
     const token = req.get('Authorization') || '';
-    const user = getUser(token.replace('Bearer', ''))
+    const user = getUser(token.replace('Bearer', '').trim());
     return {
       user: {
         ...user,
