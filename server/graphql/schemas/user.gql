@@ -42,7 +42,7 @@ type User {
   outgoingFriendRequests: [UserUserRelationship!]!
   blockedUsers: [UserUserRelationship!]!
   userRelationships: [UserUserRelationship!]! # all relationships
-  myRelationshipWithUser: UserUserRelationship
+  relationshipWithUser: UserUserRelationship
   profileImageMediaId: ID
 }
 

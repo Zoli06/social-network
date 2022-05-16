@@ -133,7 +133,7 @@ module.exports = {
         ON DUPLICATE KEY UPDATE type = ?, updated_at = DEFAULT`,
         [user.id, userId, type, type]
       );
-      return await module.exports.User.myRelationshipWithUser(
+      return await module.exports.User.relationshipWithUser(
         { user_id: userId },
         {},
         { user, connection }
@@ -242,7 +242,7 @@ module.exports = {
         updated_at: record.updated_at,
       }));
     },
-    async myRelationshipWithUser(parent, _, { user, connection }) {
+    async relationshipWithUser(parent, _, { user, connection }) {
       user.authenticate();
       const relationship1 = (await connection.query(
         `SELECT *
@@ -264,10 +264,10 @@ module.exports = {
       let type;
       if (type1 === 'friend' && type2 === 'friend') {
         type = 'friend';
-      } else if (type2 === 'blocked') {
-        type = 'incoming_blocking';
       } else if (type1 === 'blocked') {
         type = 'outgoing_blocking';
+      } else if (type2 === 'blocked') {
+        type = 'incoming_blocking';
       } else if (type1 === 'friend' && type2 !== 'blocked' && (updated_at1 > updated_at2 || updated_at2 === undefined)) {
         type = 'outgoing_friend_request';
       } else if (type2 === 'friend' && type1 !== 'blocked' && (updated_at2 > updated_at1 || updated_at1 === undefined)) {

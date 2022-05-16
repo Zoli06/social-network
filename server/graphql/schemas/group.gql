@@ -21,6 +21,7 @@ type Group {
   bannedUsers: [User!]!
   invitedUsers: [User!]!
   admins: [User!]!
+  rejectedUsers: [User!]!
   notificationFrequency: NotificationFrequency
   description: String
   visibility: Visibility!
@@ -34,10 +35,24 @@ input GroupInput {
 
 type Query {
   group(groupId: ID): Group
+
 }
 
 type Mutation {
   createGroup(group: GroupInput!): Group
   updateGroup(groupId: ID!, group: GroupInput!): Group
   deleteGroup(groupId: ID!): ID
+
+  # TODO: return relationship type
+  sendGroupInvitation(groupId: ID!, userId: ID!): Boolean
+  acceptGroupInvitation(groupId: ID!): Boolean
+  rejectGroupInvitation(groupId: ID!): Boolean
+  banUser(groupId: ID!, userId: ID!): Boolean
+  unbanUser(groupId: ID!, userId: ID!): Boolean
+  addAdmin(groupId: ID!, userId: ID!): Boolean
+  removeAdmin(groupId: ID!, userId: ID!): Boolean
+  sendMemberRequest(groupId: ID!): Boolean
+  acceptMemberRequest(groupId: ID!, userId: ID!): Boolean
+  rejectMemberRequest(groupId: ID!, userId: ID!): Boolean
+  leaveGroup(groupId: ID!): Boolean
 }
