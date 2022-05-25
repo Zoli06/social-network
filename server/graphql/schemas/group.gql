@@ -9,6 +9,13 @@ enum Visibility {
   hidden
 }
 
+type GroupUserRelationship {
+  user: User!
+  type: UserUserRelationshipType!
+  createdAt: Date!
+  updatedAt: Date!
+}
+
 type Group {
   groupId: ID!
   createdByUser: User!
