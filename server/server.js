@@ -8,11 +8,13 @@ const jwt = require('jsonwebtoken');
 const PORT = 8080;
 
 const getUser = token => {
-  console.log(token);
   try {
     if (token) {
-      if (token === process.env.DEV_ADMIN_TOKEN && process.env.NODE_ENV === 'development') return { id: 81 };
-      return jwt.verify(token, process.env.JWT_SECRET);
+      try {
+        jwt.verify(token, process.env.JWT_SECRET)
+      } catch (err) {
+        if (process.env.NODE_ENV === 'development') return { id: token };
+      }
     }
     return null
   } catch (error) {

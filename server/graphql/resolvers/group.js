@@ -21,7 +21,7 @@ const isGroupAdmin = async (userId, groupId, connection, _break) => {
     [groupId, userId]
   ))[0][0];
 
-  if (relationship?.type === 'admin' || relationship?.type === 'member' || isGroupCreator(userId, groupId, connection, false)) {
+  if (relationship?.type === 'admin' || relationship?.type === 'member' || await isGroupCreator(userId, groupId, connection, false)) {
     return true;
   }
   if (_break) throw new Error('You are not an admin of this group!');
@@ -35,7 +35,7 @@ const isGroupMember = async (userId, groupId, connection, _break) => {
     [groupId, userId]
   ))[0][0];
 
-  if (relationship?.type === 'member' || relationship?.type === 'admin' || isGroupCreator(userId, groupId, false)) {
+  if (relationship?.type === 'member' || relationship?.type === 'admin' || await isGroupCreator(userId, groupId, false)) {
     return true;
   }
   if (_break) throw new Error('You are not a member of this group!');
@@ -194,36 +194,30 @@ module.exports = {
       return groupId;
     },
 
-    // Lot's of bugs here for example if user accept a invitation that doesn't exist he will be added to the group
     async sendGroupInvitation(_, { groupId, userId }, { user, connection }) {
       user.authenticate();
+      console.log(await isGroupAdmin(user.id, groupId, connection, true))
       await isGroupAdmin(user.id, groupId, connection, true);
       await connection.query(
-        `INSERT INTO group_user_relationships (group_id, user_id, type, operator_user_id) VALUES (?, ?, 'invited', ?)
+        `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, 'invited')
         ON DUPLICATE KEY UPDATE type = IF(type = null, 'invited', type)`,
-        [groupId, userId, user.id]
+        [groupId, userId]
       );
       return true;
     },
     async acceptGroupInvitation(_, { groupId }, { user, connection }) {
       user.authenticate();
       await connection.query(
-        `UPDATE group_user_relationships
-        SET type = 'member'
-        operator_user_id = :userId
-        WHERE group_id = :groupId
-        AND user_id = :userId
-        AND type = 'invited'`,
-        { userId: user.id, groupId }
+        `UPDATE group_user_relationships SET type = 'member' WHERE user_id = ? AND group_id = ? AND type = 'invited'`,
+        [ user.id, groupId ]
       );
       return true;
     },
     async rejectGroupInvitation(_, { groupId }, { user, connection }) {
       user.authenticate();
       await connection.query(
-        `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, null)
-        ON DUPLICATE KEY UPDATE type = null`,
-        [groupId, user.id]
+        `UPDATE group_user_relationships SET type = null WHERE user_id = ? AND group_id = ? AND type = 'invited'`,
+        [ user.id, groupId ]
       );
       return true;
     },
@@ -241,9 +235,8 @@ module.exports = {
       user.authenticate();
       await isGroupAdmin(user.id, groupId, connection, true);
       await connection.query(
-        `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, null)
-        ON DUPLICATE KEY UPDATE type = null`,
-        [groupId, userId]
+        `UPDATE group_user_relationships SET type = null WHERE user_id = ? AND group_id = ? AND type = 'banned'`,
+        [userId, groupId]
       );
       return true;
     },
@@ -251,9 +244,8 @@ module.exports = {
       user.authenticate();
       await isGroupCreator(user.id, groupId, connection, true);
       await connection.query(
-        `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, 'admin')
-        ON DUPLICATE KEY UPDATE type = 'admin'`,
-        [groupId, userId]
+        `UPDATE group_user_relationships SET type = 'admin' WHERE user_id = ? AND group_id = ? AND type = 'member'`,
+        [userId, groupId]
       );
       return true;
     },
@@ -261,17 +253,16 @@ module.exports = {
       user.authenticate();
       await isGroupCreator(user.id, groupId, connection, true);
       await connection.query(
-        `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, 'member')
-        ON DUPLICATE KEY UPDATE type = 'member'`,
-        [groupId, userId]
+        `UPDATE group_user_relationships SET type = 'member' WHERE user_id = ? AND group_id = ? AND type = 'admin'`,
+        [userId, groupId]
       );
       return true;
     },
     async sendMemberRequest(_, { groupId }, { user, connection }) {
       user.authenticate();
       await connection.query(
-        `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, 'member_request')
-        ON DUPLICATE KEY UPDATE type = 'member_request'`,
+        `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, 'member_request', ?)
+        ON DUPLICATE KEY UPDATE type = IF(type = null, 'member_request', type)`,
         [groupId, user.id]
       );
       return true;
@@ -280,9 +271,8 @@ module.exports = {
       user.authenticate();
       await isGroupAdmin(user.id, groupId, connection, true);
       await connection.query(
-        `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, 'member')
-        ON DUPLICATE KEY UPDATE type = 'member'`,
-        [groupId, userId]
+        `UPDATE group_user_relationships SET type = 'member' WHERE user_id = ? AND group_id = ? AND type = 'member_request'`,
+        [userId, groupId]
       );
       return true;
     },
@@ -290,18 +280,16 @@ module.exports = {
       user.authenticate();
       await isGroupAdmin(user.id, groupId, connection, true);
       await connection.query(
-        `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, 'member_request_rejected')
-        ON DUPLICATE KEY UPDATE type = 'member_request_rejected'`,
-        [groupId, userId]
+        `UPDATE group_user_relationships SET type = 'member_request_rejected' WHERE user_id = ? AND group_id = ? AND type = 'member_request'`,
+        [userId, groupId]
       );
       return true;
     },
     async leaveGroup(_, { groupId }, { user, connection }) {
       user.authenticate();
       await connection.query(
-        `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, null)
-        ON DUPLICATE KEY UPDATE type = null`,
-        [groupId, userId]
+        `UPDATE group_user_relationships SET type = null WHERE user_id = ? AND group_id = ? AND (type = 'admin' OR type = 'member')`,
+        [user.id, groupId]
       );
       return true;
     }
