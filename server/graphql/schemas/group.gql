@@ -62,4 +62,7 @@ type Mutation {
   acceptMemberRequest(groupId: ID!, userId: ID!): Boolean
   rejectMemberRequest(groupId: ID!, userId: ID!): Boolean
   leaveGroup(groupId: ID!): Boolean
+  kickUser(groupId: ID!, userId: ID!): Boolean
+
+  setNotificationFrequency(groupId: ID!, frequency: NotificationFrequency!): Boolean
 }

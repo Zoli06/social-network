@@ -292,6 +292,24 @@ module.exports = {
         [user.id, groupId]
       );
       return true;
+    },
+    async kickUser(_, { groupId, userId }, { user, connection }) {
+      user.authenticate();
+      await isGroupAdmin(user.id, groupId, connection, true);
+      await connection.query(
+        `UPDATE group_user_relationships SET type = null WHERE user_id = ? AND group_id = ? AND (type = 'member' OR type = 'admin')`,
+        [userId, groupId]
+      );
+      return true;
+    },
+
+    async setNotificationFrequency(_, { groupId, frequency }, { user, connection }) {
+      user.authenticate();
+      await connection.query(
+        `UPDATE group_user_relationships SET notification_frequency = ? WHERE user_id = ? AND group_id = ?`,
+        [frequency, user.id, groupId]
+      );
+      return true;
     }
   }
 }
