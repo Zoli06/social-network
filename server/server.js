@@ -6,6 +6,11 @@ const { fieldResolver, resolvers } = require('./graphql/resolvers.js');
 const connection = require('./db/sql_connect.js');
 const typeDefs = require('./graphql/typeDefs.js');
 const jwt = require('jsonwebtoken');
+const bodyParser = require("body-parser");
+const path = require('path').resolve(__dirname, '../client/build/');
+const app = express();
+app.use(express.static(path));
+app.use(bodyParser.json());
 
 const getUser = token => {
   try {
@@ -44,14 +49,11 @@ const apolloServer = new ApolloServer({
 });
 
 apolloServer.start().then(() => {
-  const app = express();
   apolloServer.applyMiddleware({ app });
 
-  // app.get("/rest", (req, res) => {
-  //   res.json({
-  //     data: "API is working...",
-  //   });
-  // });
+  app.get('/*', (req, res) => {
+    res.sendFile(path + "index.html");
+  });
 
   app.listen(process.env.PORT || PORT, () => console.log('Server running on port ' + (process.env.PORT || PORT)));
 });
