@@ -3,22 +3,27 @@ import {
   useQuery,
   gql
 } from "@apollo/client";
+import { Message } from './components/Message';
 
-const TEST_QUERY = gql`
-  query{
-    me {
-      userId
+const MESSAGE_QUERY = gql`
+  query GetMessage($messageId: ID!) {
+    message(messageId: $messageId) {
+      text
     }
   }
 `; 
 
 function App() {
-  const { loading, error, data } = useQuery(TEST_QUERY);
+  const { loading, error, data } = useQuery(MESSAGE_QUERY, {
+    variables: {
+      messageId: "1"
+    }
+  });
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: ${error.toString()}</p>;
-
+  
   return (
-    <p>${data}</p>
+    <Message text = {data.message.text}/>
   );
 }
 
