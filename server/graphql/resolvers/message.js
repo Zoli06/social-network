@@ -1,4 +1,6 @@
 const { Query: { user: getUser } } = require('./user.js');
+const { isGroupMember } = require('../helpers/group.js');
+const { isMessageCreator } = require('../helpers/message.js');
 
 module.exports = {
   Message: {
@@ -89,6 +91,16 @@ module.exports = {
           [parent.response_to_message_id]
         )
       )[0][0];
+    },
+    async responses(parent, _, { user, connection }) {
+      user.authenticate();
+      return (
+        await connection.query(
+          `SELECT * FROM messages
+          WHERE response_to_message_id = ?`,
+          [parent.message_id]
+        )
+      )[0];
     }
   },
   Reaction: {
@@ -106,11 +118,15 @@ module.exports = {
   Query: {
     async message(_, { messageId }, { user, connection }) {
       user.authenticate();
-      return (
+      const message = (
         await connection.query(`SELECT * FROM messages WHERE message_id = ?`, [
           messageId,
         ])
       )[0][0];
+
+      await isGroupMember(user.id, message.group_id, connection, true);
+
+      return message;
     }
   },
   Mutation: {
@@ -123,6 +139,7 @@ module.exports = {
       { user, connection }
     ) {
       user.authenticate();
+      await isGroupMember(user.id, groupId, connection, true);
       const messageId = (
         await connection.query(
           `INSERT INTO messages (user_id, text, response_to_message_id, group_id) VALUES (?, ?, ?, ?)`,
@@ -145,6 +162,8 @@ module.exports = {
     },
     async editMessage(_, { message: { text, responseToMessageId, mentionedUserIds, mediaIds }, messageId, }, { user, connection }) {
       user.authenticate();
+      await isGroupMember(user.id, groupId, connection, true);
+      await isMessageCreator(user.id, messageId, connection, true);
       await connection.query(
         `UPDATE messages
           SET text = ?, response_to_message_id = ?, updated_at = DEFAULT
@@ -171,6 +190,8 @@ module.exports = {
     },
     async deleteMessage(_, { messageId }, { user, connection }) {
       user.authenticate();
+      await isGroupMember(user.id, groupId, connection, true);
+      await isMessageCreator(user.id, messageId, connection, true);
       await connection.query(
         `DELETE FROM mentioned_users WHERE message_id = ?`,
         [messageId]
@@ -186,6 +207,7 @@ module.exports = {
     },
     async createReaction(_, { messageId, type }, { user, connection }) {
       user.authenticate();
+      await isGroupMember(user.id, groupId, connection, true);
       await connection.query(
         `INSERT INTO reactions (user_id, message_id, type) VALUES (:userId, :messageId, :type)
         ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,
@@ -199,6 +221,7 @@ module.exports = {
     },
     async createVote(_, { messageId, type }, { user, connection }) {
       user.authenticate();
+      await isGroupMember(user.id, groupId, connection, true);
       await connection.query(
         `INSERT INTO votes (user_id, message_id, type) VALUES (:userId, :messageId, :type)
         ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,

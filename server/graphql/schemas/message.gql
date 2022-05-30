@@ -39,6 +39,7 @@ type Message {
   updatedAt: Date!
   text: String!
   responseToMessage: Message
+  responses: [Message]
   reactions: [Reaction!]!
   reaction: Reaction
   upVotes: Int!
@@ -56,7 +57,7 @@ input MessageInput {
 }
 
 type Query {
-  message(messageId: ID): Message
+  message(messageId: ID!): Message
 }
 
 type Mutation {
