@@ -1,11 +1,16 @@
 console.log("Hello world");
 
-const { ApolloServer } = require('apollo-server')
+const { ApolloServer } = require('apollo-server-express');
+const express = require('express');
 const { fieldResolver, resolvers } = require('./graphql/resolvers.js');
 const connection = require('./db/sql_connect.js');
 const typeDefs = require('./graphql/typeDefs.js');
 const jwt = require('jsonwebtoken');
-const PORT = 8080;
+const bodyParser = require("body-parser");
+const path = require('path').resolve(__dirname, '../client/build/');
+const app = express();
+app.use(express.static(path));
+app.use(bodyParser.json());
 
 const getUser = token => {
   try {
@@ -22,7 +27,7 @@ const getUser = token => {
   }
 }
 
-const server = new ApolloServer({
+const apolloServer = new ApolloServer({
   fieldResolver,
   typeDefs,
   resolvers,
@@ -41,6 +46,14 @@ const server = new ApolloServer({
   tracing: true,
   introspection: true,
   playground: true
-})
+});
 
-server.listen(process.env.PORT || PORT, () => console.log('Server running on port ' + process.env.PORT || PORT));
+apolloServer.start().then(() => {
+  apolloServer.applyMiddleware({ app });
+
+  app.get('/*', (req, res) => {
+    res.sendFile(path + "index.html");
+  });
+
+  app.listen(process.env.PORT || PORT, () => console.log('Server running on port ' + (process.env.PORT || PORT)));
+});

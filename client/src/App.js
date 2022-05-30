@@ -1,20 +1,24 @@
 import './App.css';
 import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
   useQuery,
   gql
 } from "@apollo/client";
 
-const client = new ApolloClient({
-  uri: 'localhost:3000/api',
-  cache: new InMemoryCache()
-});
+const TEST_QUERY = gql`
+  query{
+    me {
+      userId
+    }
+  }
+`; 
 
 function App() {
+  const { loading, error, data } = useQuery(TEST_QUERY);
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: ${error.toString()}</p>;
+
   return (
-    <p>Hello world</p>
+    <p>${data}</p>
   );
 }
 
