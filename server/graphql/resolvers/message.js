@@ -58,6 +58,18 @@ module.exports = {
         )
       )[0][0]['COUNT(*)'];
     },
+    async vote(parent, _, { user, connection }) {
+      user.authenticate();
+      return (
+        await connection.query(
+          `SELECT * FROM votes
+          JOIN users
+          USING(user_id)
+          WHERE message_id = ?`,
+          [parent.message_id]
+        )
+      )[0];
+    },
     async mentionedUsers(parent, _, { user, connection }) {
       user.authenticate();
       return (

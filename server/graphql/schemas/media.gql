@@ -1,3 +1,12 @@
+type Media {
+  mediaId: ID!
+  createdAt: Date!
+  updatedAt: Date!
+  url: String!
+  user: User!
+  caption: String
+}
+
 type Query {
   media(mediaId: ID!): Media
 }

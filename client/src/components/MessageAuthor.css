@@ -1,0 +1,11 @@
+.profile-image {
+    width: 5vw;
+    height: 5vw;
+    border-radius: 50%;
+    object-fit: cover;
+    display: inline-block;
+}
+
+.name {
+    display: inline-block;
+}

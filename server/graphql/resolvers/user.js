@@ -282,6 +282,15 @@ module.exports = {
         updated_at: Math.max(relationship1?.updated_at, relationship2?.updated_at),
         user: module.exports.Query.user({}, { userId: parent.user_id }, { user, connection }),
       }
+    },
+    async profileImage(parent, _, { user, connection }) {
+      user.authenticate();
+
+      return (await connection.query(`
+        SELECT * FROM users
+        JOIN medias
+        ON profile_image_media_id = media_id
+      `))[0][0]
     }
   }
 }

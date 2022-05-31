@@ -8,6 +8,38 @@ import { Message } from './components/Message';
 const MESSAGE_QUERY = gql`
   query GetMessage($messageId: ID!) {
     message(messageId: $messageId) {
+      user {
+        firstName
+        lastName
+        middleName
+        userName
+        intro
+        profileImage {
+          url
+        }
+      }
+      group {
+        name
+      }
+      createdAt
+      updatedAt
+      responses {
+        messageId
+      }
+      reactions {
+        type
+      }
+      reaction {
+        type
+      }
+      upVotes
+      downVotes
+      vote {
+        type
+      }
+      medias {
+        url
+      }
       text
     }
   }
@@ -23,7 +55,7 @@ function App() {
   if (error) return <p>Error: ${error.toString()}</p>;
   
   return (
-    <Message text = {data.message.text}/>
+    <Message {...data.message}/>
   );
 }
 

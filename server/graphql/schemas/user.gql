@@ -43,7 +43,7 @@ type User {
   blockedUsers: [UserUserRelationship!]!
   userRelationships: [UserUserRelationship!]! # all relationships
   relationshipWithUser: UserUserRelationship
-  profileImageMediaId: ID
+  profileImage: Media
 }
 
 input UserInput {
