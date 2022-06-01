@@ -1,5 +1,5 @@
 import React from 'react'
-import './MessageActions.css'
+import './MessageActions.scss'
 
 export const MessageActions = () => {
     return (

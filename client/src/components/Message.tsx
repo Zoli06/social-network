@@ -1,8 +1,8 @@
-import React from "react";
-import "./Message.css";
-import { MessageAuthor } from "./MessageAuthor";
-import { MessageText } from "./MessageText";
-import { MessageActions } from "./MessageActions";
+import React from 'react';
+import './Message.scss';
+import { MessageAuthor } from './MessageAuthor';
+import { MessageText } from './MessageText';
+import { MessageActions } from './MessageActions';
 
 export const Message = ({
   user,
@@ -17,10 +17,44 @@ export const Message = ({
   vote,
   medias,
   text,
+}: {
+  user: {
+    firstName: string;
+    lastName: string;
+    middleName: string;
+    userName: string;
+    intro: string;
+    profileImage: {
+      url: string;
+    };
+  };
+  group: {
+    name: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+  responses: {
+    messageId: string;
+  }[];
+  reactions: {
+    type: string;
+  }[];
+  reaction: {
+    type: string;
+  };
+  upVotes: number;
+  downVotes: number;
+  vote: {
+    type: string;
+  };
+  medias: {
+    url: string;
+  }[];
+  text: string;
 }) => {
   return (
     <>
-      <div style={{ display: "none" }}>
+      <div style={{ display: 'none' }}>
         {user.firstName}
         <br />
         {user.lastName}
@@ -31,7 +65,7 @@ export const Message = ({
         <br />
         {user.intro}
         <br />
-        {user.profileImageMediaId}
+        {user.profileImage.url}
         <br />
 
         {group.name}
@@ -64,9 +98,9 @@ export const Message = ({
         <br />
       </div>
 
-      <div className="message-container">
-        <MessageAuthor user = {user} />
-        <MessageText text = {text} />
+      <div className='message-container'>
+        <MessageAuthor user={user} />
+        <MessageText text={text} />
         <MessageActions />
       </div>
     </>

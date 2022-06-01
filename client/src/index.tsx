@@ -1,13 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import './index.scss';
 import App from './App';
 import {
   ApolloClient,
   InMemoryCache,
   ApolloProvider,
   createHttpLink
-} from "@apollo/client";
+} from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 
 const httpLink = createHttpLink({
@@ -20,7 +20,7 @@ const authLink = setContext((_, { headers }) => {
 
   // temp code
   let token = localStorage.getItem('token');
-  if (!token) token = 81;
+  if (!token) token = '81';
 
   return {
     headers: {
@@ -35,7 +35,7 @@ const client = new ApolloClient({
   cache: new InMemoryCache()
 });
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <React.StrictMode>
     <ApolloProvider client={client}>

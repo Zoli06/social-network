@@ -1,11 +1,29 @@
-import React from 'react'
-import './MessageAuthor.css'
+import React from 'react';
+import './MessageAuthor.scss';
 
-export const MessageAuthor = ({ user }) => {
+export const MessageAuthor = ({
+  user,
+}: {
+  user: {
+    firstName: string;
+    lastName: string;
+    middleName: string;
+    userName: string;
+    intro: string;
+    profileImage: {
+      url: string;
+    };
+  };
+}) => {
   return (
     <div className='message-author-container'>
       <div className='image-container'>
-        <img src={user.profileImage.url} className='profile-image' />
+        {/* eslint-disable-next-line */}
+        <img
+          src={user.profileImage.url}
+          className='profile-image'
+          alt='profile image'
+        />
       </div>
       <div className='text-container'>
         <p className='name'>
@@ -17,5 +35,5 @@ export const MessageAuthor = ({ user }) => {
         <p className='intro'>{user.intro}</p>
       </div>
     </div>
-  )
-}
+  );
+};

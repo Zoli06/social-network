@@ -3,14 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@apollo/client": "^3.5.10",
+    "@apollo/client": "^3.6.6",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.1.1",
     "@testing-library/user-event": "^13.5.0",
+    "@types/react": "^18.0.10",
+    "@types/react-dom": "^18.0.5",
     "graphql": "^16.3.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-scripts": "5.0.1",
+    "sass": "^1.52.1",
+    "ts-invariant": "^0.10.3",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -37,5 +41,12 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:8080"
+  "proxy": "http://localhost:8080",
+  "devDependencies": {
+    "@types/graphql": "^14.5.0",
+    "apollo": "^2.34.0",
+    "source-map-loader": "^3.0.1",
+    "ts-loader": "^9.3.0",
+    "typescript": "^4.7.2"
+  }
 }
