@@ -13,7 +13,7 @@ const pool = mysql.createPool({
 module.exports = {
   query: async (query, args) => {
     const connection = await pool.promise().getConnection();
-    result = connection.query(query, args);
+    result = await connection.query(query, args);
     connection.release();
     return result;
   }

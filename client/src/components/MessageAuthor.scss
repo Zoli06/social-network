@@ -1,16 +1,24 @@
 .message-author-container {
-    display: flex;
-    height: 5vw;
-}
+  display: flex;
+  height: 6vw;
+  min-height: 48px;
 
-p.intro {
-    color: var(--secondary-text-color);
-}
-
-.profile-image {
+  .profile-image {
     aspect-ratio: 1 / 1;
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
     margin-right: 1vw;
+  }
+
+  .intro {
+    color: var(--secondary-text-color);
+  }
+
+  .text-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-size: max(1.5vw, 12px);
+  }
 }

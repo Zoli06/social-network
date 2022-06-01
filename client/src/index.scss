@@ -9,8 +9,9 @@
   --secondary-text-color: #555;
   --link-color: #509;
   --link-hover-color: #70b;
+  --link-visited-color: #70b;
 }
 
 p {
-  color: var(--main-text-color)
+  color: var(--main-text-color);
 }
