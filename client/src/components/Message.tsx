@@ -17,6 +17,7 @@ export const Message = ({
   vote,
   medias,
   text,
+  responsesCount,
 }: {
   user: {
     firstName: string;
@@ -51,6 +52,7 @@ export const Message = ({
     url: string;
   }[];
   text: string;
+  responsesCount: number;
 }) => {
   return (
     <>
@@ -101,7 +103,7 @@ export const Message = ({
       <div className='message-container'>
         <MessageAuthor user={user} />
         <MessageText text={text} />
-        <MessageActions />
+        <MessageActions upVotes={upVotes} downVotes={downVotes} responsesCount={responsesCount} />
       </div>
     </>
   );

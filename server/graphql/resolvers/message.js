@@ -113,6 +113,16 @@ module.exports = {
           [parent.message_id]
         )
       )[0];
+    },
+    async responsesCount(parent, _, { user, connection }) {
+      user.authenticate();
+      return (
+        await connection.query(
+          `SELECT COUNT(*) FROM messages
+          WHERE response_to_message_id = ?`,
+          [parent.message_id]
+        )
+      )[0][0]['COUNT(*)'];
     }
   },
   Reaction: {

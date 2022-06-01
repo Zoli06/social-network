@@ -26,6 +26,7 @@ const MESSAGE_QUERY = gql`
       responses {
         messageId
       }
+      responsesCount
       reactions {
         type
       }

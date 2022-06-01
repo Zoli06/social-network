@@ -31,6 +31,7 @@ type Message {
   text: String!
   responseToMessage: Message
   responses: [Message]
+  responsesCount: Int!
   reactions: [Reaction!]!
   reaction: Reaction
   upVotes: Int!

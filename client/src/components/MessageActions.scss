@@ -3,6 +3,7 @@
   height: 3vw;
   display: flex;
   justify-content: center;
+  align-items: center;
   column-gap: 1.5vw;
 
   .icon {
@@ -25,8 +26,8 @@
       mask: url('../../public/assets/images/downvote.svg');
     }
 
-    &.comment {
-      mask: url('../../public/assets/images/comment.svg');
+    &.response {
+      mask: url('../../public/assets/images/response.svg');
     }
   }
 }
