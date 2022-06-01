@@ -1,11 +1,16 @@
-.profile-image {
-    width: 5vw;
+.message-author-container {
+    display: flex;
     height: 5vw;
-    border-radius: 50%;
-    object-fit: cover;
-    display: inline-block;
 }
 
-.name {
-    display: inline-block;
+p.intro {
+    color: var(--secondary-text-color);
+}
+
+.profile-image {
+    aspect-ratio: 1 / 1;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 1vw;
 }

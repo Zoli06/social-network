@@ -1,6 +1,8 @@
 import React from "react";
 import "./Message.css";
 import { MessageAuthor } from "./MessageAuthor";
+import { MessageText } from "./MessageText";
+import { MessageActions } from "./MessageActions";
 
 export const Message = ({
   user,
@@ -64,6 +66,8 @@ export const Message = ({
 
       <div className="message-container">
         <MessageAuthor user = {user} />
+        <MessageText text = {text} />
+        <MessageActions />
       </div>
     </>
   );
