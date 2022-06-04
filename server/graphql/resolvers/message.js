@@ -243,6 +243,12 @@ module.exports = {
     },
     async createVote(_, { messageId, type }, { user, connection }) {
       user.authenticate();
+      const groupId = (
+        await connection.query(
+          `SELECT group_id FROM messages WHERE message_id = ?`,
+          [messageId]
+        )
+      )[0][0].group_id;
       await isGroupMember(user.id, groupId, connection, true);
       await connection.query(
         `INSERT INTO votes (user_id, message_id, type) VALUES (:userId, :messageId, :type)

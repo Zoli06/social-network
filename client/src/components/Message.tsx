@@ -5,6 +5,7 @@ import { MessageText } from './MessageText';
 import { MessageActions } from './MessageActions';
 
 export const Message = ({
+  messageId,
   user,
   group,
   createdAt,
@@ -19,6 +20,7 @@ export const Message = ({
   text,
   responsesCount,
 }: {
+  messageId: string;
   user: {
     firstName: string;
     lastName: string;
@@ -53,7 +55,7 @@ export const Message = ({
   }[];
   text: string;
   responsesCount: number;
-}) => {
+  }) => {
   return (
     <>
       <div style={{ display: 'none' }}>
@@ -103,7 +105,7 @@ export const Message = ({
       <div className='message-container'>
         <MessageAuthor user={user} />
         <MessageText text={text} />
-        <MessageActions upVotes={upVotes} downVotes={downVotes} responsesCount={responsesCount} />
+        <MessageActions upVotes={upVotes} downVotes={downVotes} responsesCount={responsesCount} messageId={messageId} />
       </div>
     </>
   );

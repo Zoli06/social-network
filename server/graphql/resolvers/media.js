@@ -1,3 +1,5 @@
+const { isMediaCreator } = require('../helpers/media.js');
+
 module.exports = {
   Media: {
     async user(parent, _, { user, connection }) {
@@ -36,6 +38,7 @@ module.exports = {
     },
     async deleteMedia(_, { mediaId }, { user, connection }) {
       user.authenticate();
+      await isMediaCreator(user.id, mediaId, connection, true);
       await connection.query(`DELETE FROM medias WHERE media_id = ?`, [mediaId]);
       return mediaId;
     }

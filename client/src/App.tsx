@@ -8,6 +8,7 @@ import { Message } from './components/Message';
 const MESSAGE_QUERY = gql`
   query GetMessage($messageId: ID!) {
     message(messageId: $messageId) {
+      messageId
       user {
         firstName
         lastName
