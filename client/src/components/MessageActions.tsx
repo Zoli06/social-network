@@ -31,11 +31,17 @@ export const MessageActions = ({
 
   return (
     <div className='message-actions'>
-      <div className='upvote icon' onClick={() => handleVote('up')}/>
+      <svg className='upvote icon' onClick={() => handleVote('up')}>
+        <use href='./assets/images/svg-bundle.svg#upvote' />
+      </svg>
       <p className='upvote-count'>{upVotes}</p>
-      <div className='downvote icon' onClick={() => handleVote('down')}/>
+      <svg className='downvote icon' onClick={() => handleVote('down')}>
+        <use href='./assets/images/svg-bundle.svg#downvote' />
+      </svg>
       <p className='downvote-count'>{downVotes}</p>
-      <div className='response icon' />
+      <svg className='response icon'>
+        <use href='./assets/images/svg-bundle.svg#response' />
+      </svg>
       <p className='responses-count'>{responsesCount}</p>
     </div>
   );

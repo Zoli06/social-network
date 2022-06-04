@@ -9,25 +9,10 @@
   .icon {
     height: 100%;
     aspect-ratio: 1 / 1;
-    background-color: var(--main-text-color);
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
 
     &:hover {
       cursor: pointer;
-      background-color: var(--secondary-color);
-    }
-
-    &.upvote {
-      mask: url('../../public/assets/images/upvote.svg');
-    }
-
-    &.downvote {
-      mask: url('../../public/assets/images/downvote.svg');
-    }
-
-    &.response {
-      mask: url('../../public/assets/images/response.svg');
+      fill: var(--secondary-color);
     }
   }
 }
