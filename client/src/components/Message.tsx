@@ -105,7 +105,7 @@ export const Message = ({
       <div className='message-container'>
         <MessageAuthor user={user} />
         <MessageText text={text} />
-        <MessageActions upVotes={upVotes} downVotes={downVotes} responsesCount={responsesCount} messageId={messageId} />
+        <MessageActions upVotes={upVotes} downVotes={downVotes} responsesCount={responsesCount} messageId={messageId} myVote={vote.type} />
       </div>
     </>
   );

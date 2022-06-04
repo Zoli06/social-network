@@ -13,15 +13,22 @@ export const MessageActions = ({
   downVotes,
   responsesCount,
   messageId,
+  myVote,
 }: {
   upVotes: number;
   downVotes: number;
   responsesCount: number;
   messageId: string;
-}) => {
+  myVote: string | null;
+  }) => {
   // TODO: get current vote from server
-  const [myVoteType, setMyVoteType] = useState<string | null>(null);
+  const [myVoteType, setMyVoteType] = useState(myVote);
   const [voteMutation, { data, loading, error }] = useMutation(VOTE_MUTATION);
+
+  // Bug here. Sometimes even if the vote is set, the vote is null.
+  useEffect(() => {
+    console.log(myVoteType)
+  }, [myVoteType]);
 
   const handleVote = (type: string | null) => {
     if (myVoteType === type) type = null;
