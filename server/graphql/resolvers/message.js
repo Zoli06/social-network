@@ -60,16 +60,6 @@ module.exports = {
     },
     async vote(parent, _, { user, connection }) {
       user.authenticate();
-      console.log(user);
-      console.log((
-        await connection.query(
-          `SELECT * FROM votes
-          JOIN users
-          USING(user_id)
-          WHERE message_id = ? AND user_id = ?`,
-          [parent.message_id, user.id]
-        )
-      )[0][0]);
       return (
         await connection.query(
           `SELECT * FROM votes
