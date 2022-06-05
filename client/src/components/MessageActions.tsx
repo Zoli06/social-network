@@ -56,7 +56,7 @@ export const MessageActions = ({
       <div className='reactions-container'>
         {[...new Set(reactions.map(reaction => reaction.type))].map(
           reactionType => (
-            <span className='reaction-emoji' dangerouslySetInnerHTML={{ __html: `&#${reactionType + 8986};` }} />
+            <span className='reaction-emoji' dangerouslySetInnerHTML={{ __html: `&#${reactionType + 8986};` }} key={ reactionType }/>
           )
         )}
       </div>
