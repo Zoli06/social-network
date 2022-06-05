@@ -14,12 +14,16 @@ export const MessageActions = ({
   responsesCount,
   messageId,
   myVote,
+  reactions,
 }: {
   upVotes: number;
   downVotes: number;
   responsesCount: number;
   messageId: string;
   myVote: string | null;
+  reactions: {
+    type: number;
+  }[];
 }) => {
   // TODO: get current vote from server
   const [myVoteType, setMyVoteType] = useState(myVote);
@@ -49,6 +53,13 @@ export const MessageActions = ({
         <use href='./assets/images/svg-bundle.svg#response' />
       </svg>
       <p className='responses-count'>{responsesCount}</p>
+      <div className='reactions-container'>
+        {[...new Set(reactions.map(reaction => reaction.type))].map(
+          reactionType => (
+            <span className='reaction-emoji' dangerouslySetInnerHTML={{ __html: `&#${reactionType + 8986};` }} />
+          )
+        )}
+      </div>
     </div>
   );
 };

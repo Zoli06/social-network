@@ -40,10 +40,10 @@ export const Message = ({
     messageId: string;
   }[];
   reactions: {
-    type: string;
+    type: number;
   }[];
   reaction: {
-    type: string;
+    type: number;
   };
   upVotes: number;
   downVotes: number;
@@ -105,7 +105,7 @@ export const Message = ({
       <div className='message-container'>
         <MessageAuthor user={user} />
         <MessageText text={text} />
-        <MessageActions upVotes={upVotes} downVotes={downVotes} responsesCount={responsesCount} messageId={messageId} myVote={vote.type} />
+        <MessageActions upVotes={upVotes} downVotes={downVotes} responsesCount={responsesCount} messageId={messageId} myVote={vote.type} reactions={reactions} />
       </div>
     </>
   );
