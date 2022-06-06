@@ -54,9 +54,11 @@ export const MessageActions = ({
       </svg>
       <p className='responses-count'>{responsesCount}</p>
       <div className='reactions-container'>
-        {[...new Set(reactions.map(reaction => reaction.type))].map(
-          reactionType => (
-            <span className='reaction-emoji' dangerouslySetInnerHTML={{ __html: `&#${reactionType + 8986};` }} key={ reactionType }/>
+        {[...new Set(reactions.map((reaction) => reaction.type))].map(
+          (reactionType) => (
+            <span className='reaction-emoji' key={reactionType}>
+              {String.fromCodePoint(reactionType)}
+            </span>
           )
         )}
       </div>

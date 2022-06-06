@@ -1,6 +1,8 @@
 const { Query: { user: getUser } } = require('./user.js');
 const { isGroupMember } = require('../helpers/group.js');
 const { isMessageCreator } = require('../helpers/message.js');
+const Grapheme = require('grapheme-splitter');
+const splitter = new Grapheme();
 
 module.exports = {
   Message: {
@@ -241,6 +243,10 @@ module.exports = {
     },
     async createReaction(_, { messageId, type }, { user, connection }) {
       user.authenticate();
+      emoji = String.fromCodePoint(type);
+      if (splitter.splitGraphemes(emoji).length !== 1 || !/\p{Extended_Pictographic}/u.test(emoji)) {
+        throw new Error('Invalid emoji');
+      }
       const groupId = (
         await connection.query(
           `SELECT group_id FROM messages WHERE message_id = ?`,

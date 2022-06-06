@@ -7,6 +7,7 @@
     "apollo-server": "^3.6.7",
     "bcrypt": "^5.0.1",
     "dotenv": "^16.0.0",
+    "grapheme-splitter": "^1.0.4",
     "graphql": "^16.3.0",
     "graphql-date": "^1.0.3",
     "jsonwebtoken": "^8.5.1",
@@ -15,8 +16,8 @@
     "nodemon": "^2.0.15"
   },
   "scripts": {
-    "start": "node server.js",
-    "live": "nodemon server.js"
+    "start": "node --use_strict server.js",
+    "live": "nodemon --use_strict server.js"
   },
   "name": "server",
   "version": "1.0.0",
