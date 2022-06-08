@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import './MessageActions.scss';
 import { gql, useMutation } from '@apollo/client';
+import Twemoji from 'react-twemoji';
+import { v4 as uuidv4 } from 'uuid';
 
 const VOTE_MUTATION = gql`
   mutation VoteMutation($messageId: ID!, $type: VoteType) {
@@ -54,13 +56,31 @@ export const MessageActions = ({
       </svg>
       <p className='responses-count'>{responsesCount}</p>
       <div className='reactions-container'>
-        {[...new Set(reactions.map((reaction) => reaction.type))].map(
-          (reactionType) => (
-            <span className='reaction-emoji' key={reactionType}>
-              {String.fromCodePoint(reactionType)}
-            </span>
-          )
-        )}
+        <div className='common-reactions'>
+          <Twemoji options={{ className: 'reaction-emoji' }}>
+            {[...new Set(reactions.map((reaction) => reaction.type))].map(
+              (reactionType) => (
+                <div className='common-reaction-emoji' key={uuidv4()}>
+                  {String.fromCodePoint(reactionType)}
+                </div>
+              )
+            )}
+          </Twemoji>
+        </div>
+        <div className='add-reaction-container'>
+          <div className='add-reaction-popup'>
+            <div className='add-reaction-popup-emojis'>
+              <Twemoji options={{ className: 'add-reaction-popup-emoji' }}>
+              👍❤🥰🤣😲😢😠
+              </Twemoji>
+            </div>
+          </div>
+          <div className='add-reaction-button'>
+            <svg className='add-reaction-icon icon'>
+              <use href='./assets/images/svg-bundle.svg#plus' />
+            </svg>
+          </div>
+        </div>
       </div>
     </div>
   );
