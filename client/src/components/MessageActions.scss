@@ -1,5 +1,6 @@
 :root {
   --reaction-icon-size: 3vw;
+  --reaction-add-popup-space: .5vw;
 }
 
 .message-actions {
@@ -35,22 +36,23 @@
     .add-reaction-container {
       .add-reaction-popup {
         position: absolute;
-        bottom: 3.5vw;
+        bottom: calc(var(--reaction-icon-size) + .5vw);
         right: calc(var(--reaction-icon-size) / 2 - 10vw);
         height: 90%;
         width: 20vw;
         background-color: var(--secondary-color);
         border-radius: 1vw;
+        display: none;
 
-        .add-reaction-popup-emojis {
+        .add-reaction-popup-emoji-container {
           /*twimoji container*/
           div {
             display: flex;
             justify-content: space-around;
 
             .add-reaction-popup-emoji {
-              height: calc(var(--reaction-icon-size) * .75);
-              transform: translateY(calc(var(--reaction-icon-size) * .125));
+              height: calc(var(--reaction-icon-size) * 0.75);
+              transform: translateY(calc(var(--reaction-icon-size) * 0.125));
 
               &:hover {
                 transform: scale(1.1);
@@ -58,11 +60,40 @@
             }
           }
         }
+
+        &:hover {
+          display: block;
+        }
       }
 
       .add-reaction-button {
         margin-left: 1vw;
-        .add-reaction-icon {
+        // height: 200%;
+        // transform: translateY(-50%);
+        // display: flex;
+        // align-items: flex-end;
+
+        &:hover {
+          cursor: pointer;
+
+          & ~ .add-reaction-popup {
+            display: block;
+          }
+        }
+
+        .add-reaction-icon:hover {
+          fill: var(--main-text-color);
+        }
+      }
+
+      .space-holder {
+        height: var(--reaction-add-popup-space);
+        width: var(--reaction-icon-size);
+        bottom: var(--reaction-icon-size);
+        position: absolute;
+
+        & ~ .add-reaction-popup {
+          display: block;
         }
       }
     }
@@ -72,9 +103,10 @@
 .icon {
   height: var(--reaction-icon-size);
   aspect-ratio: 1 / 1;
+  fill: var(--main-text-color);
 
   &:hover {
     cursor: pointer;
-    fill: var(--secondary-color);
+    fill: var(--secondary-text-color);
   }
 }

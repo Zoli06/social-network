@@ -68,17 +68,18 @@ export const MessageActions = ({
           </Twemoji>
         </div>
         <div className='add-reaction-container'>
-          <div className='add-reaction-popup'>
-            <div className='add-reaction-popup-emojis'>
-              <Twemoji options={{ className: 'add-reaction-popup-emoji' }}>
-              👍❤🥰🤣😲😢😠
-              </Twemoji>
-            </div>
-          </div>
           <div className='add-reaction-button'>
+            <div className='space-holder'></div>
             <svg className='add-reaction-icon icon'>
               <use href='./assets/images/svg-bundle.svg#plus' />
             </svg>
+          </div>
+          <div className='add-reaction-popup'>
+            <div className='add-reaction-popup-emoji-container'>
+              <Twemoji options={{ className: 'add-reaction-popup-emoji' }}>
+                👍❤🥰🤣😲😢😠
+              </Twemoji>
+            </div>
           </div>
         </div>
       </div>
