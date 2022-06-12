@@ -89,7 +89,7 @@ export const MessageActions = ({
         </div>
         <div className='add-reaction-container'>
           <div className='add-reaction-button'>
-            <div className='space-holder'></div>
+            <div className='space-holder' />
             <svg className='add-reaction-icon icon'>
               <use href='./assets/images/svg-bundle.svg#plus' />
             </svg>
