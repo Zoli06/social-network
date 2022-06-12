@@ -10,6 +10,14 @@ const VOTE_MUTATION = gql`
   }
 `;
 
+const REACTION_MUTATION = gql`
+  mutation ReactionMutation($messageId: ID!, $type: Int) {
+    createReaction(messageId: $messageId, type: $type) {
+      type
+    }
+  }
+`;
+
 export const MessageActions = ({
   upVotes,
   downVotes,
@@ -29,7 +37,15 @@ export const MessageActions = ({
 }) => {
   // TODO: get current vote from server
   const [myVoteType, setMyVoteType] = useState(myVote);
-  const [voteMutation, { data, loading, error }] = useMutation(VOTE_MUTATION);
+  const [
+    voteMutation,
+    { data: voteData, loading: voteLoading, error: voteError },
+  ] = useMutation(VOTE_MUTATION);
+  const [
+    reactionMutation,
+    { data: reactionData, loading: reactionLoading, error: reactionError },
+  ] = useMutation(REACTION_MUTATION);
+  const possibleReactions = ['👍', '❤', '🥰', '🤣', '😲', '😢', '😠'];
 
   useEffect(() => {
     console.log(myVoteType);
@@ -39,6 +55,10 @@ export const MessageActions = ({
     if (myVoteType === type) type = null;
     voteMutation({ variables: { messageId, type } });
     setMyVoteType(type);
+  };
+
+  const handleAddReaction = (type: string) => {
+    reactionMutation({ variables: { messageId, type: type.codePointAt(0) } });
   };
 
   return (
@@ -57,7 +77,7 @@ export const MessageActions = ({
       <p className='responses-count'>{responsesCount}</p>
       <div className='reactions-container'>
         <div className='common-reactions'>
-          <Twemoji options={{ className: 'reaction-emoji' }}>
+          <Twemoji options={{ className: 'reaction-emoji' }} noWrapper>
             {[...new Set(reactions.map((reaction) => reaction.type))].map(
               (reactionType) => (
                 <div className='common-reaction-emoji' key={uuidv4()}>
@@ -75,11 +95,16 @@ export const MessageActions = ({
             </svg>
           </div>
           <div className='add-reaction-popup'>
-            <div className='add-reaction-popup-emoji-container'>
-              <Twemoji options={{ className: 'add-reaction-popup-emoji' }}>
-                👍❤🥰🤣😲😢😠
-              </Twemoji>
-            </div>
+            <Twemoji
+              options={{ className: 'add-reaction-popup-emoji' }}
+              noWrapper
+            >
+              {possibleReactions.map((reaction) => (
+                <span key={uuidv4()} onClick={() => handleAddReaction(reaction)}>
+                  {reaction}
+                </span>
+              ))}
+            </Twemoji>
           </div>
         </div>
       </div>

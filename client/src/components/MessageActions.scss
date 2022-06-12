@@ -1,6 +1,6 @@
 :root {
   --reaction-icon-size: 3vw;
-  --reaction-add-popup-space: .5vw;
+  --reaction-add-popup-space: 0.5vw;
 }
 
 .message-actions {
@@ -17,18 +17,17 @@
     display: flex;
 
     .common-reactions {
-      /*twimoji container*/
-      div {
-        display: flex;
-        flex-direction: row-reverse;
+      display: flex;
+      flex-direction: row-reverse;
 
-        .common-reaction-emoji {
+      .common-reaction-emoji {
+        img {
           height: 3vw;
           filter: drop-shadow(0.1vw 0 0 var(--main-color));
+        }
 
-          &:not(:first-child) {
-            margin-right: -0.85vw;
-          }
+        &:not(:first-child) {
+          margin-right: -0.85vw;
         }
       }
     }
@@ -36,33 +35,26 @@
     .add-reaction-container {
       .add-reaction-popup {
         position: absolute;
-        bottom: calc(var(--reaction-icon-size) + .5vw);
+        bottom: calc(var(--reaction-icon-size) + 0.5vw);
         right: calc(var(--reaction-icon-size) / 2 - 10vw);
         height: 90%;
         width: 20vw;
         background-color: var(--secondary-color);
         border-radius: 1vw;
         display: none;
+        justify-content: space-around;
 
-        .add-reaction-popup-emoji-container {
-          /*twimoji container*/
-          div {
-            display: flex;
-            justify-content: space-around;
+        .add-reaction-popup-emoji {
+          height: calc(var(--reaction-icon-size) * 0.75);
+          transform: translateY(calc(var(--reaction-icon-size) * 0.125));
 
-            .add-reaction-popup-emoji {
-              height: calc(var(--reaction-icon-size) * 0.75);
-              transform: translateY(calc(var(--reaction-icon-size) * 0.125));
-
-              &:hover {
-                transform: scale(1.1);
-              }
-            }
+          &:hover {
+            transform: scale(1.1);
           }
         }
 
         &:hover {
-          display: block;
+          display: flex;
         }
       }
 
@@ -77,7 +69,7 @@
           cursor: pointer;
 
           & ~ .add-reaction-popup {
-            display: block;
+            display: flex;
           }
         }
 
@@ -93,7 +85,7 @@
         position: absolute;
 
         & ~ .add-reaction-popup {
-          display: block;
+          display: flex;
         }
       }
     }
