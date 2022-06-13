@@ -1,16 +1,36 @@
 console.log("Hello world");
 
 const { ApolloServer } = require('apollo-server-express');
+const { createServer } = require('http');
 const express = require('express');
+const { ApolloServerPluginDrainHttpServer } = require("apollo-server-core");
+const { makeExecutableSchema } = require('@graphql-tools/schema');
+const { WebSocketServer } = require('ws');
+const { useServer } = require('graphql-ws/lib/use/ws');
+
 const { fieldResolver, resolvers } = require('./graphql/resolvers.js');
 const connection = require('./db/sql_connect.js');
 const typeDefs = require('./graphql/typeDefs.js');
 const jwt = require('jsonwebtoken');
 const bodyParser = require("body-parser");
 const path = require('path').resolve(__dirname, '../client/build');
+
+const schema = makeExecutableSchema({ typeDefs, resolvers });
+
 const app = express();
+
 app.use(express.static(path));
 app.use(bodyParser.json());
+app.get('/*', (req, res) => {
+  res.sendFile(path + "/index.html");
+});
+const httpServer = createServer(app);
+
+const wsServer = new WebSocketServer({
+  server: httpServer,
+  path: '/graphql',
+});
+const serverCleanup = useServer({ schema }, wsServer);
 
 const getUser = token => {
   try {
@@ -27,10 +47,9 @@ const getUser = token => {
   }
 }
 
-const apolloServer = new ApolloServer({
+const server = new ApolloServer({
+  schema,
   fieldResolver,
-  typeDefs,
-  resolvers,
   context: ({ req }) => {
     const token = req.get('Authorization') || '';
     const user = getUser(token.replace('Bearer', '').trim());
@@ -42,18 +61,27 @@ const apolloServer = new ApolloServer({
       connection
     }
   },
+  plugins: [
+    ApolloServerPluginDrainHttpServer({ httpServer }),
+
+    {
+      async serverWillStart() {
+        return {
+          async drainServer() {
+            await serverCleanup.dispose();
+          },
+        };
+      },
+    },
+  ],
   debug: true,
   tracing: true,
   introspection: true,
   playground: true
 });
 
-apolloServer.start().then(() => {
-  apolloServer.applyMiddleware({ app });
-
-  app.get('/*', (req, res) => {
-    res.sendFile(path + "/index.html");
-  });
-
-  app.listen(process.env.PORT || PORT, () => console.log('Server running on port ' + (process.env.PORT || PORT)));
+PORT = process.env.PORT || 8080;
+server.start().then(() => {
+  server.applyMiddleware({ app });
+  httpServer.listen(PORT, () => console.log('Server running on port ' + PORT));
 });
