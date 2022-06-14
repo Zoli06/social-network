@@ -1,1 +1,9 @@
 scalar Date
+
+type Subscription {
+    example: String
+}
+
+type Mutation {
+    callExample(foo: String): String
+}

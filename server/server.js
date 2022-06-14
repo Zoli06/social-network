@@ -7,6 +7,7 @@ const { ApolloServerPluginDrainHttpServer } = require("apollo-server-core");
 const { makeExecutableSchema } = require('@graphql-tools/schema');
 const { WebSocketServer } = require('ws');
 const { useServer } = require('graphql-ws/lib/use/ws');
+const { PubSub } = require('graphql-subscriptions');
 
 const { fieldResolver, resolvers } = require('./graphql/resolvers.js');
 const connection = require('./db/sql_connect.js');
@@ -44,6 +45,8 @@ const getUser = token => {
   }
 }
 
+const pubsub = new PubSub();
+
 const server = new ApolloServer({
   schema,
   fieldResolver,
@@ -55,7 +58,8 @@ const server = new ApolloServer({
         ...user,
         authenticate: () => { if (!user) throw new Error('You are not authenticated!'); }
       },
-      connection
+      connection,
+      pubsub
     }
   },
   plugins: [
