@@ -21,9 +21,6 @@ const app = express();
 
 app.use(express.static(path));
 app.use(bodyParser.json());
-app.get('/*', (req, res) => {
-  res.sendFile(path + "/index.html");
-});
 const httpServer = createServer(app);
 
 const wsServer = new WebSocketServer({
