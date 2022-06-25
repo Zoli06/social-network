@@ -6,14 +6,14 @@ module.exports = {
   Date: GraphQLDate,
   Subscription: {
     example: {
-      subscribe: (_, __, pubsub) => {
-        pubsub.asyncIterator(EXAMPLE);
+      subscribe: (_, __, { pubsub }) => {
+        return pubsub.asyncIterator(EXAMPLE);
       }
     }
   },
   Mutation: {
     callExample: (_, { foo }, { pubsub }) => {
-      pubsub.publish(EXAMPLE, { example: { foo } });
+      pubsub.publish(EXAMPLE, { example: foo });
       return foo;
     }
   }

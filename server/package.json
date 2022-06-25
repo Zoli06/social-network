@@ -4,17 +4,21 @@
     "@graphql-tools/load": "^7.5.9",
     "@graphql-tools/load-files": "^6.5.3",
     "@graphql-tools/merge": "^8.2.10",
+    "@graphql-tools/schema": "^8.3.14",
     "apollo-server": "^3.6.7",
+    "apollo-server-core": "^3.9.0",
     "bcrypt": "^5.0.1",
     "dotenv": "^16.0.0",
     "grapheme-splitter": "^1.0.4",
     "graphql": "^16.3.0",
     "graphql-date": "^1.0.3",
     "graphql-subscriptions": "^2.0.0",
+    "graphql-ws": "^5.9.0",
     "jsonwebtoken": "^8.5.1",
     "lodash.snakecase": "^4.1.1",
     "mysql2": "^2.3.3",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "ws": "^8.8.0"
   },
   "scripts": {
     "start": "node --use_strict server.js",

@@ -28,7 +28,18 @@ const wsServer = new WebSocketServer({
   server: httpServer,
   path: '/graphql',
 });
-const serverCleanup = useServer({ schema }, wsServer);
+
+const pubsub = new PubSub();
+
+const serverCleanup = useServer(
+  {
+    schema,
+    context: () => {
+      return { pubsub }
+    }
+  },
+  wsServer
+);
 
 const getUser = token => {
   try {
@@ -44,8 +55,6 @@ const getUser = token => {
     return null
   }
 }
-
-const pubsub = new PubSub();
 
 const server = new ApolloServer({
   schema,
@@ -64,7 +73,6 @@ const server = new ApolloServer({
   },
   plugins: [
     ApolloServerPluginDrainHttpServer({ httpServer }),
-
     {
       async serverWillStart() {
         return {
