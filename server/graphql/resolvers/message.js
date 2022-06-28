@@ -70,7 +70,7 @@ module.exports = {
           WHERE message_id = ? AND user_id = ?`,
           [parent.message_id, user.id]
         )
-      )[0][0];
+      )[0][0]['type'];
     },
     async mentionedUsers(parent, _, { user, connection }) {
       user.authenticate();
@@ -133,12 +133,12 @@ module.exports = {
       return await getUser({}, { userId: parent.user_id }, { user, connection });
     },
   },
-  Vote: {
-    async user(parent, _, { user, connection }) {
-      user.authenticate();
-      return await getUser({}, { userId: parent.user_id }, { user, connection });
-    },
-  },
+  // Vote: {
+  //   async user(parent, _, { user, connection }) {
+  //     user.authenticate();
+  //     return await getUser({}, { userId: parent.user_id }, { user, connection });
+  //   },
+  // },
   Query: {
     async message(_, { messageId }, { user, connection }) {
       user.authenticate();
@@ -160,7 +160,7 @@ module.exports = {
         message: { text, responseToMessageId, mentionedUserIds, mediaIds },
         groupId,
       },
-      { user, connection }
+      { user, connection, pubsub }
     ) {
       user.authenticate();
       await isGroupMember(user.id, groupId, connection, true);
@@ -182,7 +182,9 @@ module.exports = {
           [mediaIds.map((mediaId) => [messageId, mediaId])]
         );
       }
-      return await module.exports.Query.message({}, { messageId }, { user, connection });
+      const createdMessage = await module.exports.Query.message({}, { messageId }, { user, connection });
+      pubsub.publish(`messageAdded_${groupId}`, { message: createdMessage });
+      return createdMessage;
     },
     async editMessage(_, { message: { text, responseToMessageId, mentionedUserIds, mediaIds }, messageId, }, { user, connection }) {
       user.authenticate();
@@ -265,7 +267,7 @@ module.exports = {
         { user, connection }
       );
     },
-    async createVote(_, { messageId, type }, { user, connection }) {
+    async createVote(_, { messageId, type }, { user, connection, pubsub }) {
       user.authenticate();
       const groupId = (
         await connection.query(
@@ -279,7 +281,25 @@ module.exports = {
         ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,
         { userId: user.id, messageId, type }
       );
+      //pubsub.publish(`messageVoted_${groupId}`, { messageId });
       return type;  // TODO: return actual updated vote
     }
+  },
+  Subscription: {
+    messageAdded: {
+      subscribe: (_, { groupId }, { user, connection, pubsub }) => {
+        user.authenticate();
+        isGroupMember(user.id, groupId, connection, true);
+        return pubsub.asyncIterator(`messageAdded_${groupId}`);
+      }
+    },
+    // ...
+    // messageVoted: {
+    //   subscribe: (_, { groupId }, { user, connection, pubsub }) => {
+    //     user.authenticate();
+    //     isGroupMember(user.id, groupId, connection, true);
+    //     return pubsub.asyncIterator(`messageVoted_${groupId}`);
+    //   }
+    // }
   }
 }

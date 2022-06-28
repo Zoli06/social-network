@@ -36,9 +36,7 @@ const MESSAGE_QUERY = gql`
       }
       upVotes
       downVotes
-      vote {
-        type
-      }
+      vote
       medias {
         url
       }

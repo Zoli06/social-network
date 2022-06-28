@@ -10,13 +10,6 @@ type Reaction {
   type: Int!
 }
 
-type Vote {
-  user: User!
-  createdAt: Date!
-  updatedAt: Date!
-  type: VoteType
-}
-
 input MediaInput {
   url: String!
   caption: String
@@ -36,7 +29,7 @@ type Message {
   reaction: Reaction
   upVotes: Int!
   downVotes: Int!
-  vote: Vote
+  vote: VoteType
   mentionedUsers: [User!]!
   medias: [Media!]! # urls of the medias
 }
@@ -58,4 +51,12 @@ type Mutation {
   deleteMessage(messageId: ID!): ID
   createReaction(messageId: ID!, type: Int): Reaction # also can be used to delete and update
   createVote(messageId: ID!, type: VoteType): VoteType # also can be used to delete and update
+}
+
+type Subscription {
+  messageAdded(groupId: ID!): Message
+  messageEdited(groupId: ID!): Message
+  messageDeleted(groupId: ID!): ID
+  messageReacted(groupId: ID!): Reaction
+  messageVoted(groupId: ID!): Vote
 }

@@ -31,12 +31,24 @@ const wsServer = new WebSocketServer({
 
 const pubsub = new PubSub();
 
+const getDynamicContext = (ctx) => {
+  const token = (ctx.req?.get('Authorization') || ctx.connectionParams?.Authorization || '').replace('Bearer', '').trim();
+  console.log(token);
+  const user = getUser(token);
+  return {
+    user: {
+      ...user,
+      authenticate: () => { if (!user) throw new Error('You are not authenticated!'); }
+    },
+    connection,
+    pubsub
+  }
+}
+
 const serverCleanup = useServer(
   {
     schema,
-    context: () => {
-      return { pubsub }
-    }
+    context: getDynamicContext
   },
   wsServer
 );
@@ -59,18 +71,7 @@ const getUser = token => {
 const server = new ApolloServer({
   schema,
   fieldResolver,
-  context: ({ req }) => {
-    const token = req.get('Authorization') || '';
-    const user = getUser(token.replace('Bearer', '').trim());
-    return {
-      user: {
-        ...user,
-        authenticate: () => { if (!user) throw new Error('You are not authenticated!'); }
-      },
-      connection,
-      pubsub
-    }
-  },
+  context: getDynamicContext,
   plugins: [
     ApolloServerPluginDrainHttpServer({ httpServer }),
     {

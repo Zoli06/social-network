@@ -47,9 +47,7 @@ export const Message = ({
   };
   upVotes: number;
   downVotes: number;
-  vote: {
-    type: string;
-  };
+  vote: string;
   medias: {
     url: string;
   }[];
@@ -92,7 +90,7 @@ export const Message = ({
         <br />
         {/*downVotes*/}
         <br />
-        {vote.type}
+        {vote}
         <br />
 
         {/*medias.mediaId*/}
@@ -105,7 +103,7 @@ export const Message = ({
       <div className='message-container'>
         <MessageAuthor user={user} />
         <MessageText text={text} />
-        <MessageActions upVotes={upVotes} downVotes={downVotes} responsesCount={responsesCount} messageId={messageId} myVote={vote.type} reactions={reactions} />
+        <MessageActions upVotes={upVotes} downVotes={downVotes} responsesCount={responsesCount} messageId={messageId} myVote={vote} reactions={reactions} />
       </div>
     </>
   );
