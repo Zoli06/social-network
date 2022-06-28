@@ -3,25 +3,25 @@ const { isGroupAdmin, isGroupCreator } = require('../helpers/group.js');
 
 module.exports = {
   Group: {
-    async messages(parent, _, { user, connection }) {
+    async messages({ group_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM messages
           WHERE group_id = ?`,
-          [parent.group_id]
+          [group_id]
         )
       )[0];
     },
-    async createdByUser(parent, _, { user, connection }) {
+    async createdByUser({ created_by_user_id }, _, { user, connection }) {
       user.authenticate();
       return await getUser(
         {},
-        { userId: parent.created_by_user_id },
+        { userId: created_by_user_id },
         { user, connection }
       );
     },
-    async members(parent, _, { user, connection }) {
+    async members({ group_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
@@ -29,11 +29,11 @@ module.exports = {
           JOIN users
           USING (user_id)
           WHERE group_id = ? AND type = 'member'`,
-          [parent.group_id]
+          [group_id]
         )
       )[0];
     },
-    async memberRequests(parent, _, { user, connection }) {
+    async memberRequests({ group_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
@@ -41,11 +41,11 @@ module.exports = {
           JOIN users
           USING (user_id)
           WHERE group_id = ? AND type = 'member_request'`,
-          [parent.group_id]
+          [group_id]
         )
       )[0];
     },
-    async bannedUsers(parent, _, { user, connection }) {
+    async bannedUsers({ group_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
@@ -53,11 +53,11 @@ module.exports = {
           JOIN users
           USING (user_id)
           WHERE group_id = ? AND type = 'banned'`,
-          [parent.group_id]
+          [group_id]
         )
       )[0];
     },
-    async invitedUsers(parent, _, { user, connection }) {
+    async invitedUsers({ group_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
@@ -65,11 +65,11 @@ module.exports = {
           JOIN users
           USING (user_id)
           WHERE group_id = ? AND type = 'invited'`,
-          [parent.group_id]
+          [group_id]
         )
       )[0];
     },
-    async admins(parent, _, { user, connection }) {
+    async admins({ group_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
@@ -77,11 +77,11 @@ module.exports = {
           JOIN users
           USING (user_id)
           WHERE group_id = ? AND type = 'admin'`,
-          [parent.group_id]
+          [group_id]
         )
       )[0];
     },
-    async rejectedUsers(parent, _, { user, connection }) {
+    async rejectedUsers({ group_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
@@ -89,17 +89,17 @@ module.exports = {
           JOIN users
           USING (user_id)
           WHERE group_id = ? AND type = 'member_request_rejected'`,
-          [parent.group_id]
+          [group_id]
         )
       )[0];
     },
-    async notificationFrequency(parent, _, { user, connection }) {
+    async notificationFrequency({ group_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
           `SELECT notification_frequency FROM group_user_relationships
           WHERE group_id = ? AND user_id = ?`,
-          [parent.group_id, user.id]
+          [group_id, user.id]
         )
       )[0][0];
     }

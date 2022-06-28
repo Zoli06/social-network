@@ -2,7 +2,7 @@ const { isMediaCreator } = require('../helpers/media.js');
 
 module.exports = {
   Media: {
-    async user(parent, _, { user, connection }) {
+    async user({ media_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
@@ -10,7 +10,7 @@ module.exports = {
           JOIN users
           USING(user_id)
           WHERE media_id = ?`,
-          [parent.media_id]
+          [media_id]
         )
       )[0][0];
     },

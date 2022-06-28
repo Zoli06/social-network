@@ -151,7 +151,7 @@ module.exports = {
         ...(await this.blockedUsers(parent, _, { user, connection })),
       ];
     },
-    async friends(parent, _, { user, connection }) {
+    async friends({ user_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
@@ -167,7 +167,7 @@ module.exports = {
         AND (uur1.initiating_user_id = :id OR uur1.target_user_id = :id)
         AND user_id != :id
       GROUP BY user_id`,
-          { id: parent.user_id }
+          { id: user_id }
         )
       )[0].map((record) => ({
         user: record,
@@ -176,7 +176,7 @@ module.exports = {
         updated_at: record.real_updated_at,
       }));
     },
-    async incomingFriendRequests(parent, _, { user, connection }) {
+    async incomingFriendRequests({ user_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
@@ -191,7 +191,7 @@ module.exports = {
           AND ((uur2.type != 'friend' AND uur2.type != 'blocked' AND uur1.updated_at > uur2.updated_at) OR uur2.type IS NULL)
           AND uur1.target_user_id = :id
           AND user_id != :id`,
-          { id: parent.user_id }
+          { id: user_id }
         )
       )[0].map((record) => ({
         user: record,
@@ -200,7 +200,7 @@ module.exports = {
         updated_at: record.updated_at,
       }));
     },
-    async outgoingFriendRequests(parent, _, { user, connection }) {
+    async outgoingFriendRequests({ user_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
@@ -215,7 +215,7 @@ module.exports = {
           AND ((uur2.type != 'friend' AND uur2.type != 'blocked' AND uur1.updated_at > uur2.updated_at) OR uur2.type IS NULL)
           AND uur1.initiating_user_id = :id
           AND user_id != :id`,
-          { id: parent.user_id }
+          { id: user_id }
         )
       )[0].map((record) => ({
         user: record,
@@ -224,7 +224,7 @@ module.exports = {
         updated_at: record.updated_at,
       }));
     },
-    async blockedUsers(parent, _, { user, connection }) {
+    async blockedUsers({ user_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
@@ -233,7 +233,7 @@ module.exports = {
         JOIN users
         ON user_id = target_user_id
         WHERE type = 'outgoing_blocking' AND initiating_user_id = ?`,
-          [parent.user_id]
+          [user_id]
         )
       )[0].map((record) => ({
         user: record,
@@ -242,19 +242,19 @@ module.exports = {
         updated_at: record.updated_at,
       }));
     },
-    async relationshipWithUser(parent, _, { user, connection }) {
+    async relationshipWithUser({ user_id }, _, { user, connection }) {
       user.authenticate();
       const relationship1 = (await connection.query(
         `SELECT *
       FROM user_user_relationships
       WHERE initiating_user_id = ? AND target_user_id = ?`,
-        [user.id, parent.user_id]
+        [user.id, part.user_id]
       ))[0][0];
       const relationship2 = (await connection.query(
         `SELECT *
       FROM user_user_relationships
       WHERE initiating_user_id = ? AND target_user_id = ?`,
-        [parent.user_id, user.id]
+        [user_id, user.id]
       ))[0][0];
       const type1 = relationship1?.type;
       const type2 = relationship2?.type;
@@ -280,17 +280,17 @@ module.exports = {
         type,
         created_at: Math.min(relationship1?.created_at, relationship2?.created_at),
         updated_at: Math.max(relationship1?.updated_at, relationship2?.updated_at),
-        user: module.exports.Query.user({}, { userId: parent.user_id }, { user, connection }),
+        user: module.exports.Query.user({}, { userId: user_id }, { user, connection }),
       }
     },
-    async profileImage(parent, _, { user, connection }) {
+    async profileImage(_, __, { user, connection }) {
       user.authenticate();
 
-      return (await connection.query(`
-        SELECT * FROM users
+      return (await connection.query(
+        `SELECT * FROM users
         JOIN medias
-        ON profile_image_media_id = media_id
-      `))[0][0]
+        ON profile_image_media_id = media_id`
+      ))[0][0]
     }
   }
 }

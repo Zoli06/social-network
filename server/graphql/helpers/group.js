@@ -5,7 +5,7 @@ module.exports = {
     WHERE group_id = ?`,
       [groupId]
     ))[0][0];
-
+    
     if (group.created_by_user_id === userId) {
       return true;
     }
@@ -20,7 +20,7 @@ module.exports = {
       [groupId, userId]
     ))[0][0];
 
-    if (relationship?.type === 'admin' || relationship?.type === 'member' || await module.exports.isGroupCreator(userId, groupId, connection, false)) {
+    if (relationship?.type === 'admin' || await module.exports.isGroupCreator(userId, groupId, connection, false)) {
       return true;
     }
     if (_break) throw new Error('You are not an admin of this group!');

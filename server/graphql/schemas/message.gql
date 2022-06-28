@@ -58,5 +58,6 @@ type Subscription {
   messageEdited(groupId: ID!): Message
   messageDeleted(groupId: ID!): ID
   messageReacted(groupId: ID!): Reaction
-  messageVoted(groupId: ID!): Vote
+  messageUpVoteNumberChanged(messageId: ID!): Int
+  messageDownVoteNumberChanged(messageId: ID!): Int
 }

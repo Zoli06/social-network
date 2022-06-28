@@ -6,61 +6,61 @@ const splitter = new Grapheme();
 
 module.exports = {
   Message: {
-    async user(parent, _, { user, connection }) {
+    async user({ user_id }, _, { user, connection }) {
       user.authenticate();
-      return await getUser({}, { userId: parent.user_id }, { user, connection });
+      return await getUser({}, { userId: user_id }, { user, connection });
     },
-    async group(parent, _, { user, connection }) {
+    async group({ group_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM groups
           WHERE group_id = ?`,
-          [parent.group_id]
+          [group_id]
         )
       )[0][0];
     },
-    async reactions(parent, _, { user, connection }) {
+    async reactions({ message_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM reactions
           WHERE message_id = ? AND type IS NOT NULL`,
-          [parent.message_id]
+          [message_id]
         )
       )[0];
     },
-    async reaction(parent, _, { user, connection }) {
+    async reaction({ message_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM reactions
           WHERE message_id = ? AND user_id = ? AND type IS NOT NULL`,
-          [parent.message_id, user.id]
+          [message_id, user.id]
         )
       )[0][0];
     },
-    async upVotes(parent, _, { user, connection }) {
+    async upVotes({ message_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
           `SELECT COUNT(*) FROM votes
           WHERE message_id = ? AND type = 'up'`,
-          [parent.message_id]
+          [message_id]
         )
       )[0][0]['COUNT(*)'];
     },
-    async downVotes(parent, _, { user, connection }) {
+    async downVotes({ message_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
           `SELECT COUNT(*) FROM votes
           WHERE message_id = ? AND type = 'down'`,
-          [parent.message_id]
+          [message_id]
         )
       )[0][0]['COUNT(*)'];
     },
-    async vote(parent, _, { user, connection }) {
+    async vote({ message_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
@@ -68,11 +68,11 @@ module.exports = {
           JOIN users
           USING(user_id)
           WHERE message_id = ? AND user_id = ?`,
-          [parent.message_id, user.id]
+          [message_id, user.id]
         )
       )[0][0]['type'];
     },
-    async mentionedUsers(parent, _, { user, connection }) {
+    async mentionedUsers({ message_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
@@ -80,11 +80,11 @@ module.exports = {
           JOIN users
           USING(user_id)
           WHERE message_id = ?`,
-          [parent.message_id]
+          [message_id]
         )
       )[0];
     },
-    async medias(parent, _, { user, connection }) {
+    async medias({ message_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
@@ -92,51 +92,51 @@ module.exports = {
           JOIN medias
           USING(media_id)
           WHERE message_id = ?`,
-          [parent.message_id]
+          [message_id]
         )
       )[0];
     },
-    async responseToMessage(parent, _, { user, connection }) {
+    async responseToMessage({ response_to_message_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM messages
           WHERE message_id = ?`,
-          [parent.response_to_message_id]
+          [response_to_message_id]
         )
       )[0][0];
     },
-    async responses(parent, _, { user, connection }) {
+    async responses({ message_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM messages
           WHERE response_to_message_id = ?`,
-          [parent.message_id]
+          [message_id]
         )
       )[0];
     },
-    async responsesCount(parent, _, { user, connection }) {
+    async responsesCount({ message_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
           `SELECT COUNT(*) FROM messages
           WHERE response_to_message_id = ?`,
-          [parent.message_id]
+          [message_id]
         )
       )[0][0]['COUNT(*)'];
     }
   },
   Reaction: {
-    async user(parent, _, { user, connection }) {
+    async user({ user_id }, _, { user, connection }) {
       user.authenticate();
-      return await getUser({}, { userId: parent.user_id }, { user, connection });
+      return await getUser({}, { userId: user_id }, { user, connection });
     },
   },
   // Vote: {
-  //   async user(parent, _, { user, connection }) {
+  //   async user({ user_id }, _, { user, connection }) {
   //     user.authenticate();
-  //     return await getUser({}, { userId: parent.user_id }, { user, connection });
+  //     return await getUser({}, { userId: user_id }, { user, connection });
   //   },
   // },
   Query: {
@@ -183,7 +183,7 @@ module.exports = {
         );
       }
       const createdMessage = await module.exports.Query.message({}, { messageId }, { user, connection });
-      pubsub.publish(`messageAdded_${groupId}`, { message: createdMessage });
+      pubsub.publish(`MESSAGE_ADDED_${groupId}`, { message: createdMessage });
       return createdMessage;
     },
     async editMessage(_, { message: { text, responseToMessageId, mentionedUserIds, mediaIds }, messageId, }, { user, connection }) {
@@ -281,7 +281,7 @@ module.exports = {
         ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,
         { userId: user.id, messageId, type }
       );
-      //pubsub.publish(`messageVoted_${groupId}`, { messageId });
+      pubsub.publish(`MESSAGE_VOTE_NUMBER_CHANGED_${messageId}`, { messageUpVoteNumberChanged: module.exports.Message.upVotes({ message_id: messageId }, {}, { user, connection }), messageDownVoteNumberChanged: module.exports.Message.downVotes({ message_id: messageId }, {}, { user, connection }) });
       return type;  // TODO: return actual updated vote
     }
   },
@@ -290,16 +290,23 @@ module.exports = {
       subscribe: (_, { groupId }, { user, connection, pubsub }) => {
         user.authenticate();
         isGroupMember(user.id, groupId, connection, true);
-        return pubsub.asyncIterator(`messageAdded_${groupId}`);
+        return pubsub.asyncIterator(`MESSAGE_ADDED_${groupId}`);
       }
     },
     // ...
-    // messageVoted: {
-    //   subscribe: (_, { groupId }, { user, connection, pubsub }) => {
-    //     user.authenticate();
-    //     isGroupMember(user.id, groupId, connection, true);
-    //     return pubsub.asyncIterator(`messageVoted_${groupId}`);
-    //   }
-    // }
+    messageUpVoteNumberChanged: {
+      subscribe: async (_, { messageId }, { user, connection, pubsub }) => {
+        user.authenticate();
+        await isGroupMember(user.id, (await module.exports.Query.message({}, { messageId }, { user, connection })).group_id, connection, true);
+        return pubsub.asyncIterator(`MESSAGE_VOTE_NUMBER_CHANGED_${messageId}`);
+      }
+    },
+    messageDownVoteNumberChanged: {
+      subscribe: async (_, { messageId }, { user, connection, pubsub }) => {
+        user.authenticate();
+        await isGroupMember(user.id, (await module.exports.Query.message({}, { messageId }, { user, connection })).group_id, connection, true);
+        return pubsub.asyncIterator(`MESSAGE_VOTE_NUMBER_CHANGED_${messageId}`);
+      }
+    }
   }
 }
