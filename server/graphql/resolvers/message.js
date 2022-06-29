@@ -70,7 +70,7 @@ module.exports = {
           WHERE message_id = ? AND user_id = ?`,
           [message_id, user.id]
         )
-      )[0][0]['type'];
+      )[0][0]?.['type'];
     },
     async mentionedUsers({ message_id }, _, { user, connection }) {
       user.authenticate();
@@ -183,10 +183,10 @@ module.exports = {
         );
       }
       const createdMessage = await module.exports.Query.message({}, { messageId }, { user, connection });
-      pubsub.publish(`MESSAGE_ADDED_${groupId}`, { message: createdMessage });
+      pubsub.publish(`MESSAGE_ADDED_${groupId}`, { messageAdded: createdMessage });
       return createdMessage;
     },
-    async editMessage(_, { message: { text, responseToMessageId, mentionedUserIds, mediaIds }, messageId, }, { user, connection }) {
+    async editMessage(_, { message: { text, responseToMessageId, mentionedUserIds, mediaIds }, messageId, }, { user, connection, pubsub }) {
       user.authenticate();
       const groupId = (
         await connection.query(
@@ -218,9 +218,11 @@ module.exports = {
         `INSERT INTO message_medias (message_id, media_id) VALUES ?`,
         [mediaIds.map((mediaId) => [messageId, mediaId])]
       );
-      return await module.exports.Query.message({}, { messageId }, { user, connection });
+      const editedMessage = await module.exports.Query.message({}, { messageId }, { user, connection });
+      pubsub.publish(`MESSAGE_EDITED_${groupId}`, { messageEdited: editedMessage });
+      return editedMessage;
     },
-    async deleteMessage(_, { messageId }, { user, connection }) {
+    async deleteMessage(_, { messageId }, { user, connection, pubsub }) {
       user.authenticate();
       const groupId = (
         await connection.query(
@@ -241,9 +243,10 @@ module.exports = {
       await connection.query(`DELETE FROM messages WHERE message_id = ?`, [
         messageId,
       ]);
+      pubsub.publish(`MESSAGE_DELETED_${groupId}`, { messageDeleted: messageId });
       return messageId;
     },
-    async createReaction(_, { messageId, type }, { user, connection }) {
+    async createReaction(_, { messageId, type }, { user, connection, pubsub }) {
       user.authenticate();
       emoji = String.fromCodePoint(type);
       if (splitter.splitGraphemes(emoji).length !== 1 || !/\p{Extended_Pictographic}/u.test(emoji)) {
@@ -261,11 +264,15 @@ module.exports = {
         ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,
         { userId: user.id, messageId, type }
       );
-      return await module.exports.Message.reaction(
-        { message_id: messageId },
-        {},
-        { user, connection }
-      );
+      const reaction = await module.exports.Message.reaction({ message_id: messageId }, {}, { user, connection });
+      console.log(messageId)
+      pubsub.publish(`MESSAGE_REACTED_${messageId}`, {
+        messageReacted: {
+          messageId,
+          reaction
+        }
+      });
+      return reaction;
     },
     async createVote(_, { messageId, type }, { user, connection, pubsub }) {
       user.authenticate();
@@ -281,31 +288,53 @@ module.exports = {
         ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,
         { userId: user.id, messageId, type }
       );
-      pubsub.publish(`MESSAGE_VOTE_NUMBER_CHANGED_${messageId}`, { messageUpVoteNumberChanged: module.exports.Message.upVotes({ message_id: messageId }, {}, { user, connection }), messageDownVoteNumberChanged: module.exports.Message.downVotes({ message_id: messageId }, {}, { user, connection }) });
+      pubsub.publish(
+        `MESSAGE_VOTED_${messageId}`,
+        {
+          messageVoted: {
+            upVotes: await module.exports.Message.upVotes({ message_id: messageId }, {}, { user, connection }),
+            downVotes: await module.exports.Message.downVotes({ message_id: messageId }, {}, { user, connection }),
+            messageId
+          }
+        }
+      );
       return type;  // TODO: return actual updated vote
     }
   },
   Subscription: {
     messageAdded: {
-      subscribe: (_, { groupId }, { user, connection, pubsub }) => {
+      subscribe: async (_, { groupId }, { user, connection, pubsub }) => {
         user.authenticate();
-        isGroupMember(user.id, groupId, connection, true);
+        await isGroupMember(user.id, groupId, connection, true);
         return pubsub.asyncIterator(`MESSAGE_ADDED_${groupId}`);
       }
     },
-    // ...
-    messageUpVoteNumberChanged: {
-      subscribe: async (_, { messageId }, { user, connection, pubsub }) => {
+    messageEdited: {
+      subscribe: async (_, { groupId }, { user, connection, pubsub }) => {
         user.authenticate();
-        await isGroupMember(user.id, (await module.exports.Query.message({}, { messageId }, { user, connection })).group_id, connection, true);
-        return pubsub.asyncIterator(`MESSAGE_VOTE_NUMBER_CHANGED_${messageId}`);
+        await isGroupMember(user.id, groupId, connection, true);
+        return pubsub.asyncIterator(`MESSAGE_EDITED_${groupId}`);
       }
     },
-    messageDownVoteNumberChanged: {
+    messageDeleted: {
+      subscribe: async (_, { groupId }, { user, connection, pubsub }) => {
+        user.authenticate();
+        await isGroupMember(user.id, groupId, connection, true);
+        return pubsub.asyncIterator(`MESSAGE_DELETED_${groupId}`);
+      }
+    },
+    messageReacted: {
+      subscribe: async (_, { messageId }, { user, connection, pubsub }) => {
+        user.authenticate();
+        isGroupMember(user.id, (await module.exports.Query.message({}, { messageId }, { user, connection })).group_id, connection, true);
+        return pubsub.asyncIterator(`MESSAGE_REACTED_${messageId}`);
+      }
+    },
+    messageVoted: {
       subscribe: async (_, { messageId }, { user, connection, pubsub }) => {
         user.authenticate();
         await isGroupMember(user.id, (await module.exports.Query.message({}, { messageId }, { user, connection })).group_id, connection, true);
-        return pubsub.asyncIterator(`MESSAGE_VOTE_NUMBER_CHANGED_${messageId}`);
+        return pubsub.asyncIterator(`MESSAGE_VOTED_${messageId}`);
       }
     }
   }

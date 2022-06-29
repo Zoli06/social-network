@@ -84,7 +84,7 @@ export const Message = ({
 
         {/*reactions.type*/}
         <br />
-        {reaction.type}
+        {reaction?.type}
         <br />
         {/*upVotes*/}
         <br />

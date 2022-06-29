@@ -46,16 +46,28 @@ const MESSAGE_QUERY = gql`
 `; 
 
 function App() {
-  const { loading, error, data } = useQuery(MESSAGE_QUERY, {
+  const res1 = useQuery(MESSAGE_QUERY, {
     variables: {
       messageId: "1"
     }
   });
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: ${error.toString()}</p>;
+  const res2 = useQuery(MESSAGE_QUERY, {
+    variables: {
+      messageId: "11"
+    }
+  });
+  if (res1.loading || res2.loading) return <p>Loading...</p>;
+  if (res1.error || res2.error) {
+    console.log(res1?.error);
+    console.log(res2?.error);
+    return <p>Error</p>;
+  }
   
   return (
-    <Message {...data.message}/>
+    <>
+      <Message {...res1.data.message} />
+      <Message {...res2.data.message} />
+    </>
   );
 }
 
