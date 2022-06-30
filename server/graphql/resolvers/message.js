@@ -298,7 +298,7 @@ module.exports = {
           }
         }
       );
-      return type;  // TODO: return actual updated vote
+      return await module.exports.Message.vote({ message_id: messageId }, {}, { user, connection });
     }
   },
   Subscription: {
@@ -326,7 +326,7 @@ module.exports = {
     messageReacted: {
       subscribe: async (_, { messageId }, { user, connection, pubsub }) => {
         user.authenticate();
-        isGroupMember(user.id, (await module.exports.Query.message({}, { messageId }, { user, connection })).group_id, connection, true);
+        await isGroupMember(user.id, (await module.exports.Query.message({}, { messageId }, { user, connection })).group_id, connection, true);
         return pubsub.asyncIterator(`MESSAGE_REACTED_${messageId}`);
       }
     },
