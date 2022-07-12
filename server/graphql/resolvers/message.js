@@ -332,6 +332,7 @@ module.exports = {
     },
     messageVoted: {
       subscribe: async (_, { messageId }, { user, connection, pubsub }) => {
+        console.log(messageId)
         user.authenticate();
         await isGroupMember(user.id, (await module.exports.Query.message({}, { messageId }, { user, connection })).group_id, connection, true);
         return pubsub.asyncIterator(`MESSAGE_VOTED_${messageId}`);
