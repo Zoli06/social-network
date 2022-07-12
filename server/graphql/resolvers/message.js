@@ -267,10 +267,7 @@ module.exports = {
       const reaction = await module.exports.Message.reaction({ message_id: messageId }, {}, { user, connection });
       console.log(messageId)
       pubsub.publish(`MESSAGE_REACTED_${messageId}`, {
-        messageReacted: {
-          messageId,
-          reaction
-        }
+        messageReacted: module.exports.Message.reactions({ message_id: messageId }, {}, { user, connection }),
       });
       return reaction;
     },
@@ -294,7 +291,6 @@ module.exports = {
           messageVoted: {
             upVotes: await module.exports.Message.upVotes({ message_id: messageId }, {}, { user, connection }),
             downVotes: await module.exports.Message.downVotes({ message_id: messageId }, {}, { user, connection }),
-            messageId
           }
         }
       );
@@ -332,7 +328,6 @@ module.exports = {
     },
     messageVoted: {
       subscribe: async (_, { messageId }, { user, connection, pubsub }) => {
-        console.log(messageId)
         user.authenticate();
         await isGroupMember(user.id, (await module.exports.Query.message({}, { messageId }, { user, connection })).group_id, connection, true);
         return pubsub.asyncIterator(`MESSAGE_VOTED_${messageId}`);

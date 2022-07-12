@@ -18,6 +18,23 @@ const REACTION_MUTATION = gql`
   }
 `;
 
+const MESSAGE_VOTED_SUBSCRIPTION = gql`
+  subscription MessageVoted($messageId: ID!) {
+    messageVoted(messageId: $messageId) {
+      upVotes
+      downVotes
+    }
+  }
+`;
+
+const MESSAGE_REACTED_SUBSCRIPTION = gql`
+  subscription MessageReacted($messageId: ID!) {
+    messageReacted(messageId: $messageId) {
+      type
+    }
+  }
+`;
+
 export const MessageActions = ({
   upVotes,
   downVotes,
@@ -25,6 +42,7 @@ export const MessageActions = ({
   messageId,
   myVote,
   reactions,
+  subscribeToMore,
 }: {
   upVotes: number;
   downVotes: number;
@@ -34,17 +52,64 @@ export const MessageActions = ({
   reactions: {
     type: number;
   }[];
+  subscribeToMore: any;
 }) => {
   // TODO: get current vote from server
   const [myVoteType, setMyVoteType] = useState(myVote);
   const [
     voteMutation,
-    { data: voteData, loading: voteLoading, error: voteError },
+    {
+      data: voteMutationData,
+      loading: voteMutationLoading,
+      error: voteMutationError,
+    },
   ] = useMutation(VOTE_MUTATION);
   const [
     reactionMutation,
-    { data: reactionData, loading: reactionLoading, error: reactionError },
+    {
+      data: reactionMutationData,
+      loading: reactionMutationLoading,
+      error: reactionMutationError,
+    },
   ] = useMutation(REACTION_MUTATION);
+
+  subscribeToMore({
+    document: MESSAGE_VOTED_SUBSCRIPTION,
+    variables: {
+      messageId,
+    },
+    updateQuery: (prev: any, { subscriptionData }: any) => {
+      if (!subscriptionData.data) return prev;
+      const { messageVoted } = subscriptionData.data;
+      return {
+        ...prev,
+        message: {
+          ...prev.message,
+          upVotes: messageVoted.upVotes,
+          downVotes: messageVoted.downVotes,
+        },
+      };
+    },
+  });
+
+  subscribeToMore({
+    document: MESSAGE_REACTED_SUBSCRIPTION,
+    variables: {
+      messageId,
+    },
+    updateQuery: (prev: any, { subscriptionData }: any) => {
+      if (!subscriptionData.data) return prev;
+      const { messageReacted } = subscriptionData.data;
+      return {
+        ...prev,
+        message: {
+          ...prev.message,
+          reactions: messageReacted,
+        }
+      };
+    },
+  });
+
   const possibleReactions = ['👍', '❤', '🥰', '🤣', '😲', '😢', '😠'];
 
   useEffect(() => {
@@ -100,7 +165,10 @@ export const MessageActions = ({
               noWrapper
             >
               {possibleReactions.map((reaction) => (
-                <span key={uuidv4()} onClick={() => handleAddReaction(reaction)}>
+                <span
+                  key={uuidv4()}
+                  onClick={() => handleAddReaction(reaction)}
+                >
                   {reaction}
                 </span>
               ))}
@@ -110,4 +178,18 @@ export const MessageActions = ({
       </div>
     </div>
   );
+};
+
+MessageActions.fragments = {
+  message: gql`
+    fragment MessageActions on Message {
+      upVotes
+      downVotes
+      responsesCount
+      vote
+      reactions {
+        type
+      }
+    }
+  `,
 };

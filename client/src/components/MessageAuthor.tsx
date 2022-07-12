@@ -1,5 +1,6 @@
 import React from 'react';
 import './MessageAuthor.scss';
+import { gql } from '@apollo/client';
 
 export const MessageAuthor = ({
   user,
@@ -36,4 +37,19 @@ export const MessageAuthor = ({
       </div>
     </div>
   );
+};
+
+MessageAuthor.fragments = {
+  user: gql`
+    fragment MessageAuthor on User {
+      firstName
+      lastName
+      middleName
+      userName
+      intro
+      profileImage {
+        url
+      }
+    }
+  `,
 };

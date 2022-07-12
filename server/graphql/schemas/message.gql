@@ -53,13 +53,7 @@ type Mutation {
   createVote(messageId: ID!, type: VoteType): VoteType # also can be used to delete and update
 }
 
-type ReactionChange {
-  messageId: ID!
-  reaction: Reaction!
-}
-
 type VoteChange {
-  messageId: ID!
   upVotes: Int!
   downVotes: Int!
 }
@@ -68,6 +62,6 @@ type Subscription {
   messageAdded(groupId: ID!): Message!
   messageEdited(groupId: ID!): Message!
   messageDeleted(groupId: ID!): ID!
-  messageReacted(messageId: ID!): ReactionChange!
+  messageReacted(messageId: ID!): [Reaction!]!
   messageVoted(messageId: ID!): VoteChange!
 }
