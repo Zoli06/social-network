@@ -54,8 +54,6 @@ export const MessageActions = ({
   }[];
   subscribeToMore: any;
 }) => {
-  // TODO: get current vote from server
-  const [myVoteType, setMyVoteType] = useState(myVote);
   const [
     voteMutation,
     {
@@ -63,7 +61,17 @@ export const MessageActions = ({
       loading: voteMutationLoading,
       error: voteMutationError,
     },
-  ] = useMutation(VOTE_MUTATION);
+  ] = useMutation(VOTE_MUTATION, {
+    update(cache, { data: { createVote } }) {
+      cache.modify({
+        id: cache.identify({ __typename: 'Message', messageId }),
+        fields: {
+          vote: () => createVote,
+        },
+      })
+      
+    },
+  });
   const [
     reactionMutation,
     {
@@ -73,53 +81,50 @@ export const MessageActions = ({
     },
   ] = useMutation(REACTION_MUTATION);
 
-  subscribeToMore({
-    document: MESSAGE_VOTED_SUBSCRIPTION,
-    variables: {
-      messageId,
-    },
-    updateQuery: (prev: any, { subscriptionData }: any) => {
-      if (!subscriptionData.data) return prev;
-      const { messageVoted } = subscriptionData.data;
-      return {
-        ...prev,
-        message: {
-          ...prev.message,
-          upVotes: messageVoted.upVotes,
-          downVotes: messageVoted.downVotes,
-        },
-      };
-    },
-  });
+  useEffect(() => {
+    subscribeToMore({
+      document: MESSAGE_VOTED_SUBSCRIPTION,
+      variables: {
+        messageId,
+      },
+      updateQuery: (prev: any, { subscriptionData }: any) => {
+        if (!subscriptionData.data) return prev;
+        const { messageVoted } = subscriptionData.data;
+        return {
+          ...prev,
+          message: {
+            ...prev.message,
+            upVotes: messageVoted.upVotes,
+            downVotes: messageVoted.downVotes,
+          },
+        };
+      },
+    });
 
-  subscribeToMore({
-    document: MESSAGE_REACTED_SUBSCRIPTION,
-    variables: {
-      messageId,
-    },
-    updateQuery: (prev: any, { subscriptionData }: any) => {
-      if (!subscriptionData.data) return prev;
-      const { messageReacted } = subscriptionData.data;
-      return {
-        ...prev,
-        message: {
-          ...prev.message,
-          reactions: messageReacted,
-        }
-      };
-    },
-  });
+    subscribeToMore({
+      document: MESSAGE_REACTED_SUBSCRIPTION,
+      variables: {
+        messageId,
+      },
+      updateQuery: (prev: any, { subscriptionData }: any) => {
+        if (!subscriptionData.data) return prev;
+        const { messageReacted } = subscriptionData.data;
+        return {
+          ...prev,
+          message: {
+            ...prev.message,
+            reactions: messageReacted,
+          },
+        };
+      },
+    });
+  }, []);
 
   const possibleReactions = ['👍', '❤', '🥰', '🤣', '😲', '😢', '😠'];
 
-  useEffect(() => {
-    console.log(myVoteType);
-  }, [myVoteType]);
-
   const handleVote = (type: string | null) => {
-    if (myVoteType === type) type = null;
+    if (myVote === type) type = null;
     voteMutation({ variables: { messageId, type } });
-    setMyVoteType(type);
   };
 
   const handleAddReaction = (type: string) => {
@@ -128,12 +133,20 @@ export const MessageActions = ({
 
   return (
     <div className='message-actions'>
-      <svg className='upvote icon' onClick={() => handleVote('up')}>
-        <use href='./assets/images/svg-bundle.svg#upvote' />
+      <svg className={`upvote icon ${myVote === 'up' ? 'active' : ''}`} onClick={() => handleVote('up')}>
+        <use
+          href={`./assets/images/svg-bundle.svg#upvote${
+            myVote === 'up' ? '_active' : ''
+          }`}
+        />
       </svg>
       <p className='upvote-count'>{upVotes}</p>
-      <svg className='downvote icon' onClick={() => handleVote('down')}>
-        <use href='./assets/images/svg-bundle.svg#downvote' />
+      <svg className={`downvote icon ${myVote === 'down' ? 'active' : ''}`} onClick={() => handleVote('down')}>
+      <use
+          href={`./assets/images/svg-bundle.svg#downvote${
+            myVote === 'down' ? '_active' : ''
+          }`}
+        />
       </svg>
       <p className='downvote-count'>{downVotes}</p>
       <svg className='response icon'>

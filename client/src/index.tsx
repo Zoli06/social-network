@@ -60,9 +60,25 @@ const splitLink = split(
   authLink.concat(httpLink)
 );
 
+const cache = new InMemoryCache({
+  dataIdFromObject: ({__typename, id, ...rest}): any => {
+    switch (__typename) {
+      case 'Group':
+        return rest.groupId;
+      case 'Media':
+        return rest.mediaId;
+      case 'Message':
+        return rest.messageId;
+      case 'User':
+        return rest.userId;
+      default: return id;
+    }
+  }
+});
+
 const client = new ApolloClient({
   link: splitLink,
-  cache: new InMemoryCache(),
+  cache,
 });
 
 const root = ReactDOM.createRoot(

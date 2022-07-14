@@ -101,4 +101,14 @@
     cursor: pointer;
     fill: var(--secondary-text-color);
   }
+
+  &.active {
+    &.upvote {
+      fill: var(--upvote-color);
+    }
+
+    &.downvote {
+      fill: var(--downvote-color);
+    }
+  }
 }
