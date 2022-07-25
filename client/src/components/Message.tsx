@@ -37,12 +37,7 @@ export const Message = ({ messageId }: { messageId: string }) => {
         <MessageAuthor user={data.message.user} />
         <MessageText text={data.message.text} />
         <MessageActions
-          upVotes={data.message.upVotes}
-          downVotes={data.message.downVotes}
-          responsesCount={data.message.responsesCount}
-          messageId={messageId}
-          myVote={data.message.vote}
-          reactions={data.message.reactions}
+          { ...data.message }
           subscribeToMore={subscribeToMore}
         />
       </div>

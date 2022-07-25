@@ -42,44 +42,46 @@ export const MessageActions = ({
   messageId,
   myVote,
   reactions,
+  reaction,
   subscribeToMore,
 }: {
   upVotes: number;
   downVotes: number;
   responsesCount: number;
   messageId: string;
-  myVote: string | null;
+  myVote: string;
   reactions: {
     type: number;
   }[];
+  reaction: {
+    type: number;
+  } | null;
   subscribeToMore: any;
 }) => {
-  const [
-    voteMutation,
-    {
-      data: voteMutationData,
-      loading: voteMutationLoading,
-      error: voteMutationError,
-    },
-  ] = useMutation(VOTE_MUTATION, {
+  const [voteMutation, voteMutationVariables] = useMutation(VOTE_MUTATION, {
     update(cache, { data: { createVote } }) {
       cache.modify({
         id: cache.identify({ __typename: 'Message', messageId }),
         fields: {
           vote: () => createVote,
         },
-      })
-      
+      });
     },
   });
-  const [
-    reactionMutation,
+
+  const [reactionMutation, reactionMutationVariables] = useMutation(
+    REACTION_MUTATION,
     {
-      data: reactionMutationData,
-      loading: reactionMutationLoading,
-      error: reactionMutationError,
-    },
-  ] = useMutation(REACTION_MUTATION);
+      update(cache, { data: { createReaction } }) {
+        cache.modify({
+          id: cache.identify({ __typename: 'Message', messageId }),
+          fields: {
+            reaction: () => createReaction,
+          },
+        });
+      },
+    }
+  );
 
   useEffect(() => {
     subscribeToMore({
@@ -127,24 +129,31 @@ export const MessageActions = ({
     voteMutation({ variables: { messageId, type } });
   };
 
-  const handleAddReaction = (type: string) => {
-    reactionMutation({ variables: { messageId, type: type.codePointAt(0) } });
+  const handleAddReaction = (type: string | null) => {
+    reactionMutation({ variables: { messageId, type: type ? type.codePointAt(0) : null } });
   };
 
+  console.log(reaction);
   return (
     <div className='message-actions'>
-      <svg className={`upvote icon ${myVote === 'up' ? 'active' : ''}`} onClick={() => handleVote('up')}>
+      <svg
+        className={`upvote icon ${myVote === 'up' ? 'active' : ''}`}
+        onClick={() => handleVote('up')}
+      >
         <use
           href={`./assets/images/svg-bundle.svg#upvote${
-            myVote === 'up' ? '_active' : ''
+            myVote === 'up' ? '-active' : ''
           }`}
         />
       </svg>
       <p className='upvote-count'>{upVotes}</p>
-      <svg className={`downvote icon ${myVote === 'down' ? 'active' : ''}`} onClick={() => handleVote('down')}>
-      <use
+      <svg
+        className={`downvote icon ${myVote === 'down' ? 'active' : ''}`}
+        onClick={() => handleVote('down')}
+      >
+        <use
           href={`./assets/images/svg-bundle.svg#downvote${
-            myVote === 'down' ? '_active' : ''
+            myVote === 'down' ? '-active' : ''
           }`}
         />
       </svg>
@@ -155,22 +164,35 @@ export const MessageActions = ({
       <p className='responses-count'>{responsesCount}</p>
       <div className='reactions-container'>
         <div className='common-reactions'>
-          <Twemoji options={{ className: 'reaction-emoji' }} noWrapper>
-            {[...new Set(reactions.map((reaction) => reaction.type))].map(
-              (reactionType) => (
+          <Twemoji noWrapper>
+            {[...new Set(reactions.map((reaction) => reaction.type))]
+              .slice(0, 3)
+              .map((reactionType) => (
                 <div className='common-reaction-emoji' key={uuidv4()}>
                   {String.fromCodePoint(reactionType)}
                 </div>
-              )
-            )}
+              ))}
           </Twemoji>
         </div>
         <div className='add-reaction-container'>
           <div className='add-reaction-button'>
             <div className='space-holder' />
-            <svg className='add-reaction-icon icon'>
-              <use href='./assets/images/svg-bundle.svg#plus' />
-            </svg>
+            {reaction ? (
+              <div className='add-reaction-icon icon user-have-reaction'>
+                <Twemoji options={{ className: 'icon' }} noWrapper>
+                  <span>{
+                    String.fromCodePoint(reaction.type)
+                  }</span>
+                  <svg className='remove-reaction icon' onClick={() => handleAddReaction(null)}>
+                    <use href='./assets/images/svg-bundle.svg#close-button' />
+                  </svg>
+                </Twemoji>
+              </div>
+            ) : (
+              <svg className='add-reaction-icon icon'>
+                <use href='./assets/images/svg-bundle.svg#plus' />
+              </svg>
+            )}
           </div>
           <div className='add-reaction-popup'>
             <Twemoji
@@ -201,6 +223,9 @@ MessageActions.fragments = {
       responsesCount
       vote
       reactions {
+        type
+      }
+      reaction {
         type
       }
     }

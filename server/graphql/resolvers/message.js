@@ -248,8 +248,8 @@ module.exports = {
     },
     async createReaction(_, { messageId, type }, { user, connection, pubsub }) {
       user.authenticate();
-      emoji = String.fromCodePoint(type);
-      if (splitter.splitGraphemes(emoji).length !== 1 || !/\p{Extended_Pictographic}/u.test(emoji)) {
+      emoji = type ? String.fromCodePoint(type) : null;
+      if (emoji != null && (splitter.splitGraphemes(emoji).length !== 1 || !/\p{Extended_Pictographic}/u.test(emoji))) {
         throw new Error('Invalid emoji');
       }
       const groupId = (

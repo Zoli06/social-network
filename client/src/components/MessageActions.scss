@@ -76,6 +76,15 @@
         .add-reaction-icon:hover {
           fill: var(--main-text-color);
         }
+
+        .user-have-reaction {
+          .remove-reaction {
+            position: absolute;
+            right: calc(0px - var(--reaction-icon-size) / 2);
+            top: calc(0px - var(--reaction-icon-size) / 2);
+            fill: var(--close-color);
+          }
+        }
       }
 
       .space-holder {
