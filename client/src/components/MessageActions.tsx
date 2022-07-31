@@ -130,10 +130,11 @@ export const MessageActions = ({
   };
 
   const handleAddReaction = (type: string | null) => {
-    reactionMutation({ variables: { messageId, type: type ? type.codePointAt(0) : null } });
+    reactionMutation({
+      variables: { messageId, type: type ? type.codePointAt(0) : null },
+    });
   };
 
-  console.log(reaction);
   return (
     <div className='message-actions'>
       <svg
@@ -163,8 +164,8 @@ export const MessageActions = ({
       </svg>
       <p className='responses-count'>{responsesCount}</p>
       <div className='reactions-container'>
-        <div className='common-reactions'>
-          <Twemoji noWrapper>
+        <Twemoji noWrapper>
+          <div className='common-reactions'>
             {[...new Set(reactions.map((reaction) => reaction.type))]
               .slice(0, 3)
               .map((reactionType) => (
@@ -172,18 +173,19 @@ export const MessageActions = ({
                   {String.fromCodePoint(reactionType)}
                 </div>
               ))}
-          </Twemoji>
-        </div>
+          </div>
+        </Twemoji>
         <div className='add-reaction-container'>
           <div className='add-reaction-button'>
             <div className='space-holder' />
             {reaction ? (
               <div className='add-reaction-icon icon user-have-reaction'>
                 <Twemoji options={{ className: 'icon' }} noWrapper>
-                  <span>{
-                    String.fromCodePoint(reaction.type)
-                  }</span>
-                  <svg className='remove-reaction icon' onClick={() => handleAddReaction(null)}>
+                  <span>{String.fromCodePoint(reaction.type)}</span>
+                  <svg
+                    className='remove-reaction icon'
+                    onClick={() => handleAddReaction(null)}
+                  >
                     <use href='./assets/images/svg-bundle.svg#close-button' />
                   </svg>
                 </Twemoji>
