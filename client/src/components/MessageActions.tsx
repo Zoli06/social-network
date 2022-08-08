@@ -40,7 +40,7 @@ export const MessageActions = ({
   downVotes,
   responsesCount,
   messageId,
-  myVote,
+  vote,
   reactions,
   reaction,
   subscribeToMore,
@@ -49,7 +49,7 @@ export const MessageActions = ({
   downVotes: number;
   responsesCount: number;
   messageId: string;
-  myVote: string;
+  vote: string;
   reactions: {
     type: number;
   }[];
@@ -124,37 +124,37 @@ export const MessageActions = ({
 
   const possibleReactions = ['👍', '❤', '🥰', '🤣', '😲', '😢', '😠'];
 
-  const handleVote = (type: string | null) => {
-    if (myVote === type) type = null;
-    voteMutation({ variables: { messageId, type } });
+  const handleVote = (newVote: string | null) => {
+    if (vote === newVote) newVote = null;
+    voteMutation({ variables: { messageId, type: newVote } });
   };
 
-  const handleAddReaction = (type: string | null) => {
+  const handleAddReaction = (newVote: string | null) => {
     reactionMutation({
-      variables: { messageId, type: type ? type.codePointAt(0) : null },
+      variables: { messageId, type: newVote ? newVote.codePointAt(0) : null },
     });
   };
 
   return (
     <div className='message-actions'>
       <svg
-        className={`upvote icon ${myVote === 'up' ? 'active' : ''}`}
+        className={`upvote icon ${vote === 'up' ? 'active' : ''}`}
         onClick={() => handleVote('up')}
       >
         <use
           href={`./assets/images/svg-bundle.svg#upvote${
-            myVote === 'up' ? '-active' : ''
+            vote === 'up' ? '-active' : ''
           }`}
         />
       </svg>
       <p className='upvote-count'>{upVotes}</p>
       <svg
-        className={`downvote icon ${myVote === 'down' ? 'active' : ''}`}
+        className={`downvote icon ${vote === 'down' ? 'active' : ''}`}
         onClick={() => handleVote('down')}
       >
         <use
           href={`./assets/images/svg-bundle.svg#downvote${
-            myVote === 'down' ? '-active' : ''
+            vote === 'down' ? '-active' : ''
           }`}
         />
       </svg>
