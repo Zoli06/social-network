@@ -29,7 +29,10 @@ export const Message = ({ messageId }: { messageId: string }) => {
   });
 
   if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error!</div>;
+  if (error) {
+    console.log(error);
+    return <div>Error!</div>;
+  }
 
   return (
     <>
