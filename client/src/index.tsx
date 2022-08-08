@@ -73,6 +73,26 @@ const cache = new InMemoryCache({
         return rest.userId;
       default: return id;
     }
+  },
+  typePolicies: {
+    Message: {
+      fields: {
+        reactions: {
+          merge(_existing: any, incoming: any) {
+            return incoming;
+          }
+        }
+      }
+    },
+    Subscription: {
+      fields: {
+        messageReacted: {
+          merge(_existing: any, incoming: any) {
+            return incoming;
+          }
+        }
+      }
+    }
   }
 });
 
