@@ -96,7 +96,7 @@ module.exports = {
         )
       )[0];
     },
-    async responseToMessage({ response_to_message_id }, _, { user, connection }) {
+    async responseTo({ response_to_message_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
@@ -116,12 +116,27 @@ module.exports = {
         )
       )[0];
     },
+    async getResponseTree({ message_id }, _, { user, connection }) {
+      user.authenticate();
+      return (
+        await connection.query(
+          // thank you stackoverflow for this one
+          `SELECT *
+          FROM (SELECT * FROM messages
+            ORDER BY response_to_message_id, message_id) messages_sorted,
+            (SELECT @pv := ?) initialisation
+          WHERE find_in_set(response_to_message_id, @pv)
+          AND LENGTH(@pv := concat(@pv, ',', message_id))`,
+          [message_id]
+        )
+      )[0];
+    },
     async responsesCount({ message_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
           `SELECT COUNT(*) FROM messages
-          WHERE response_to_message_id = ?`,
+          WHERE response_to_message_id = ? `,
           [message_id]
         )
       )[0][0]['COUNT(*)'];
@@ -143,7 +158,7 @@ module.exports = {
     async message(_, { messageId }, { user, connection }) {
       user.authenticate();
       const message = (
-        await connection.query(`SELECT * FROM messages WHERE message_id = ?`, [
+        await connection.query(`SELECT * FROM messages WHERE message_id = ? `, [
           messageId,
         ])
       )[0][0];
@@ -166,19 +181,19 @@ module.exports = {
       await isGroupMember(user.id, groupId, connection, true);
       const messageId = (
         await connection.query(
-          `INSERT INTO messages (user_id, text, response_to_message_id, group_id) VALUES (?, ?, ?, ?)`,
+          `INSERT INTO messages(user_id, text, response_to_message_id, group_id) VALUES(?, ?, ?, ?)`,
           [user.id, text, responseToMessageId, groupId]
         )
       )[0].insertId;
       if (mentionedUserIds) {
         await connection.query(
-          `INSERT INTO mentioned_users (message_id, user_id) VALUES ?`,
+          `INSERT INTO mentioned_users(message_id, user_id) VALUES ? `,
           [mentionedUserIds.map((userId) => [messageId, userId])]
         );
       }
       if (mediaIds) {
         await connection.query(
-          `INSERT INTO message_medias (message_id, media_id) VALUES ?`,
+          `INSERT INTO message_medias(message_id, media_id) VALUES ? `,
           [mediaIds.map((mediaId) => [messageId, mediaId])]
         );
       }
@@ -190,7 +205,7 @@ module.exports = {
       user.authenticate();
       const groupId = (
         await connection.query(
-          `SELECT group_id FROM messages WHERE message_id = ?`,
+          `SELECT group_id FROM messages WHERE message_id = ? `,
           [messageId]
         )
       )[0][0].group_id;
@@ -199,23 +214,23 @@ module.exports = {
       await connection.query(
         `UPDATE messages
           SET text = ?, response_to_message_id = ?, updated_at = DEFAULT
-          WHERE message_id = ?`,
+          WHERE message_id = ? `,
         [text, responseToMessageId, messageId]
       );
       await connection.query(
-        `DELETE FROM mentioned_users WHERE message_id = ?`,
+        `DELETE FROM mentioned_users WHERE message_id = ? `,
         [messageId]
       );
       await connection.query(
-        `INSERT INTO mentioned_users (message_id, user_id) VALUES ?`,
+        `INSERT INTO mentioned_users(message_id, user_id) VALUES ? `,
         [mentionedUserIds.map((userId) => [messageId, userId])]
       );
       await connection.query(
-        `DELETE FROM message_medias WHERE message_id = ?`,
+        `DELETE FROM message_medias WHERE message_id = ? `,
         [messageId]
       );
       await connection.query(
-        `INSERT INTO message_medias (message_id, media_id) VALUES ?`,
+        `INSERT INTO message_medias(message_id, media_id) VALUES ? `,
         [mediaIds.map((mediaId) => [messageId, mediaId])]
       );
       const editedMessage = await module.exports.Query.message({}, { messageId }, { user, connection });
@@ -226,21 +241,21 @@ module.exports = {
       user.authenticate();
       const groupId = (
         await connection.query(
-          `SELECT group_id FROM messages WHERE message_id = ?`,
+          `SELECT group_id FROM messages WHERE message_id = ? `,
           [messageId]
         )
       )[0][0].group_id;
       await isGroupMember(user.id, groupId, connection, true);
       await isMessageCreator(user.id, messageId, connection, true);
       await connection.query(
-        `DELETE FROM mentioned_users WHERE message_id = ?`,
+        `DELETE FROM mentioned_users WHERE message_id = ? `,
         [messageId]
       );
       await connection.query(
-        `DELETE FROM message_medias WHERE message_id = ?`,
+        `DELETE FROM message_medias WHERE message_id = ? `,
         [messageId]
       );
-      await connection.query(`DELETE FROM messages WHERE message_id = ?`, [
+      await connection.query(`DELETE FROM messages WHERE message_id = ? `, [
         messageId,
       ]);
       pubsub.publish(`MESSAGE_DELETED_${groupId}`, { messageDeleted: messageId });
@@ -254,14 +269,14 @@ module.exports = {
       }
       const groupId = (
         await connection.query(
-          `SELECT group_id FROM messages WHERE message_id = ?`,
+          `SELECT group_id FROM messages WHERE message_id = ? `,
           [messageId]
         )
       )[0][0].group_id;
       await isGroupMember(user.id, groupId, connection, true);
       await connection.query(
-        `INSERT INTO reactions (user_id, message_id, type) VALUES (:userId, :messageId, :type)
-        ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,
+        `INSERT INTO reactions(user_id, message_id, type) VALUES(: userId, : messageId, : type)
+        ON DUPLICATE KEY UPDATE type = : type, updated_at = DEFAULT`,
         { userId: user.id, messageId, type }
       );
       const reaction = await module.exports.Message.reaction({ message_id: messageId }, {}, { user, connection });
@@ -275,14 +290,14 @@ module.exports = {
       user.authenticate();
       const groupId = (
         await connection.query(
-          `SELECT group_id FROM messages WHERE message_id = ?`,
+          `SELECT group_id FROM messages WHERE message_id = ? `,
           [messageId]
         )
       )[0][0].group_id;
       await isGroupMember(user.id, groupId, connection, true);
       await connection.query(
-        `INSERT INTO votes (user_id, message_id, type) VALUES (:userId, :messageId, :type)
-        ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,
+        `INSERT INTO votes(user_id, message_id, type) VALUES(: userId, : messageId, : type)
+        ON DUPLICATE KEY UPDATE type = : type, updated_at = DEFAULT`,
         { userId: user.id, messageId, type }
       );
       pubsub.publish(
