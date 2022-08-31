@@ -92,14 +92,35 @@ export const MessageActions = ({
       updateQuery: (prev: any, { subscriptionData }: any) => {
         if (!subscriptionData.data) return prev;
         const { messageVoted } = subscriptionData.data;
-        return {
-          ...prev,
-          message: {
-            ...prev.message,
-            upVotes: messageVoted.upVotes,
-            downVotes: messageVoted.downVotes,
-          },
-        };
+        console.log(prev);
+        if (prev.message.messageId === messageId) {
+          return {
+            ...prev,
+            message: {
+              ...prev.message,
+              upVotes: messageVoted.upVotes,
+              downVotes: messageVoted.downVotes,
+            },
+          };
+        } else {
+          return {
+            ...prev,
+            message: {
+              ...prev.message,
+              responseTree: prev.message.responseTree.map((message: any) => {
+                if (message.messageId === messageId) {
+                  return {
+                    ...message,
+                    upVotes: messageVoted.upVotes,
+                    downVotes: messageVoted.downVotes,
+                  };
+                } else {
+                  return message;
+                }
+              }),
+            },
+          };
+        }
       },
     });
 
@@ -111,13 +132,32 @@ export const MessageActions = ({
       updateQuery: (prev: any, { subscriptionData }: any) => {
         if (!subscriptionData.data) return prev;
         const { messageReacted } = subscriptionData.data;
-        return {
-          ...prev,
-          message: {
-            ...prev.message,
-            reactions: messageReacted,
-          },
-        };
+        if (prev.message.messageId === messageId) {
+          return {
+            ...prev,
+            message: {
+              ...prev.message,
+              reactions: messageReacted,
+            },
+          };
+        } else {
+          return {
+            ...prev,
+            message: {
+              ...prev.message,
+              responseTree: prev.message.responseTree.map((message: any) => {
+                if (message.messageId === messageId) {
+                  return {
+                    ...message,
+                    reactions: messageReacted,
+                  };
+                } else {
+                  return message;
+                }
+              }),
+            },
+          };
+        }
       },
     });
   }, []);

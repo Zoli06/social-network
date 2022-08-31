@@ -1,11 +1,11 @@
 import './App.scss';
-import { Message } from './components/Message';
+import { Post } from './components/Post';
 
 function App() {
   return (
     <>
-      <Message messageId='1' />
-      <Message messageId='11' />
+      <Post messageId='1' />
+      <Post messageId='11' />
     </>
   );
 }

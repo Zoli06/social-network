@@ -1,49 +1,30 @@
-import React from 'react';
+import React, { createContext } from 'react';
 import './Message.scss';
-import { useQuery, gql } from '@apollo/client';
 import { MessageAuthor } from './MessageAuthor';
 import { MessageText } from './MessageText';
 import { MessageActions } from './MessageActions';
 
-const MESSAGE_QUERY = gql`
-  query GetMessage($messageId: ID!) {
-    message(messageId: $messageId) {
-      messageId
-      user {
-        ...MessageAuthor
-      }
-      ...MessageActions
-      ...MessageText
-    }
-  }
-  ${MessageActions.fragments.message}
-  ${MessageAuthor.fragments.user}
-  ${MessageText.fragments.text}
-`;
-
-export const Message = ({ messageId }: { messageId: string }) => {
-  const { data, loading, error, subscribeToMore } = useQuery(MESSAGE_QUERY, {
-    variables: {
-      messageId,
-    },
-  });
-
-  if (loading) return <div>Loading...</div>;
-  if (error) {
-    console.log(error);
-    return <div>Error!</div>;
-  }
-
+export function Message({ messageData, responseTree, subscribeToMore }: { messageData: any, responseTree: any, subscribeToMore: any }) {
   return (
     <>
       <div className='message-container'>
-        <MessageAuthor user={data.message.user} />
-        <MessageText text={data.message.text} />
-        <MessageActions
-          { ...data.message }
-          subscribeToMore={subscribeToMore}
-        />
+        <MessageAuthor user={messageData.user} />
+        <MessageText text={messageData.text} />
+        <MessageActions {...messageData} subscribeToMore={subscribeToMore} />
+        <div className='response-tree'>
+          {responseTree.map(
+            (responseData: any) =>
+              responseData.responseTo.messageId === messageData.messageId && (
+                <Message
+                  key={responseData.messageId}
+                  messageData={responseData}
+                  responseTree={responseTree}
+                  subscribeToMore={subscribeToMore}
+                />
+              )
+          )}
+        </div>
       </div>
     </>
   );
-};
+}

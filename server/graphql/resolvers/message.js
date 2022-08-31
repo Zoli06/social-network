@@ -116,7 +116,7 @@ module.exports = {
         )
       )[0];
     },
-    async getResponseTree({ message_id }, _, { user, connection }) {
+    async responseTree({ message_id }, _, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
@@ -275,8 +275,8 @@ module.exports = {
       )[0][0].group_id;
       await isGroupMember(user.id, groupId, connection, true);
       await connection.query(
-        `INSERT INTO reactions(user_id, message_id, type) VALUES(: userId, : messageId, : type)
-        ON DUPLICATE KEY UPDATE type = : type, updated_at = DEFAULT`,
+        `INSERT INTO reactions(user_id, message_id, type) VALUES(:userId, :messageId, :type)
+        ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,
         { userId: user.id, messageId, type }
       );
       const reaction = await module.exports.Message.reaction({ message_id: messageId }, {}, { user, connection });
@@ -296,8 +296,8 @@ module.exports = {
       )[0][0].group_id;
       await isGroupMember(user.id, groupId, connection, true);
       await connection.query(
-        `INSERT INTO votes(user_id, message_id, type) VALUES(: userId, : messageId, : type)
-        ON DUPLICATE KEY UPDATE type = : type, updated_at = DEFAULT`,
+        `INSERT INTO votes(user_id, message_id, type) VALUES(:userId, :messageId, :type)
+        ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,
         { userId: user.id, messageId, type }
       );
       pubsub.publish(
