@@ -4,17 +4,17 @@
 }
 
 .message-actions {
-  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  column-gap: 1.5vw;
+  column-gap: calc(var(--reaction-icon-size) / 4);
   position: relative;
 
   .reactions-container {
     position: absolute;
     right: 0;
     display: flex;
+    margin-left: 100%;
 
     .common-reactions {
       display: flex;
@@ -22,7 +22,7 @@
 
       .common-reaction-emoji {
         img {
-          height: 3vw;
+          height: var(--reaction-icon-size);
           filter: drop-shadow(0.1vw 0 0 var(--main-color));
         }
 
@@ -37,8 +37,8 @@
         position: absolute;
         bottom: calc(var(--reaction-icon-size) + 0.5vw);
         right: calc(var(--reaction-icon-size) / 2 - 10vw);
-        height: 90%;
-        width: 20vw;
+        height: 20%;
+        width: 100%;
         background-color: var(--secondary-color);
         border-radius: 1vw;
         display: none;
@@ -59,7 +59,7 @@
       }
 
       .add-reaction-button {
-        margin-left: 1vw;
+        margin-left: calc(var(--reaction-icon-size) / 2);
         // height: 200%;
         // transform: translateY(-50%);
         // display: flex;

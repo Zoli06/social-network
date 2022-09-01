@@ -1,5 +1,7 @@
 #root {
-  display: flex;
   justify-content: center;
-  padding: 10vw;
+  padding: 5vw 30vw;
+  display: flex;
+  flex-direction: column;
+  row-gap: 5vw;
 }

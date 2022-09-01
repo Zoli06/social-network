@@ -57,6 +57,6 @@ export function Post({ messageId }: { messageId: string }) {
   }
 
   return (
-    <Message messageData={data.message} responseTree={data.message.responseTree} subscribeToMore={subscribeToMore} />
+    <Message messageData={data.message} responseTree={data.message.responseTree} subscribeToMore={subscribeToMore} className='root-message' />
   );
 }

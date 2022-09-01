@@ -1,16 +1,28 @@
-import React, { createContext } from 'react';
+import React from 'react';
 import './Message.scss';
 import { MessageAuthor } from './MessageAuthor';
 import { MessageText } from './MessageText';
 import { MessageActions } from './MessageActions';
 
-export function Message({ messageData, responseTree, subscribeToMore }: { messageData: any, responseTree: any, subscribeToMore: any }) {
+export function Message({
+  messageData,
+  responseTree,
+  subscribeToMore,
+  className = '',
+}: {
+  messageData: any;
+  responseTree: any;
+  subscribeToMore: any;
+  className?: string;
+}) {
   return (
     <>
-      <div className='message-container'>
-        <MessageAuthor user={messageData.user} />
-        <MessageText text={messageData.text} />
-        <MessageActions {...messageData} subscribeToMore={subscribeToMore} />
+      <div className={`message-container ${className}`}>
+        <div className='message-content'>
+          <MessageAuthor user={messageData.user} />
+          <MessageText text={messageData.text} />
+          <MessageActions {...messageData} subscribeToMore={subscribeToMore} />
+        </div>
         <div className='response-tree'>
           {responseTree.map(
             (responseData: any) =>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import './MessageActions.scss';
 import { gql, useMutation } from '@apollo/client';
 import Twemoji from 'react-twemoji';
@@ -203,6 +203,7 @@ export const MessageActions = ({
         <use href='./assets/images/svg-bundle.svg#response' />
       </svg>
       <p className='responses-count'>{responsesCount}</p>
+      <div className='space-holder' />
       <div className='reactions-container'>
         <Twemoji noWrapper>
           <div className='common-reactions'>

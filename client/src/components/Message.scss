@@ -1,7 +1,25 @@
+:root {
+  --response-indent: 1.5vw;
+}
+
 .message-container {
-  display: grid;
-  width: 50vw;
-  padding: 1.5vw;
-  border: .1vw solid var(--secondary-color);
-  border-radius: 1vw;
+  border-color: var(--secondary-color);
+  border-width: .1vw;
+
+  &.root-message {
+    border-radius: 1vw;
+    border-style: solid;
+    width: 100%;
+    //padding-bottom: var(--response-indent);
+  }
+
+  &:not(.root-message) {
+    margin-left: var(--response-indent);
+    border-left-style: solid;
+    width: calc(100% - var(--response-indent));
+  }
+
+  .message-content {
+    padding: 1.5vw;
+  }
 }
