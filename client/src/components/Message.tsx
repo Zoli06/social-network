@@ -3,6 +3,7 @@ import './Message.scss';
 import { MessageAuthor } from './MessageAuthor';
 import { MessageText } from './MessageText';
 import { MessageActions } from './MessageActions';
+import { AddResponse } from './AddResponse';
 
 export function Message({
   messageData,
@@ -36,6 +37,7 @@ export function Message({
               )
           )}
         </div>
+        <AddResponse messageId={messageData.messageId} />
       </div>
     </>
   );
