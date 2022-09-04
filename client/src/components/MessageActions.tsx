@@ -58,7 +58,7 @@ export const MessageActions = ({
   } | null;
   subscribeToMore: any;
 }) => {
-  const [voteMutation, voteMutationVariables] = useMutation(VOTE_MUTATION, {
+  const [voteMutation] = useMutation(VOTE_MUTATION, {
     update(cache, { data: { createVote } }) {
       cache.modify({
         id: cache.identify({ __typename: 'Message', messageId }),
@@ -69,19 +69,16 @@ export const MessageActions = ({
     },
   });
 
-  const [reactionMutation, reactionMutationVariables] = useMutation(
-    REACTION_MUTATION,
-    {
-      update(cache, { data: { createReaction } }) {
-        cache.modify({
-          id: cache.identify({ __typename: 'Message', messageId }),
-          fields: {
-            reaction: () => createReaction,
-          },
-        });
-      },
-    }
-  );
+  const [reactionMutation] = useMutation(REACTION_MUTATION, {
+    update(cache, { data: { createReaction } }) {
+      cache.modify({
+        id: cache.identify({ __typename: 'Message', messageId }),
+        fields: {
+          reaction: () => createReaction,
+        },
+      });
+    },
+  });
 
   useEffect(() => {
     subscribeToMore({

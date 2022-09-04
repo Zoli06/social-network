@@ -5,6 +5,7 @@
 .message-container {
   border-color: var(--secondary-color);
   border-width: .1vw;
+  padding: var(--response-indent);
 
   &.root-message {
     border-radius: 1vw;
@@ -14,7 +15,6 @@
   }
 
   &:not(.root-message) {
-    margin-left: var(--response-indent);
     border-left-style: solid;
     width: calc(100% - var(--response-indent));
   }

@@ -172,12 +172,20 @@ module.exports = {
     async sendMessage(
       _,
       {
-        message: { text, responseToMessageId, mentionedUserIds, mediaIds },
-        groupId,
+        message: { text, responseToMessageId, mentionedUserIds, mediaIds }
       },
       { user, connection, pubsub }
     ) {
       user.authenticate();
+
+      // TODO: lot's of sql query like this, maybe we should make a helper function
+      const groupId = (
+        await connection.query(
+          `SELECT group_id FROM messages WHERE message_id = ? `,
+          [responseToMessageId]
+        )
+      )[0][0].group_id;
+
       await isGroupMember(user.id, groupId, connection, true);
       const messageId = (
         await connection.query(

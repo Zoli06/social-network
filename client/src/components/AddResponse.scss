@@ -1,0 +1,19 @@
+.add-response {
+  width: 100%;
+
+  #response-text {
+    width: 80%;
+  }
+
+  #submit-button {
+    width: 18%;
+    margin-left: 2%;
+  }
+  
+  #response-text, #submit-button {
+    display: inline-block;
+    vertical-align: top;
+    height: 4vw;
+    font-size: 1.75vw;
+  }
+}

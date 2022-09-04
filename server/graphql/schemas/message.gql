@@ -47,7 +47,7 @@ type Query {
 }
 
 type Mutation {
-  sendMessage(groupId: ID!, message: MessageInput!): Message
+  sendMessage(message: MessageInput!): Message
   editMessage(messageId: ID!, message: MessageInput!): Message
   deleteMessage(messageId: ID!): ID
   createReaction(messageId: ID!, type: Int): Reaction # also can be used to delete and update
