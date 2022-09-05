@@ -5,9 +5,9 @@
 
 .message-actions {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
-  column-gap: calc(var(--reaction-icon-size) / 4);
+  column-gap: calc(var(--reaction-icon-size) / 2);
   position: relative;
 
   .reactions-container {
@@ -37,8 +37,8 @@
         position: absolute;
         bottom: calc(var(--reaction-icon-size) + 0.5vw);
         right: calc(var(--reaction-icon-size) / 2 - 10vw);
-        height: 20%;
-        width: 100%;
+        height: var(--reaction-icon-size);
+        width: calc(var(--reaction-icon-size) * 7);
         background-color: var(--secondary-color);
         border-radius: 1vw;
         display: none;
