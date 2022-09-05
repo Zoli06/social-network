@@ -288,7 +288,6 @@ module.exports = {
         { userId: user.id, messageId, type }
       );
       const reaction = await module.exports.Message.reaction({ message_id: messageId }, {}, { user, connection });
-      console.log(messageId)
       pubsub.publish(`MESSAGE_REACTED_${messageId}`, {
         messageReacted: module.exports.Message.reactions({ message_id: messageId }, {}, { user, connection }),
       });

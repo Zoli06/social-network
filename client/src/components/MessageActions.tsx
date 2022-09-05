@@ -157,7 +157,7 @@ export const MessageActions = ({
         }
       },
     });
-  }, []);
+  }, [subscribeToMore, messageId]);
 
   const possibleReactions = ['👍', '❤', '🥰', '🤣', '😲', '😢', '😠'];
 

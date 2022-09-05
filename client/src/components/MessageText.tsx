@@ -9,7 +9,7 @@ export const MessageText = ({ text }: { text: string }) => {
 }
 
 MessageText.fragments = {
-  text: gql`
+  message: gql`
     fragment MessageText on Message {
       text
     }

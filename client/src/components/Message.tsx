@@ -1,5 +1,6 @@
 import React from 'react';
 import './Message.scss';
+import { gql } from '@apollo/client';
 import { MessageAuthor } from './MessageAuthor';
 import { MessageText } from './MessageText';
 import { MessageActions } from './MessageActions';
@@ -27,7 +28,7 @@ export function Message({
         <div className='response-tree'>
           {responseTree.map(
             (responseData: any) =>
-              responseData.responseTo.messageId === messageData.messageId && (
+              responseData.responseTo?.messageId === messageData.messageId && (
                 <Message
                   key={responseData.messageId}
                   messageData={responseData}
@@ -42,3 +43,24 @@ export function Message({
     </>
   );
 }
+
+Message.fragments = {
+  message: gql`
+    fragment Message on Message {
+      messageId
+      user {
+        ...MessageAuthor
+      }
+      ...MessageActions
+      ...MessageText
+
+      responseTo {
+        messageId
+      }
+    }
+
+    ${MessageActions.fragments.message}
+    ${MessageAuthor.fragments.user}
+    ${MessageText.fragments.message}
+  `,
+};

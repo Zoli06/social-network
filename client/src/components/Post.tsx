@@ -1,46 +1,19 @@
 import React from 'react';
 import { useQuery, gql } from '@apollo/client';
-import { MessageAuthor } from './MessageAuthor';
-import { MessageText } from './MessageText';
-import { MessageActions } from './MessageActions';
 import { Message } from './Message';
 
 const POST_QUERY = gql`
   query GetMessage($messageId: ID!) {
     message(messageId: $messageId) {
-      # responseTree {
-      #   user {
-      #     ...MessageAuthor
-      #   }
-      #   ...MessageActions
-      #   ...MessageText
-      #   responseTo {
-      #     messageId
-      #   }
-      # }
-      ...MessageData
+      ...Message
 
       responseTree {
-        ...MessageData
-        responseTo {
-          messageId
-        }
+        ...Message
       }
     }
   }
 
-  fragment MessageData on Message {
-    messageId
-    user {
-      ...MessageAuthor
-    }
-    ...MessageActions
-    ...MessageText
-  }
-
-  ${MessageActions.fragments.message}
-  ${MessageAuthor.fragments.user}
-  ${MessageText.fragments.text}
+  ${Message.fragments.message}
 `;
 
 export function Post({ messageId }: { messageId: string }) {
@@ -57,6 +30,11 @@ export function Post({ messageId }: { messageId: string }) {
   }
 
   return (
-    <Message messageData={data.message} responseTree={data.message.responseTree} subscribeToMore={subscribeToMore} className='root-message' />
+    <Message
+      messageData={data.message}
+      responseTree={data.message.responseTree}
+      subscribeToMore={subscribeToMore}
+      className='root-message'
+    />
   );
 }
