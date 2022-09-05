@@ -1,5 +1,7 @@
 .add-response {
   width: 100%;
+  padding: 0 var(--response-indent);
+  margin-top: var(--response-indent);
 
   #response-text {
     width: 80%;
