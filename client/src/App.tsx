@@ -2,7 +2,7 @@ import './App.scss';
 //import { Post } from './components/Post';
 import { Group } from './components/Group';
 
-function App() {
+export function App() {
   return (
     <>
       {/* <Post messageId='1' />
@@ -11,5 +11,3 @@ function App() {
     </>
   );
 }
-
-export default App;
