@@ -25,12 +25,12 @@ const getAuthToken = () => {
 };
 
 const httpLink = createHttpLink({
-  uri: '/graphql',
+  uri: 'http://localhost:8000/graphql',
 });
 
 const wsLink = new GraphQLWsLink(
   createClient({
-    url: `ws://localhost:8080/graphql`,
+    url: `ws://localhost:8000/graphql`,
     connectionParams: {
       Authorization: `Bearer ${getAuthToken()}`,
     },

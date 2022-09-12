@@ -1,5 +1,8 @@
 console.log("Hello world");
 
+const SegfaultHandler = require('segfault-handler');
+SegfaultHandler.registerHandler('crash.log');
+
 const { ApolloServer } = require('apollo-server-express');
 const { createServer } = require('http');
 const express = require('express');
@@ -90,7 +93,7 @@ const server = new ApolloServer({
   playground: true
 });
 
-PORT = process.env.PORT || 8080;
+PORT = process.env.PORT || 8000;
 server.start().then(() => {
   server.applyMiddleware({ app });
   httpServer.listen(PORT, () => console.log('Server running on port ' + PORT));
