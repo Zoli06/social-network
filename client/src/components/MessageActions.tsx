@@ -94,7 +94,7 @@ export const MessageActions = ({
           group: {
             ...prev.group,
             messages: prev.group.messages.map((message: any) => {
-              if (message.messageId == messageId) {
+              if (message.messageId === messageId) {
                 return {
                   ...message,
                   upVotes: messageVoted.upVotes,
@@ -122,7 +122,7 @@ export const MessageActions = ({
           group: {
             ...prev.group,
             messages: prev.group.messages.map((message: any) => {
-              if (message.messageId == messageId) {
+              if (message.messageId === messageId) {
                 return {
                   ...message,
                   reactions: messageReacted,
