@@ -60,8 +60,8 @@ type VoteChange {
 }
 
 type Subscription {
-  messageAdded(groupId: ID!): Message!
-  messageEdited(groupId: ID!): Message!
+  messageAdded(groupId: ID!): ID!
+  messageEdited(groupId: ID!): ID!
   messageDeleted(groupId: ID!): ID!
   messageReacted(messageId: ID!): [Reaction!]!
   messageVoted(messageId: ID!): VoteChange!

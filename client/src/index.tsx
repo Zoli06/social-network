@@ -60,7 +60,7 @@ const splitLink = split(
   authLink.concat(httpLink)
 );
 
-const cache = new InMemoryCache({
+export const cache = new InMemoryCache({
   dataIdFromObject: ({__typename, id, ...rest}): any => {
     switch (__typename) {
       case 'Group':

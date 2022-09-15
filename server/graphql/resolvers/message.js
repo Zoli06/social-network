@@ -1,6 +1,7 @@
 const { Query: { user: getUser } } = require('./user.js');
 const { isGroupMember } = require('../helpers/group.js');
 const { isMessageCreator } = require('../helpers/message.js');
+const { resolveFields } = require('../helpers/subscriptions.js');
 const Grapheme = require('grapheme-splitter');
 const splitter = new Grapheme();
 
@@ -205,8 +206,12 @@ module.exports = {
           [mediaIds.map((mediaId) => [messageId, mediaId])]
         );
       }
-      const createdMessage = await module.exports.Query.message({}, { messageId }, { user, connection });
-      pubsub.publish(`MESSAGE_ADDED_${groupId}`, { messageAdded: createdMessage });
+      pubsub.publish(`MESSAGE_ADDED_${groupId}`, { messageAdded: messageId });
+      const createdMessage = (
+        await connection.query(`SELECT * FROM messages WHERE message_id = ? `, [
+          messageId,
+        ])
+      )[0][0];
       return createdMessage;
     },
     async editMessage(_, { message: { text, responseToMessageId, mentionedUserIds, mediaIds }, messageId, }, { user, connection, pubsub }) {
@@ -241,8 +246,12 @@ module.exports = {
         `INSERT INTO message_medias(message_id, media_id) VALUES ? `,
         [mediaIds.map((mediaId) => [messageId, mediaId])]
       );
-      const editedMessage = await module.exports.Query.message({}, { messageId }, { user, connection });
-      pubsub.publish(`MESSAGE_EDITED_${groupId}`, { messageEdited: editedMessage });
+      pubsub.publish(`MESSAGE_EDITED_${groupId}`, { messageEdited: messageId });
+      const editedMessage = (
+        await connection.query(`SELECT * FROM messages WHERE message_id = ? `, [
+          messageId,
+        ])
+      )[0][0];
       return editedMessage;
     },
     async deleteMessage(_, { messageId }, { user, connection, pubsub }) {

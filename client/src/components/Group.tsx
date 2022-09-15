@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import './Group.scss';
-import { useQuery, gql } from '@apollo/client';
+import { useQuery, useLazyQuery, gql } from '@apollo/client';
 import { Message } from './Message';
+import { cache } from '../index';
 
 const GROUP_QUERY = gql`
   query GetGroup($groupId: ID!) {
@@ -18,6 +19,16 @@ const GROUP_QUERY = gql`
   ${Message.fragments.message}
 `;
 
+const MESSAGE_QUERY = gql`
+  query GetMessage($messageId: ID!) {
+    message(messageId: $messageId) {
+      ...Message
+    }
+  }
+
+  ${Message.fragments.message}
+`;
+
 export const Group = ({ groupId }: { groupId: string }) => {
   const { data, loading, error, subscribeToMore } = useQuery(GROUP_QUERY, {
     variables: {
@@ -25,16 +36,14 @@ export const Group = ({ groupId }: { groupId: string }) => {
     },
   });
 
+  const [getMessage] = useLazyQuery(MESSAGE_QUERY);
+
   useEffect(() => {
     subscribeToMore({
       document: gql`
         subscription OnMessageAdded($groupId: ID!) {
-          messageAdded(groupId: $groupId) {
-            ...Message
-          }
+          messageAdded(groupId: $groupId)
         }
-
-        ${Message.fragments.message}
       `,
       variables: {
         groupId,
@@ -44,15 +53,33 @@ export const Group = ({ groupId }: { groupId: string }) => {
           return prev;
         }
 
-        const newMessage = subscriptionData.data.messageAdded;
-
-        return {
-          ...prev,
-          group: {
-            ...prev.group,
-            messages: [...prev.group.messages, newMessage],
+        getMessage({
+          variables: {
+            messageId: subscriptionData.data.messageAdded,
           },
-        };
+          onCompleted: (data) => {
+            // push message to apollo cache
+            cache.modify({
+              id: cache.identify({
+                __typename: 'Group',
+                groupId,
+              }),
+              fields: {
+                messages(existingMessages = []) {
+                  const newMessageRef = cache.writeFragment({
+                    data: data.message,
+                    fragment: Message.fragments.message,
+                    fragmentName: 'Message',
+                  });
+
+                  return [...existingMessages, newMessageRef];
+                },
+              },
+            });
+          },
+        });
+
+        return prev;
       },
     });
   }, [subscribeToMore, groupId]);
