@@ -10,11 +10,15 @@ export function Message({
   messageData,
   responseTree,
   subscribeToMore,
+  messageVotedUpdateFunc,
+  messageReactedUpdateFunc,
   className = '',
 }: {
   messageData: any;
   responseTree: any;
   subscribeToMore: any;
+  messageVotedUpdateFunc: Function;
+  messageReactedUpdateFunc: Function;
   className?: string;
 }) {
   return (
@@ -23,7 +27,12 @@ export function Message({
         <div className='message-content'>
           <MessageAuthor user={messageData.user} />
           <MessageText text={messageData.text} />
-          <MessageActions {...messageData} subscribeToMore={subscribeToMore} />
+          <MessageActions
+            {...messageData}
+            subscribeToMore={subscribeToMore}
+            messageReactedUpdateFunc={messageReactedUpdateFunc}
+            messageVotedUpdateFunc={messageVotedUpdateFunc}
+          />
         </div>
         <div className='response-tree'>
           {responseTree.map(
@@ -34,6 +43,8 @@ export function Message({
                   messageData={responseData}
                   responseTree={responseTree}
                   subscribeToMore={subscribeToMore}
+                  messageReactedUpdateFunc={messageReactedUpdateFunc}
+                  messageVotedUpdateFunc={messageVotedUpdateFunc}
                 />
               )
           )}

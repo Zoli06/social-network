@@ -36,7 +36,6 @@ const pubsub = new PubSub();
 
 const getDynamicContext = (ctx) => {
   const token = (ctx.req?.get('Authorization') || ctx.connectionParams?.Authorization || '').replace('Bearer', '').trim();
-  console.log(token);
   const user = getUser(token);
   return {
     user: {

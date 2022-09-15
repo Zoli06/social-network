@@ -44,6 +44,8 @@ export const MessageActions = ({
   reactions,
   reaction,
   subscribeToMore,
+  messageVotedUpdateFunc,
+  messageReactedUpdateFunc,
 }: {
   upVotes: number;
   downVotes: number;
@@ -57,6 +59,8 @@ export const MessageActions = ({
     type: number;
   } | null;
   subscribeToMore: any;
+  messageVotedUpdateFunc: Function;
+  messageReactedUpdateFunc: Function;
 }) => {
   const [voteMutation] = useMutation(VOTE_MUTATION, {
     update(cache, { data: { createVote } }) {
@@ -86,27 +90,7 @@ export const MessageActions = ({
       variables: {
         messageId,
       },
-      updateQuery: (prev: any, { subscriptionData }: any) => {
-        if (!subscriptionData.data) return prev;
-        const { messageVoted } = subscriptionData.data;
-        return {
-          ...prev,
-          group: {
-            ...prev.group,
-            messages: prev.group.messages.map((message: any) => {
-              if (message.messageId === messageId) {
-                return {
-                  ...message,
-                  upVotes: messageVoted.upVotes,
-                  downVotes: messageVoted.downVotes,
-                };
-              } else {
-                return message
-              }
-            }),
-          },
-        };
-      },
+      updateQuery: (prev: any, { subscriptionData }: { subscriptionData: any }) => messageVotedUpdateFunc(prev, { subscriptionData }, messageId),
     });
 
     subscribeToMore({
@@ -114,26 +98,7 @@ export const MessageActions = ({
       variables: {
         messageId,
       },
-      updateQuery: (prev: any, { subscriptionData }: any) => {
-        if (!subscriptionData.data) return prev;
-        const { messageReacted } = subscriptionData.data;
-        return {
-          ...prev,
-          group: {
-            ...prev.group,
-            messages: prev.group.messages.map((message: any) => {
-              if (message.messageId === messageId) {
-                return {
-                  ...message,
-                  reactions: messageReacted,
-                };
-              } else {
-                return message
-              }
-            }),
-          },
-        };
-      },
+      updateQuery: (prev: any, { subscriptionData }: { subscriptionData: any }) => messageReactedUpdateFunc(prev, { subscriptionData }, messageId),
     });
   }, [subscribeToMore, messageId]);
 
@@ -157,9 +122,8 @@ export const MessageActions = ({
         onClick={() => handleVote("up")}
       >
         <use
-          href={`./assets/images/svg-bundle.svg#upvote${
-            vote === "up" ? "-active" : ""
-          }`}
+          href={`./assets/images/svg-bundle.svg#upvote${vote === "up" ? "-active" : ""
+            }`}
         />
       </svg>
       <p className="upvote-count">{upVotes}</p>
@@ -168,9 +132,8 @@ export const MessageActions = ({
         onClick={() => handleVote("down")}
       >
         <use
-          href={`./assets/images/svg-bundle.svg#downvote${
-            vote === "down" ? "-active" : ""
-          }`}
+          href={`./assets/images/svg-bundle.svg#downvote${vote === "down" ? "-active" : ""
+            }`}
         />
       </svg>
       <p className="downvote-count">{downVotes}</p>

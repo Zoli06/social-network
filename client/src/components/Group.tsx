@@ -63,6 +63,57 @@ export const Group = ({ groupId }: { groupId: string }) => {
     return <div>Error!</div>;
   }
 
+  const messageVotedUpdateFunc = (
+    prev: any,
+    { subscriptionData }: { subscriptionData: any },
+    messageId: string
+  ) => {
+    if (!subscriptionData.data) return prev;
+    const { messageVoted } = subscriptionData.data;
+    return {
+      ...prev,
+      group: {
+        ...prev.group,
+        messages: prev.group.messages.map((message: any) => {
+          if (message.messageId === messageId) {
+            return {
+              ...message,
+              upVotes: messageVoted.upVotes,
+              downVotes: messageVoted.downVotes,
+            };
+          } else {
+            return message;
+          }
+        }),
+      },
+    };
+  };
+
+  const messageReactedUpdateFunc = (
+    prev: any,
+    { subscriptionData }: { subscriptionData: any },
+    messageId: string
+  ) => {
+    if (!subscriptionData.data) return prev;
+    const { messageReacted } = subscriptionData.data;
+    return {
+      ...prev,
+      group: {
+        ...prev.group,
+        messages: prev.group.messages.map((message: any) => {
+          if (message.messageId === messageId) {
+            return {
+              ...message,
+              reactions: messageReacted,
+            };
+          } else {
+            return message;
+          }
+        }),
+      },
+    };
+  };
+
   return (
     <>
       <h1>
@@ -77,6 +128,8 @@ export const Group = ({ groupId }: { groupId: string }) => {
               subscribeToMore={subscribeToMore}
               className='root-message'
               key={message.messageId}
+              messageVotedUpdateFunc={messageVotedUpdateFunc}
+              messageReactedUpdateFunc={messageReactedUpdateFunc}
             />
           )
       )}
