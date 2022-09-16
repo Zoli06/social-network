@@ -63,8 +63,8 @@ export function Post({ messageId }: { messageId: string }) {
           onCompleted: (data) => {
             // push message to apollo cache in responseTree
 
-            const message = data.message;
-            const responseTree = prev.message.responseTree;
+            const { message } = data;
+            const { responseTree } = prev.message;
             const newResponseTree = [...responseTree, message];
             cache.writeQuery({
               query: POST_QUERY,

@@ -62,20 +62,15 @@ export const Group = ({ groupId }: { groupId: string }) => {
 
             const { message } = data;
 
-            cache.modify({
-              id: cache.identify({
-                __typename: 'Group',
+            cache.writeQuery({
+              query: GROUP_QUERY,
+              variables: {
                 groupId,
-              }),
-              fields: {
-                messages(existingMessages = []) {
-                  const newMessageRef = cache.writeFragment({
-                    data: message,
-                    fragment: Message.fragments.message,
-                    fragmentName: 'Message',
-                  });
-
-                  return [...existingMessages, newMessageRef];
+              },
+              data: {
+                group: {
+                  ...prev.group,
+                  messages: [...prev.group.messages, message],
                 }
               }
             });
