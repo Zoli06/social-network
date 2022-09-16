@@ -1,15 +1,29 @@
-import React from 'react';
-import { useQuery, gql } from '@apollo/client';
+import React, { useEffect } from 'react';
+import { useQuery, gql, useLazyQuery } from '@apollo/client';
 import { Message } from './Message';
+import { cache } from '../index';
 
 const POST_QUERY = gql`
   query GetMessage($messageId: ID!) {
     message(messageId: $messageId) {
       ...Message
+      group {
+        groupId
+      }
 
       responseTree {
         ...Message
       }
+    }
+  }
+
+  ${Message.fragments.message}
+`;
+
+const MESSAGE_QUERY = gql`
+  query GetMessage($messageId: ID!) {
+    message(messageId: $messageId) {
+      ...Message
     }
   }
 
@@ -22,6 +36,55 @@ export function Post({ messageId }: { messageId: string }) {
       messageId,
     },
   });
+
+  const [getMessage] = useLazyQuery(MESSAGE_QUERY);
+
+  useEffect(() => {
+    if (loading || error) return;
+
+    subscribeToMore({
+      document: gql`
+        subscription OnMessageAdded($groupId: ID!) {
+          messageAdded(groupId: $groupId)
+        }
+      `,
+      variables: {
+        groupId: data.message.group.groupId,
+      },
+      updateQuery: (prev, { subscriptionData }) => {
+        if (!subscriptionData.data) {
+          return prev;
+        }
+
+        getMessage({
+          variables: {
+            messageId: subscriptionData.data.messageAdded,
+          },
+          onCompleted: (data) => {
+            // push message to apollo cache in responseTree
+
+            const message = data.message;
+            const responseTree = prev.message.responseTree;
+            const newResponseTree = [...responseTree, message];
+            cache.writeQuery({
+              query: POST_QUERY,
+              variables: {
+                messageId,
+              },
+              data: {
+                message: {
+                  ...prev.message,
+                  responseTree: newResponseTree,
+                },
+              },
+            });
+          },
+        });
+
+        return prev;
+      },
+    });
+  }, [loading, error, data, subscribeToMore, getMessage, messageId]);
 
   if (loading) return <div>Loading...</div>;
   if (error) {

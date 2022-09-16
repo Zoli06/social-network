@@ -42,6 +42,7 @@ export const MessageAuthor = ({
 MessageAuthor.fragments = {
   user: gql`
     fragment MessageAuthor on User {
+      userId
       firstName
       lastName
       middleName

@@ -58,7 +58,10 @@ export const Group = ({ groupId }: { groupId: string }) => {
             messageId: subscriptionData.data.messageAdded,
           },
           onCompleted: (data) => {
-            // push message to apollo cache
+            // push message to apollo cache in group messages
+
+            const { message } = data;
+
             cache.modify({
               id: cache.identify({
                 __typename: 'Group',
@@ -67,14 +70,14 @@ export const Group = ({ groupId }: { groupId: string }) => {
               fields: {
                 messages(existingMessages = []) {
                   const newMessageRef = cache.writeFragment({
-                    data: data.message,
+                    data: message,
                     fragment: Message.fragments.message,
                     fragmentName: 'Message',
                   });
 
                   return [...existingMessages, newMessageRef];
-                },
-              },
+                }
+              }
             });
           },
         });
@@ -82,7 +85,7 @@ export const Group = ({ groupId }: { groupId: string }) => {
         return prev;
       },
     });
-  }, [subscribeToMore, groupId]);
+  }, [groupId, subscribeToMore, getMessage]);
 
   if (loading) return <div>Loading...</div>;
   if (error) {

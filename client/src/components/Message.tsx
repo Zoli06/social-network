@@ -2,9 +2,11 @@ import React from 'react';
 import './Message.scss';
 import { gql } from '@apollo/client';
 import { MessageAuthor } from './MessageAuthor';
+import { MessageModify } from './MessageModify';
 import { MessageText } from './MessageText';
 import { MessageActions } from './MessageActions';
 import { AddResponse } from './AddResponse';
+import { UserContext } from '../App';
 
 export function Message({
   messageData,
@@ -20,12 +22,19 @@ export function Message({
   messageVotedUpdateFunc: Function;
   messageReactedUpdateFunc: Function;
   className?: string;
-}) {
+  }) {
+  const user = React.useContext(UserContext);
+  
   return (
     <>
       <div className={`message-container ${className}`}>
         <div className='message-content'>
           <MessageAuthor user={messageData.user} />
+          {user.userId === messageData.user.userId && (
+            /* TODO: Fix types */
+            /* @ts-ignore */
+            <MessageModify messageId={messageData.messageId} />
+          )}
           <MessageText text={messageData.text} />
           <MessageActions
             {...messageData}
