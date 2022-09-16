@@ -22,19 +22,21 @@ export function Message({
   messageVotedUpdateFunc: Function;
   messageReactedUpdateFunc: Function;
   className?: string;
-  }) {
+}) {
   const user = React.useContext(UserContext);
-  
+
   return (
     <>
       <div className={`message-container ${className}`}>
         <div className='message-content'>
-          <MessageAuthor user={messageData.user} />
-          {user.userId === messageData.user.userId && (
-            /* TODO: Fix types */
-            /* @ts-ignore */
-            <MessageModify messageId={messageData.messageId} />
-          )}
+          <div className='message-header'>
+            <MessageAuthor user={messageData.user} />
+            {user.userId === messageData.user.userId && (
+              /* TODO: Fix types */
+              /* @ts-ignore */
+              <MessageModify messageId={messageData.messageId} />
+            )}
+          </div>
           <MessageText text={messageData.text} />
           <MessageActions
             {...messageData}

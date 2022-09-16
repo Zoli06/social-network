@@ -22,4 +22,10 @@
   .message-content {
     padding: 1.5vw;
   }
+
+  .message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 }

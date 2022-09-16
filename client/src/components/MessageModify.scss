@@ -1,3 +1,8 @@
 .message-modify {
-  float: right;
+  display: flex;
+  column-gap: 1vw;
+
+  svg {
+    height: 2vw;
+  }
 }
