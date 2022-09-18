@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useQuery, gql, useLazyQuery } from '@apollo/client';
 import { Message } from './Message';
 import { cache } from '../index';
+import { type } from '@testing-library/user-event/dist/type';
 
 const POST_QUERY = gql`
   query GetMessage($messageId: ID!) {
@@ -30,7 +31,7 @@ const MESSAGE_QUERY = gql`
   ${Message.fragments.message}
 `;
 
-export function Post({ messageId }: { messageId: string }) {
+export function Post({ messageId }: IPostProps) {
   const { data, loading, error, subscribeToMore } = useQuery(POST_QUERY, {
     variables: {
       messageId,
@@ -175,3 +176,9 @@ export function Post({ messageId }: { messageId: string }) {
     />
   );
 }
+
+export interface IPostGQLData {
+  messageId: string;
+}
+
+export interface IPostProps extends IPostGQLData {}

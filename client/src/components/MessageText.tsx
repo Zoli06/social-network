@@ -1,12 +1,14 @@
-import React from 'react'
-import './MessageText.scss'
-import { gql } from '@apollo/client'
+import React from 'react';
+import './MessageText.scss';
+import { gql } from '@apollo/client';
 
-export const MessageText = ({ text }: { text: string }) => {
+export const MessageText = ({ text }: IMessageTextProps) => {
   return (
-    <div className='message-text-container'><p className='message-text'>{text}</p></div>
-  )
-}
+    <div className='message-text-container'>
+      <p className='message-text'>{text}</p>
+    </div>
+  );
+};
 
 MessageText.fragments = {
   message: gql`
@@ -14,4 +16,10 @@ MessageText.fragments = {
       text
     }
   `,
+};
+
+export interface IMessageTextGQLData {
+  text: string;
 }
+
+export interface IMessageTextProps extends IMessageTextGQLData {}

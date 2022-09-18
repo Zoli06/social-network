@@ -29,7 +29,7 @@ const MESSAGE_QUERY = gql`
   ${Message.fragments.message}
 `;
 
-export const Group = ({ groupId }: { groupId: string }) => {
+export const Group = ({ groupId }: IGroupProps) => {
   const { data, loading, error, subscribeToMore } = useQuery(GROUP_QUERY, {
     variables: {
       groupId,
@@ -71,8 +71,8 @@ export const Group = ({ groupId }: { groupId: string }) => {
                 group: {
                   ...prev.group,
                   messages: [...prev.group.messages, message],
-                }
-              }
+                },
+              },
             });
           },
         });
@@ -161,3 +161,9 @@ export const Group = ({ groupId }: { groupId: string }) => {
     </>
   );
 };
+
+export interface IGroupGQLData {
+  groupId: string;
+}
+
+export interface IGroupProps extends IGroupGQLData {}

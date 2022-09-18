@@ -1,5 +1,5 @@
 import './App.scss';
-import { Post } from './components/Post';
+// import { Post } from './components/Post';
 import { Group } from './components/Group';
 import { useQuery, gql } from '@apollo/client';
 import React from 'react';

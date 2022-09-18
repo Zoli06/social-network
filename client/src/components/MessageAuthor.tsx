@@ -2,20 +2,7 @@ import React from 'react';
 import './MessageAuthor.scss';
 import { gql } from '@apollo/client';
 
-export const MessageAuthor = ({
-  user,
-}: {
-  user: {
-    firstName: string;
-    lastName: string;
-    middleName: string;
-    userName: string;
-    intro: string;
-    profileImage: {
-      url: string;
-    };
-  };
-}) => {
+export const MessageAuthor = ({ user }: IMessageAuthorProps) => {
   return (
     <div className='message-author-container'>
       <div className='image-container'>
@@ -54,3 +41,19 @@ MessageAuthor.fragments = {
     }
   `,
 };
+
+export interface IMessageAuthorGQLData {
+  user: {
+    userId: string;
+    firstName: string;
+    lastName: string;
+    middleName: string;
+    userName: string;
+    intro: string;
+    profileImage: {
+      url: string;
+    };
+  };
+}
+
+export interface IMessageAuthorProps extends IMessageAuthorGQLData {}

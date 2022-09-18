@@ -8,6 +8,12 @@ import { MessageActions } from './MessageActions';
 import { AddResponse } from './AddResponse';
 import { UserContext } from '../App';
 
+import { IMessageAuthorGQLData } from './MessageAuthor';
+import { IMessageTextGQLData } from './MessageText';
+import { IMessageModifyGQLData } from './MessageModify';
+import { IMessageActionsGQLData } from './MessageActions';
+import { IAddResponseGQLData } from './AddResponse';
+
 export function Message({
   messageData,
   responseTree,
@@ -15,14 +21,7 @@ export function Message({
   messageVotedUpdateFunc,
   messageReactedUpdateFunc,
   className = '',
-}: {
-  messageData: any;
-  responseTree: any;
-  subscribeToMore: any;
-  messageVotedUpdateFunc: Function;
-  messageReactedUpdateFunc: Function;
-  className?: string;
-}) {
+}: IMessageProps) {
   const user = React.useContext(UserContext);
 
   return (
@@ -32,14 +31,12 @@ export function Message({
           <div className='message-header'>
             <MessageAuthor user={messageData.user} />
             {user.userId === messageData.user.userId && (
-              /* TODO: Fix types */
-              /* @ts-ignore */
               <MessageModify messageId={messageData.messageId} />
             )}
           </div>
           <MessageText text={messageData.text} />
           <MessageActions
-            {...messageData}
+            messageData={messageData}
             subscribeToMore={subscribeToMore}
             messageReactedUpdateFunc={messageReactedUpdateFunc}
             messageVotedUpdateFunc={messageVotedUpdateFunc}
@@ -47,7 +44,7 @@ export function Message({
         </div>
         <div className='response-tree'>
           {responseTree.map(
-            (responseData: any) =>
+            (responseData: IResponseTreeElement) =>
               responseData.responseTo?.messageId === messageData.messageId && (
                 <Message
                   key={responseData.messageId}
@@ -86,3 +83,25 @@ Message.fragments = {
     ${MessageText.fragments.message}
   `,
 };
+
+export interface IMessageGQLData
+  extends IMessageAuthorGQLData,
+    IMessageTextGQLData,
+    IMessageModifyGQLData,
+    IMessageActionsGQLData,
+    IAddResponseGQLData {}
+
+interface IResponseTreeElement extends IMessageGQLData {
+  responseTo: {
+    messageId: string;
+  };
+}
+
+export interface IMessageProps {
+  messageData: IMessageGQLData;
+  responseTree: IResponseTreeElement[];
+  subscribeToMore: Function;
+  messageVotedUpdateFunc: Function;
+  messageReactedUpdateFunc: Function;
+  className?: string;
+}

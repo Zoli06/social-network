@@ -11,7 +11,7 @@ const ADD_RESPONSE_MUTATION = gql`
   }
 `;
 
-export const AddResponse = ({ messageId }: { messageId: string }) => {
+export const AddResponse = ({ messageId }: IAddResponseProps) => {
   const [addResponseMutation] = useMutation(ADD_RESPONSE_MUTATION);
 
   const handleSubmit = (event: any) => {
@@ -39,3 +39,9 @@ export const AddResponse = ({ messageId }: { messageId: string }) => {
     </form>
   );
 };
+
+export interface IAddResponseGQLData {
+  messageId: string;
+}
+
+export interface IAddResponseProps extends IAddResponseGQLData {}

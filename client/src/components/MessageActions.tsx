@@ -1,8 +1,8 @@
-import React, { useEffect } from "react";
-import "./MessageActions.scss";
-import { gql, useMutation } from "@apollo/client";
-import Twemoji from "react-twemoji";
-import { v4 as uuidv4 } from "uuid";
+import React, { useEffect } from 'react';
+import './MessageActions.scss';
+import { gql, useMutation } from '@apollo/client';
+import Twemoji from 'react-twemoji';
+import { v4 as uuidv4 } from 'uuid';
 
 const VOTE_MUTATION = gql`
   mutation VoteMutation($messageId: ID!, $type: VoteType) {
@@ -36,36 +36,23 @@ const MESSAGE_REACTED_SUBSCRIPTION = gql`
 `;
 
 export const MessageActions = ({
-  upVotes,
-  downVotes,
-  responsesCount,
-  messageId,
-  vote,
-  reactions,
-  reaction,
+  messageData: {
+    upVotes,
+    downVotes,
+    responsesCount,
+    messageId,
+    vote,
+    reactions,
+    reaction,
+  },
   subscribeToMore,
   messageVotedUpdateFunc,
   messageReactedUpdateFunc,
-}: {
-  upVotes: number;
-  downVotes: number;
-  responsesCount: number;
-  messageId: string;
-  vote: string;
-  reactions: {
-    type: number;
-  }[];
-  reaction: {
-    type: number;
-  } | null;
-  subscribeToMore: any;
-  messageVotedUpdateFunc: Function;
-  messageReactedUpdateFunc: Function;
-}) => {
+}: IMessageActionsProps) => {
   const [voteMutation] = useMutation(VOTE_MUTATION, {
     update(cache, { data: { createVote } }) {
       cache.modify({
-        id: cache.identify({ __typename: "Message", messageId }),
+        id: cache.identify({ __typename: 'Message', messageId }),
         fields: {
           vote: () => createVote,
         },
@@ -76,7 +63,7 @@ export const MessageActions = ({
   const [reactionMutation] = useMutation(REACTION_MUTATION, {
     update(cache, { data: { createReaction } }) {
       cache.modify({
-        id: cache.identify({ __typename: "Message", messageId }),
+        id: cache.identify({ __typename: 'Message', messageId }),
         fields: {
           reaction: () => createReaction,
         },
@@ -90,7 +77,10 @@ export const MessageActions = ({
       variables: {
         messageId,
       },
-      updateQuery: (prev: any, { subscriptionData }: { subscriptionData: any }) => messageVotedUpdateFunc(prev, { subscriptionData }, messageId),
+      updateQuery: (
+        prev: any,
+        { subscriptionData }: { subscriptionData: any }
+      ) => messageVotedUpdateFunc(prev, { subscriptionData }, messageId),
     });
 
     subscribeToMore({
@@ -98,11 +88,14 @@ export const MessageActions = ({
       variables: {
         messageId,
       },
-      updateQuery: (prev: any, { subscriptionData }: { subscriptionData: any }) => messageReactedUpdateFunc(prev, { subscriptionData }, messageId),
+      updateQuery: (
+        prev: any,
+        { subscriptionData }: { subscriptionData: any }
+      ) => messageReactedUpdateFunc(prev, { subscriptionData }, messageId),
     });
-  }, [subscribeToMore, messageId]);
+  }, [subscribeToMore, messageId, messageVotedUpdateFunc, messageReactedUpdateFunc]);
 
-  const possibleReactions = ["👍", "❤", "🥰", "🤣", "😲", "😢", "😠"];
+  const possibleReactions = ['👍', '❤', '🥰', '🤣', '😲', '😢', '😠'];
 
   const handleVote = (newVote: string | null) => {
     if (vote === newVote) newVote = null;
@@ -116,68 +109,70 @@ export const MessageActions = ({
   };
 
   return (
-    <div className="message-actions">
+    <div className='message-actions'>
       <svg
-        className={`upvote icon ${vote === "up" ? "active" : ""}`}
-        onClick={() => handleVote("up")}
+        className={`upvote icon ${vote === 'up' ? 'active' : ''}`}
+        onClick={() => handleVote('up')}
       >
         <use
-          href={`./assets/images/svg-bundle.svg#upvote${vote === "up" ? "-active" : ""
-            }`}
+          href={`./assets/images/svg-bundle.svg#upvote${
+            vote === 'up' ? '-active' : ''
+          }`}
         />
       </svg>
-      <p className="upvote-count">{upVotes}</p>
+      <p className='upvote-count'>{upVotes}</p>
       <svg
-        className={`downvote icon ${vote === "down" ? "active" : ""}`}
-        onClick={() => handleVote("down")}
+        className={`downvote icon ${vote === 'down' ? 'active' : ''}`}
+        onClick={() => handleVote('down')}
       >
         <use
-          href={`./assets/images/svg-bundle.svg#downvote${vote === "down" ? "-active" : ""
-            }`}
+          href={`./assets/images/svg-bundle.svg#downvote${
+            vote === 'down' ? '-active' : ''
+          }`}
         />
       </svg>
-      <p className="downvote-count">{downVotes}</p>
-      <svg className="response icon">
-        <use href="./assets/images/svg-bundle.svg#response" />
+      <p className='downvote-count'>{downVotes}</p>
+      <svg className='response icon'>
+        <use href='./assets/images/svg-bundle.svg#response' />
       </svg>
-      <p className="responses-count">{responsesCount}</p>
-      <div className="space-holder" />
-      <div className="reactions-container">
+      <p className='responses-count'>{responsesCount}</p>
+      <div className='space-holder' />
+      <div className='reactions-container'>
         <Twemoji noWrapper>
-          <div className="common-reactions">
+          <div className='common-reactions'>
             {[...new Set(reactions.map((reaction) => reaction.type))]
               .slice(0, 3)
               .map((reactionType) => (
-                <div className="common-reaction-emoji" key={uuidv4()}>
+                <div className='common-reaction-emoji' key={uuidv4()}>
                   {String.fromCodePoint(reactionType)}
                 </div>
               ))}
           </div>
         </Twemoji>
-        <div className="add-reaction-container">
-          <div className="add-reaction-button">
-            <div className="space-holder" />
+        <div className='add-reaction-container'>
+          <div className='add-reaction-button'>
+            <div className='space-holder' />
             {reaction ? (
-              <div className="add-reaction-icon icon user-have-reaction">
-                <Twemoji options={{ className: "icon" }} noWrapper>
+              <div className='add-reaction-icon icon user-have-reaction'>
+                <Twemoji options={{ className: 'icon' }} noWrapper>
                   <span>{String.fromCodePoint(reaction.type)}</span>
                   <svg
-                    className="remove-reaction icon"
+                    className='remove-reaction icon'
                     onClick={() => handleAddReaction(null)}
                   >
-                    <use href="./assets/images/svg-bundle.svg#close-button" />
+                    <use href='./assets/images/svg-bundle.svg#close-button' />
                   </svg>
                 </Twemoji>
               </div>
             ) : (
-              <svg className="add-reaction-icon icon">
-                <use href="./assets/images/svg-bundle.svg#plus" />
+              <svg className='add-reaction-icon icon'>
+                <use href='./assets/images/svg-bundle.svg#plus' />
               </svg>
             )}
           </div>
-          <div className="add-reaction-popup">
+          <div className='add-reaction-popup'>
             <Twemoji
-              options={{ className: "add-reaction-popup-emoji" }}
+              options={{ className: 'add-reaction-popup-emoji' }}
               noWrapper
             >
               {possibleReactions.map((reaction) => (
@@ -212,3 +207,24 @@ MessageActions.fragments = {
     }
   `,
 };
+
+export interface IMessageActionsGQLData {
+  upVotes: number;
+  downVotes: number;
+  responsesCount: number;
+  messageId: string;
+  vote: string;
+  reactions: {
+    type: number;
+  }[];
+  reaction: {
+    type: number;
+  } | null;
+}
+
+export interface IMessageActionsProps {
+  messageData: IMessageActionsGQLData;
+  subscribeToMore: Function;
+  messageVotedUpdateFunc: Function;
+  messageReactedUpdateFunc: Function;
+}
