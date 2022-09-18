@@ -1,8 +1,5 @@
 console.log("Hello world");
 
-const SegfaultHandler = require('segfault-handler');
-SegfaultHandler.registerHandler('crash.log');
-
 const { ApolloServer } = require('apollo-server-express');
 const { createServer } = require('http');
 const express = require('express');
