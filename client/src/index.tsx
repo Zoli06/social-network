@@ -13,7 +13,6 @@ import { getMainDefinition } from "@apollo/client/utilities";
 import { setContext } from "@apollo/client/link/context";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { createClient } from "graphql-ws";
-import { KeyFieldsFunction } from "@apollo/client/cache/inmemory/policies";
 
 const getAuthToken = () => {
   // production code

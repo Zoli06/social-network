@@ -5,5 +5,8 @@
     word-wrap: break-word;
     text-align: justify;
     text-justify: inter-word;
+    img {
+      max-width: 100%;
+    }
   }
 }

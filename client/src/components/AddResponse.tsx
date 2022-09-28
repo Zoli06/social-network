@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import "./AddResponse.scss";
 import { useMutation, gql } from "@apollo/client";
+import MDEditor from "@uiw/react-md-editor";
+import rehypeSanitize from "rehype-sanitize";
 
 // TODO: refactor this code
 const ADD_RESPONSE_MUTATION = gql`
@@ -13,20 +15,18 @@ const ADD_RESPONSE_MUTATION = gql`
 
 export const AddResponse = ({ messageId }: IAddResponseProps) => {
   const [addResponseMutation] = useMutation(ADD_RESPONSE_MUTATION);
+  const [value, setValue] = useState("");
+  const [displayEditor, setDisplayEditor] = useState(false);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    const target = event.target as typeof event.target & {
-      elements: { "response-text": { value: string } };
-    };
-    const text = target.elements["response-text"].value;
-    if (text === "") return;
-    target.elements["response-text"].value = "";
+    if (value === "") return;
+    setValue("");
 
     addResponseMutation({
       variables: {
         message: {
-          text,
+          text: value,
           responseToMessageId: messageId,
         },
       },
@@ -35,9 +35,23 @@ export const AddResponse = ({ messageId }: IAddResponseProps) => {
 
   return (
     <form onSubmit={handleSubmit} className="add-response">
-      <textarea placeholder="Add a response" id="response-text" />
-      <button type="submit" id="submit-button">
-        Add
+      {/* <textarea placeholder="Add a response" id="response-text" /> */}
+      {displayEditor && (
+        <>
+          <MDEditor
+            value={value}
+            // @ts-ignore
+            onChange={setValue}
+            id="response-text"
+            previewOptions={{ rehypePlugins: [[rehypeSanitize]] }}
+          />
+          <button type="submit" id="submit-button">
+            Add
+          </button>
+        </>
+      )}
+      <button id="editor-toggle-button" onClick={() => setDisplayEditor(!displayEditor)}>
+        {displayEditor ? "Close editor" : "Open editor"}
       </button>
     </form>
   );

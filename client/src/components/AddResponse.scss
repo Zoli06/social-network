@@ -8,12 +8,12 @@
     resize: vertical;
   }
 
-  #submit-button {
+  #submit-button, #editor-toggle-button {
     width: 18%;
     margin-left: 2%;
   }
   
-  #response-text, #submit-button {
+  #response-text, #submit-button, #editor-toggle-button {
     display: inline-block;
     vertical-align: top;
     height: 4vw;

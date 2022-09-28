@@ -1,11 +1,13 @@
 import React from 'react';
 import './MessageText.scss';
 import { gql } from '@apollo/client';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export const MessageText = ({ text }: IMessageTextProps) => {
   return (
     <div className='message-text-container'>
-      <p className='message-text'>{text}</p>
+      <ReactMarkdown className='message-text' children={text} remarkPlugins={[remarkGfm]}/>
     </div>
   );
 };
