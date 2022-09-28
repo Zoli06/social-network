@@ -1,6 +1,6 @@
-import React from 'react';
-import './AddResponse.scss';
-import { useMutation, gql } from '@apollo/client';
+import React from "react";
+import "./AddResponse.scss";
+import { useMutation, gql } from "@apollo/client";
 
 // TODO: refactor this code
 const ADD_RESPONSE_MUTATION = gql`
@@ -14,11 +14,14 @@ const ADD_RESPONSE_MUTATION = gql`
 export const AddResponse = ({ messageId }: IAddResponseProps) => {
   const [addResponseMutation] = useMutation(ADD_RESPONSE_MUTATION);
 
-  const handleSubmit = (event: any) => {
+  const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    const text = event.target.elements['response-text'].value;
-    if (text === '') return;
-    event.target.elements['response-text'].value = '';
+    const target = event.target as typeof event.target & {
+      elements: { "response-text": { value: string } };
+    };
+    const text = target.elements["response-text"].value;
+    if (text === "") return;
+    target.elements["response-text"].value = "";
 
     addResponseMutation({
       variables: {
@@ -31,9 +34,9 @@ export const AddResponse = ({ messageId }: IAddResponseProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className='add-response'>
-      <textarea placeholder='Add a response' id='response-text' />
-      <button type='submit' id='submit-button'>
+    <form onSubmit={handleSubmit} className="add-response">
+      <textarea placeholder="Add a response" id="response-text" />
+      <button type="submit" id="submit-button">
         Add
       </button>
     </form>

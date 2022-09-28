@@ -4,6 +4,9 @@ import { useQuery, useLazyQuery, gql } from '@apollo/client';
 import { Message } from './Message';
 import { cache } from '../index';
 
+import { IMessageGQLData } from './Message';
+import { IMessageReactedSubscriptionData, IMessageVotedSubscriptionData } from './MessageActions';
+
 const GROUP_QUERY = gql`
   query GetGroup($groupId: ID!) {
     group(groupId: $groupId) {
@@ -30,7 +33,7 @@ const MESSAGE_QUERY = gql`
 `;
 
 export const Group = ({ groupId }: IGroupProps) => {
-  const { data, loading, error, subscribeToMore } = useQuery(GROUP_QUERY, {
+  const { data, loading, error, subscribeToMore } = useQuery<IGroupQueryGQLData>(GROUP_QUERY, {
     variables: {
       groupId,
     },
@@ -48,7 +51,7 @@ export const Group = ({ groupId }: IGroupProps) => {
       variables: {
         groupId,
       },
-      updateQuery: (prev, { subscriptionData }) => {
+      updateQuery: (prev, { subscriptionData }: { subscriptionData: { data: { messageAdded: IMessageGQLData } } }) => {
         if (!subscriptionData.data) {
           return prev;
         }
@@ -89,8 +92,8 @@ export const Group = ({ groupId }: IGroupProps) => {
   }
 
   const messageVotedUpdateFunc = (
-    prev: any,
-    { subscriptionData }: { subscriptionData: any },
+    prev: IGroupQueryGQLData,
+    { subscriptionData }: IMessageVotedSubscriptionData,
     messageId: string
   ) => {
     if (!subscriptionData.data) return prev;
@@ -99,7 +102,7 @@ export const Group = ({ groupId }: IGroupProps) => {
       ...prev,
       group: {
         ...prev.group,
-        messages: prev.group.messages.map((message: any) => {
+        messages: prev.group.messages.map((message: IMessageGQLData) => {
           if (message.messageId === messageId) {
             return {
               ...message,
@@ -115,8 +118,8 @@ export const Group = ({ groupId }: IGroupProps) => {
   };
 
   const messageReactedUpdateFunc = (
-    prev: any,
-    { subscriptionData }: { subscriptionData: any },
+    prev: IGroupQueryGQLData,
+    { subscriptionData }: IMessageReactedSubscriptionData,
     messageId: string
   ) => {
     if (!subscriptionData.data) return prev;
@@ -125,7 +128,7 @@ export const Group = ({ groupId }: IGroupProps) => {
       ...prev,
       group: {
         ...prev.group,
-        messages: prev.group.messages.map((message: any) => {
+        messages: prev.group.messages.map((message: IMessageGQLData) => {
           if (message.messageId === messageId) {
             return {
               ...message,
@@ -142,10 +145,10 @@ export const Group = ({ groupId }: IGroupProps) => {
   return (
     <>
       <h1>
-        Group: {data.group.name} #{data.group.groupId}
+        Group: {data?.group.name} #{data?.group.groupId}
       </h1>
-      {data.group.messages.map(
-        (message: any) =>
+      {data?.group.messages.map(
+        (message) =>
           message.responseTo === null && (
             <Message
               messageData={message}
@@ -161,6 +164,14 @@ export const Group = ({ groupId }: IGroupProps) => {
     </>
   );
 };
+
+export interface IGroupQueryGQLData {
+  group: {
+    messages: IMessageGQLData[];
+    groupId: string;
+    name: string;
+  };
+}
 
 export interface IGroupGQLData {
   groupId: string;

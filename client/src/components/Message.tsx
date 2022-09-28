@@ -44,7 +44,7 @@ export function Message({
         </div>
         <div className='response-tree'>
           {responseTree.map(
-            (responseData: IResponseTreeElement) =>
+            (responseData: IMessageGQLData) =>
               responseData.responseTo?.messageId === messageData.messageId && (
                 <Message
                   key={responseData.messageId}
@@ -86,20 +86,16 @@ Message.fragments = {
 
 export interface IMessageGQLData
   extends IMessageAuthorGQLData,
-    IMessageTextGQLData,
-    IMessageModifyGQLData,
-    IMessageActionsGQLData,
-    IAddResponseGQLData {}
-
-interface IResponseTreeElement extends IMessageGQLData {
-  responseTo: {
-    messageId: string;
-  };
+  IMessageTextGQLData,
+  IMessageModifyGQLData,
+  IMessageActionsGQLData,
+  IAddResponseGQLData {
+  responseTo?: { messageId: string };
 }
 
 export interface IMessageProps {
   messageData: IMessageGQLData;
-  responseTree: IResponseTreeElement[];
+  responseTree: IMessageGQLData[];
   subscribeToMore: Function;
   messageVotedUpdateFunc: Function;
   messageReactedUpdateFunc: Function;

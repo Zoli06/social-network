@@ -1,31 +1,32 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.scss';
-import { App } from './App';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.scss";
+import { App } from "./App";
 import {
   ApolloClient,
   InMemoryCache,
   ApolloProvider,
   createHttpLink,
   split,
-} from '@apollo/client';
-import { getMainDefinition } from '@apollo/client/utilities';
-import { setContext } from '@apollo/client/link/context';
-import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
-import { createClient } from 'graphql-ws';
+} from "@apollo/client";
+import { getMainDefinition } from "@apollo/client/utilities";
+import { setContext } from "@apollo/client/link/context";
+import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
+import { createClient } from "graphql-ws";
+import { KeyFieldsFunction } from "@apollo/client/cache/inmemory/policies";
 
 const getAuthToken = () => {
   // production code
   // const token = localStorage.getItem('token');
 
   // temp code
-  let token = localStorage.getItem('token');
-  if (!token) token = '81';
+  let token = localStorage.getItem("token");
+  if (!token) token = "81";
   return token;
 };
 
 const httpLink = createHttpLink({
-  uri: 'http://social-network.freeddns.org:8000/graphql',
+  uri: "http://social-network.freeddns.org:8000/graphql",
 });
 
 const wsLink = new GraphQLWsLink(
@@ -43,7 +44,7 @@ const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
-      authorization: token ? `Bearer ${token}` : '',
+      authorization: token ? `Bearer ${token}` : "",
     },
   };
 });
@@ -52,8 +53,8 @@ const splitLink = split(
   ({ query }) => {
     const definition = getMainDefinition(query);
     return (
-      definition.kind === 'OperationDefinition' &&
-      definition.operation === 'subscription'
+      definition.kind === "OperationDefinition" &&
+      definition.operation === "subscription"
     );
   },
   wsLink,
@@ -61,39 +62,52 @@ const splitLink = split(
 );
 
 export const cache = new InMemoryCache({
-  dataIdFromObject: ({__typename, id, ...rest}): any => {
+  // @ts-ignore 
+  dataIdFromObject: ({
+    __typename,
+    id,
+    ...rest
+  }: {
+    __typename: string;
+    id: string;
+    groupId: string;
+    mediaId: string;
+    messageId: string;
+    userId: string;
+  }) => {
     switch (__typename) {
-      case 'Group':
+      case "Group":
         return rest.groupId;
-      case 'Media':
+      case "Media":
         return rest.mediaId;
-      case 'Message':
+      case "Message":
         return rest.messageId;
-      case 'User':
+      case "User":
         return rest.userId;
-      default: return id;
+      default:
+        return id;
     }
   },
   typePolicies: {
     Message: {
       fields: {
         reactions: {
-          merge(_existing: any, incoming: any) {
+          merge(_existing, incoming) {
             return incoming;
-          }
-        }
-      }
+          },
+        },
+      },
     },
     Subscription: {
       fields: {
         messageReacted: {
-          merge(_existing: any, incoming: any) {
+          merge(_existing, incoming) {
             return incoming;
-          }
-        }
-      }
-    }
-  }
+          },
+        },
+      },
+    },
+  },
 });
 
 const client = new ApolloClient({
@@ -102,7 +116,7 @@ const client = new ApolloClient({
 });
 
 const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
+  document.getElementById("root") as HTMLElement
 );
 root.render(
   <React.StrictMode>
