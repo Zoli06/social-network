@@ -1,22 +1,20 @@
-:root {
-  --response-indent: 1.5vw;
-}
+@use '../variables' as v;
 
 .message-container {
-  border-color: var(--secondary-color);
+  border-color: v.$secondary-color;
   border-width: .1vw;
 
   &.root-message {
     border-radius: 1vw;
     border-style: solid;
     width: 100%;
-    padding-bottom: var(--response-indent);
+    padding-bottom: v.$response-indent;
   }
 
   &:not(.root-message) {
     border-left-style: solid;
-    width: calc(100% - var(--response-indent));
-    margin-left: var(--response-indent);
+    width: calc(100% - v.$response-indent);
+    margin-left: v.$response-indent;
   }
 
   .message-content {

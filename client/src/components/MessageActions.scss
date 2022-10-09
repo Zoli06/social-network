@@ -1,13 +1,10 @@
-:root {
-  --reaction-icon-size: 3vw;
-  --reaction-add-popup-space: 0.5vw;
-}
+@use '../variables' as v;
 
 .message-actions {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  column-gap: calc(var(--reaction-icon-size) / 2);
+  column-gap: calc(v.$reaction-icon-size / 2);
   position: relative;
 
   .reactions-container {
@@ -22,8 +19,8 @@
 
       .common-reaction-emoji {
         img {
-          height: var(--reaction-icon-size);
-          filter: drop-shadow(0.1vw 0 0 var(--main-color));
+          height: v.$reaction-icon-size;
+          filter: drop-shadow(0.1vw 0 0 v.$main-color);
         }
 
         &:not(:first-child) {
@@ -35,18 +32,18 @@
     .add-reaction-container {
       .add-reaction-popup {
         position: absolute;
-        bottom: calc(var(--reaction-icon-size) + 0.5vw);
-        right: calc(var(--reaction-icon-size) / 2 - 10vw);
-        height: var(--reaction-icon-size);
-        width: calc(var(--reaction-icon-size) * 7);
-        background-color: var(--secondary-color);
+        bottom: calc(v.$reaction-icon-size + 0.5vw);
+        right: calc(v.$reaction-icon-size / 2 - 10vw);
+        height: v.$reaction-icon-size;
+        width: calc(v.$reaction-icon-size * 7);
+        background-color: v.$secondary-color;
         border-radius: 1vw;
         display: none;
         justify-content: space-around;
 
         .add-reaction-popup-emoji {
-          height: calc(var(--reaction-icon-size) * 0.75);
-          transform: translateY(calc(var(--reaction-icon-size) * 0.125));
+          height: calc(v.$reaction-icon-size * 0.75);
+          transform: translateY(calc(v.$reaction-icon-size * 0.125));
 
           &:hover {
             transform: scale(1.1);
@@ -59,7 +56,7 @@
       }
 
       .add-reaction-button {
-        margin-left: calc(var(--reaction-icon-size) / 2);
+        margin-left: calc(v.$reaction-icon-size / 2);
         // height: 200%;
         // transform: translateY(-50%);
         // display: flex;
@@ -74,23 +71,23 @@
         }
 
         .add-reaction-icon:hover {
-          fill: var(--main-text-color);
+          fill: v.$main-text-color;
         }
 
         .user-have-reaction {
           .remove-reaction {
             position: absolute;
-            right: calc(0px - var(--reaction-icon-size) / 2);
-            top: calc(0px - var(--reaction-icon-size) / 2);
-            fill: var(--close-color);
+            right: calc(0px - v.$reaction-icon-size / 2);
+            top: calc(0px - v.$reaction-icon-size / 2);
+            fill: v.$close-color;
           }
         }
       }
 
       .space-holder {
-        height: var(--reaction-add-popup-space);
-        width: var(--reaction-icon-size);
-        bottom: var(--reaction-icon-size);
+        height: v.$reaction-add-popup-space;
+        width: v.$reaction-icon-size;
+        bottom: v.$reaction-icon-size;
         position: absolute;
 
         & ~ .add-reaction-popup {

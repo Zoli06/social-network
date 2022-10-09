@@ -1,21 +1,60 @@
+@use '../variables' as v;
+
 .add-response {
   width: 100%;
-  padding: 0 var(--response-indent);
-  margin-top: var(--response-indent);
+  padding: 0 v.$response-indent;
+  margin-top: v.$response-indent;
 
   #response-text {
-    width: 80%;
+    width: 75%;
     resize: vertical;
+    overflow: hidden;
+    resize: none; // no idea why it fixes ui bug and the best thing is resizing works
+
+    @media screen and (max-width: v.$small-screen) {
+      height: 10vw;
+      width: 100%;
+      display: block;
+    }
   }
 
-  #submit-button, #editor-toggle-button {
-    width: 18%;
-    margin-left: 2%;
-  }
-  
-  #response-text, #submit-button, #editor-toggle-button {
+  .add-response-buttons {
+    width: 20%;
     display: inline-block;
     vertical-align: top;
+
+    &.close {
+      margin-left: 0;
+      width: 100%;
+    }
+
+    &.open {
+      margin-left: 5%;
+    }
+
+    button {
+      float: right;
+      width: 100%;
+    }
+
+    #submit-button {
+      margin-top: 5%;
+
+      @media screen and (max-width: v.$small-screen) {
+        margin-top: 1vh;
+      }
+    }
+
+    @media screen and (max-width: v.$small-screen) {
+      width: 100%;
+      margin-left: 0 !important;
+    }
+  }
+
+  #response-text,
+  div #submit-button,
+  div #editor-toggle-button {
+    display: inline-block;
     height: 4vw;
     font-size: 1.75vw;
   }

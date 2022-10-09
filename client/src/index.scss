@@ -1,21 +1,10 @@
+@use 'variables' as v;
+
 * {
   box-sizing: border-box;
 }
 
-:root {
-  --main-color: #eee;
-  --secondary-color: #ccc;
-  --main-text-color: #222;
-  --secondary-text-color: #888;
-  --link-color: #509;
-  --link-hover-color: #70b;
-  --link-visited-color: #70b;
-  --upvote-color: red;
-  --downvote-color: blue;
-  --close-color: red;
-}
-
 p {
-  color: var(--main-text-color);
+  color: v.$main-text-color;
   font-size: 1.6vw;
 }

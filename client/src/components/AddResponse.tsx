@@ -37,22 +37,27 @@ export const AddResponse = ({ messageId }: IAddResponseProps) => {
     <form onSubmit={handleSubmit} className="add-response">
       {/* <textarea placeholder="Add a response" id="response-text" /> */}
       {displayEditor && (
-        <>
-          <MDEditor
-            value={value}
-            // @ts-ignore
-            onChange={setValue}
-            id="response-text"
-            previewOptions={{ rehypePlugins: [[rehypeSanitize]] }}
-          />
+        <MDEditor
+          value={value}
+          // @ts-ignore
+          onChange={setValue}
+          id="response-text"
+          previewOptions={{ rehypePlugins: [[rehypeSanitize]] }}
+        />
+      )}
+      <div className={`add-response-buttons ${displayEditor ? 'open' : 'close'}`}>
+        <button
+          id="editor-toggle-button"
+          onClick={() => setDisplayEditor(!displayEditor)}
+        >
+          {displayEditor ? "Close editor" : "Open editor"}
+        </button>
+        {displayEditor && (
           <button type="submit" id="submit-button">
             Add
           </button>
-        </>
-      )}
-      <button id="editor-toggle-button" onClick={() => setDisplayEditor(!displayEditor)}>
-        {displayEditor ? "Close editor" : "Open editor"}
-      </button>
+        )}
+      </div>
     </form>
   );
 };
