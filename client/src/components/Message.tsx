@@ -57,7 +57,7 @@ export function Message({
               )
           )}
         </div>
-        <AddResponse messageId={messageData.messageId} />
+        <AddResponse messageData={messageData} />
       </div>
     </>
   );
@@ -70,6 +70,9 @@ Message.fragments = {
       user {
         ...MessageAuthor
       }
+      group {
+        ...AddResponse
+      }
       ...MessageActions
       ...MessageText
 
@@ -81,6 +84,7 @@ Message.fragments = {
     ${MessageActions.fragments.message}
     ${MessageAuthor.fragments.user}
     ${MessageText.fragments.message}
+    ${AddResponse.fragments.group}
   `,
 };
 

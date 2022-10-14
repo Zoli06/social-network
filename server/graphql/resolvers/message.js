@@ -172,20 +172,20 @@ module.exports = {
   Mutation: {
     async sendMessage(
       _,
-      {
-        message: { text, responseToMessageId, mentionedUserIds, mediaIds }
-      },
+      { message: { text, groupId, responseToMessageId, mentionedUserIds, mediaIds } },
       { user, connection, pubsub }
     ) {
       user.authenticate();
 
       // TODO: lot's of sql query like this, maybe we should make a helper function
-      const groupId = (
+      const _groupId = (
         await connection.query(
           `SELECT group_id FROM messages WHERE message_id = ? `,
           [responseToMessageId]
         )
-      )[0][0].group_id;
+      )[0][0].group_id.toString();
+
+      if (!!responseToMessageId && groupId !== _groupId) throw new Error("Parent message is in different group!");
 
       await isGroupMember(user.id, groupId, connection, true);
       const messageId = (

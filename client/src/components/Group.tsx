@@ -145,7 +145,7 @@ export const Group = ({ groupId }: IGroupProps) => {
   return (
     <>
       <h1>
-        Group: {data?.group.name} #{data?.group.groupId}
+        Group: {data?.group.name} #{groupId}
       </h1>
       {data?.group.messages.map(
         (message) =>
