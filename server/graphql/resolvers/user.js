@@ -283,14 +283,15 @@ module.exports = {
         user: module.exports.Query.user({}, { userId: user_id }, { user, connection }),
       }
     },
-    async profileImage(_, __, { user, connection }) {
+    async profileImage({ user_id }, __, { user, connection }) {
       user.authenticate();
 
       return (await connection.query(
-        `SELECT * FROM users
+        `SELECT * FROM users AS u
         JOIN medias
-        ON profile_image_media_id = media_id`
-      ))[0][0]
+        ON profile_image_media_id = media_id AND u.user_id = ?`,
+        [user_id]
+      ))[0][0];
     }
   }
 }

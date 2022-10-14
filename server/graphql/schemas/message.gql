@@ -37,6 +37,7 @@ type Message {
 
 input MessageInput {
   text: String!
+  groupId: ID!
   responseToMessageId: ID
   mentionedUserIds: [ID!]
   mediaIds: [String!]

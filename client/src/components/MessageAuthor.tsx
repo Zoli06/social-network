@@ -8,7 +8,7 @@ export const MessageAuthor = ({ user }: IMessageAuthorProps) => {
       <div className='image-container'>
         {/* eslint-disable-next-line */}
         <img
-          src={user.profileImage.url}
+          src={!!user.profileImage?.url ? user.profileImage?.url : './assets/images/blank-profile-image.webp'}
           className='profile-image'
           alt='profile image'
         />
