@@ -56,7 +56,7 @@ const getUser = token => {
   try {
     if (token) {
       try {
-        jwt.verify(token, process.env.JWT_SECRET)
+        return jwt.verify(token, process.env.JWT_SECRET);
       } catch (err) {
         if (process.env.NODE_ENV === 'development') return { id: token };
       }
