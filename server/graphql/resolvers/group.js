@@ -1,5 +1,7 @@
-const { Query: { user: getUser } } = require('./user.js');
-const { isGroupAdmin, isGroupCreator } = require('../helpers/group.js');
+const {
+  Query: { user: getUser },
+} = require("./user.js");
+const { isGroupMember, isGroupAdmin, isGroupCreator } = require("../helpers/group.js");
 
 module.exports = {
   Group: {
@@ -102,17 +104,22 @@ module.exports = {
           [group_id, user.id]
         )
       )[0][0];
-    }
+    },
   },
   Query: {
     async group(_, { groupId }, { user, connection }) {
       user.authenticate();
-      return (
+
+      const group = (
         await connection.query(`SELECT * FROM groups WHERE group_id = ?`, [
           groupId,
         ])
       )[0][0];
-    }
+
+      await isGroupMember(user.id, group.group_id, connection, true);
+
+      return group;
+    },
   },
   Mutation: {
     async createGroup(
@@ -127,7 +134,11 @@ module.exports = {
           [user.id, name, visibility, description]
         )
       )[0].insertId;
-      return await module.exports.Query.group({}, { groupId }, { user, connection });
+      return await module.exports.Query.group(
+        {},
+        { groupId },
+        { user, connection }
+      );
     },
     async updateGroup(
       _,
@@ -141,21 +152,24 @@ module.exports = {
           WHERE group_id = ?`,
         [name, visibility, description, groupId]
       );
-      return await module.exports.Query.group({}, { groupId }, { user, connection });
+      return await module.exports.Query.group(
+        {},
+        { groupId },
+        { user, connection }
+      );
     },
     async deleteGroup(_, { groupId }, { user, connection }) {
       user.authenticate();
       await isGroupCreator(user.id, groupId, connection, true);
-      await connection.query(
-        `DELETE FROM groups WHERE group_id = ?`,
-        [groupId]
-      );
+      await connection.query(`DELETE FROM groups WHERE group_id = ?`, [
+        groupId,
+      ]);
       return groupId;
     },
 
     async sendGroupInvitation(_, { groupId, userId }, { user, connection }) {
       user.authenticate();
-      console.log(await isGroupAdmin(user.id, groupId, connection, true))
+      console.log(await isGroupAdmin(user.id, groupId, connection, true));
       await isGroupAdmin(user.id, groupId, connection, true);
       await connection.query(
         `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, 'invited')
@@ -168,7 +182,7 @@ module.exports = {
       user.authenticate();
       await connection.query(
         `UPDATE group_user_relationships SET type = 'member' WHERE user_id = ? AND group_id = ? AND type = 'invited'`,
-        [ user.id, groupId ]
+        [user.id, groupId]
       );
       return true;
     },
@@ -176,7 +190,7 @@ module.exports = {
       user.authenticate();
       await connection.query(
         `UPDATE group_user_relationships SET type = null WHERE user_id = ? AND group_id = ? AND type = 'invited'`,
-        [ user.id, groupId ]
+        [user.id, groupId]
       );
       return true;
     },
@@ -262,13 +276,17 @@ module.exports = {
       return true;
     },
 
-    async setNotificationFrequency(_, { groupId, frequency }, { user, connection }) {
+    async setNotificationFrequency(
+      _,
+      { groupId, frequency },
+      { user, connection }
+    ) {
       user.authenticate();
       await connection.query(
         `UPDATE group_user_relationships SET notification_frequency = ? WHERE user_id = ? AND group_id = ?`,
         [frequency, user.id, groupId]
       );
       return true;
-    }
-  }
-}
+    },
+  },
+};

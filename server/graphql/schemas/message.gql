@@ -50,7 +50,7 @@ type Query {
 type Mutation {
   sendMessage(message: MessageInput!): Message
   editMessage(messageId: ID!, message: MessageInput!): Message
-  deleteMessage(messageId: ID!): ID
+  deleteMessage(messageId: ID!): [ID!]
   createReaction(messageId: ID!, type: Int): Reaction # also can be used to delete and update
   createVote(messageId: ID!, type: VoteType): VoteType # also can be used to delete and update
 }
@@ -63,7 +63,7 @@ type VoteChange {
 type Subscription {
   messageAdded(groupId: ID!): ID!
   messageEdited(groupId: ID!): ID!
-  messageDeleted(groupId: ID!): ID!
+  messagesDeleted(groupId: ID!): [ID!]!
   messageReacted(messageId: ID!): [Reaction!]!
   messageVoted(messageId: ID!): VoteChange!
 }

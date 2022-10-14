@@ -1,8 +1,9 @@
-const { Query: { user: getUser } } = require('./user.js');
-const { isGroupMember } = require('../helpers/group.js');
-const { isMessageCreator } = require('../helpers/message.js');
-const { resolveFields } = require('../helpers/subscriptions.js');
-const Grapheme = require('grapheme-splitter');
+const {
+  Query: { user: getUser },
+} = require("./user.js");
+const { isGroupMember } = require("../helpers/group.js");
+const { isMessageCreator } = require("../helpers/message.js");
+const Grapheme = require("grapheme-splitter");
 const splitter = new Grapheme();
 
 module.exports = {
@@ -49,7 +50,7 @@ module.exports = {
           WHERE message_id = ? AND type = 'up'`,
           [message_id]
         )
-      )[0][0]['COUNT(*)'];
+      )[0][0]["COUNT(*)"];
     },
     async downVotes({ message_id }, _, { user, connection }) {
       user.authenticate();
@@ -59,7 +60,7 @@ module.exports = {
           WHERE message_id = ? AND type = 'down'`,
           [message_id]
         )
-      )[0][0]['COUNT(*)'];
+      )[0][0]["COUNT(*)"];
     },
     async vote({ message_id }, _, { user, connection }) {
       user.authenticate();
@@ -71,7 +72,7 @@ module.exports = {
           WHERE message_id = ? AND user_id = ?`,
           [message_id, user.id]
         )
-      )[0][0]?.['type'];
+      )[0][0]?.["type"];
     },
     async mentionedUsers({ message_id }, _, { user, connection }) {
       user.authenticate();
@@ -140,8 +141,8 @@ module.exports = {
           WHERE response_to_message_id = ? `,
           [message_id]
         )
-      )[0][0]['COUNT(*)'];
-    }
+      )[0][0]["COUNT(*)"];
+    },
   },
   Reaction: {
     async user({ user_id }, _, { user, connection }) {
@@ -167,7 +168,7 @@ module.exports = {
       await isGroupMember(user.id, message.group_id, connection, true);
 
       return message;
-    }
+    },
   },
   Mutation: {
     async sendMessage(
@@ -214,7 +215,14 @@ module.exports = {
       )[0][0];
       return createdMessage;
     },
-    async editMessage(_, { message: { text, responseToMessageId, mentionedUserIds, mediaIds }, messageId, }, { user, connection, pubsub }) {
+    async editMessage(
+      _,
+      {
+        message: { text, responseToMessageId, mentionedUserIds, mediaIds },
+        messageId,
+      },
+      { user, connection, pubsub }
+    ) {
       user.authenticate();
       const groupId = (
         await connection.query(
@@ -262,27 +270,70 @@ module.exports = {
           [messageId]
         )
       )[0][0].group_id;
-      await isGroupMember(user.id, groupId, connection, true);
-      await isMessageCreator(user.id, messageId, connection, true, true);
+
+      let messagesToDelete = []; 
+
+      const findMessagesToDeleteRecursively = async (messageId) => {
+        messagesToDelete.push(messageId.toString());
+        const responses = (
+          await connection.query(
+            `SELECT message_id FROM messages WHERE response_to_message_id = ? `,
+            [messageId]
+          )
+        )[0];
+        if (responses.length > 0) {
+          for (const response of responses) {
+            await findMessagesToDeleteRecursively(response.message_id);
+          }
+        }
+      };
+
+      await findMessagesToDeleteRecursively(messageId);
+
+      //TODO: maybe we can execute the first three query simultaneously
       await connection.query(
-        `DELETE FROM mentioned_users WHERE message_id = ? `,
-        [messageId]
+        `DELETE FROM reactions WHERE message_id IN (?) `,
+        [messagesToDelete]
       );
+
       await connection.query(
-        `DELETE FROM message_medias WHERE message_id = ? `,
-        [messageId]
+        `DELETE FROM mentioned_users WHERE message_id IN (?) `,
+        [messagesToDelete]
       );
-      await connection.query(`DELETE FROM messages WHERE message_id = ? `, [
-        messageId,
-      ]);
-      pubsub.publish(`MESSAGE_DELETED_${groupId}`, { messageDeleted: messageId });
-      return messageId;
+
+      await connection.query(
+        `DELETE FROM message_medias WHERE message_id IN (?) `,
+        [messagesToDelete]
+      );
+
+      await connection.query(
+        `DELETE FROM votes WHERE message_id IN (?) `,
+        [messagesToDelete]
+      );
+
+      messagesToDelete = messagesToDelete.reverse();
+
+      for (const message of messagesToDelete) {
+        await connection.query(
+          `DELETE FROM messages WHERE message_id = ? `,
+          [message]
+        );
+      }
+
+      pubsub.publish(`MESSAGES_DELETED_${groupId}`, {
+        messagesDeleted: messagesToDelete,
+      });
+      return messagesToDelete;
     },
     async createReaction(_, { messageId, type }, { user, connection, pubsub }) {
       user.authenticate();
       emoji = type ? String.fromCodePoint(type) : null;
-      if (emoji != null && (splitter.splitGraphemes(emoji).length !== 1 || !/\p{Extended_Pictographic}/u.test(emoji))) {
-        throw new Error('Invalid emoji');
+      if (
+        emoji != null &&
+        (splitter.splitGraphemes(emoji).length !== 1 ||
+          !/\p{Extended_Pictographic}/u.test(emoji))
+      ) {
+        throw new Error("Invalid emoji");
       }
       const groupId = (
         await connection.query(
@@ -296,9 +347,17 @@ module.exports = {
         ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,
         { userId: user.id, messageId, type }
       );
-      const reaction = await module.exports.Message.reaction({ message_id: messageId }, {}, { user, connection });
+      const reaction = await module.exports.Message.reaction(
+        { message_id: messageId },
+        {},
+        { user, connection }
+      );
       pubsub.publish(`MESSAGE_REACTED_${messageId}`, {
-        messageReacted: module.exports.Message.reactions({ message_id: messageId }, {}, { user, connection }),
+        messageReacted: module.exports.Message.reactions(
+          { message_id: messageId },
+          {},
+          { user, connection }
+        ),
       });
       return reaction;
     },
@@ -316,17 +375,26 @@ module.exports = {
         ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,
         { userId: user.id, messageId, type }
       );
-      pubsub.publish(
-        `MESSAGE_VOTED_${messageId}`,
-        {
-          messageVoted: {
-            upVotes: await module.exports.Message.upVotes({ message_id: messageId }, {}, { user, connection }),
-            downVotes: await module.exports.Message.downVotes({ message_id: messageId }, {}, { user, connection }),
-          }
-        }
+      pubsub.publish(`MESSAGE_VOTED_${messageId}`, {
+        messageVoted: {
+          upVotes: await module.exports.Message.upVotes(
+            { message_id: messageId },
+            {},
+            { user, connection }
+          ),
+          downVotes: await module.exports.Message.downVotes(
+            { message_id: messageId },
+            {},
+            { user, connection }
+          ),
+        },
+      });
+      return await module.exports.Message.vote(
+        { message_id: messageId },
+        {},
+        { user, connection }
       );
-      return await module.exports.Message.vote({ message_id: messageId }, {}, { user, connection });
-    }
+    },
   },
   Subscription: {
     messageAdded: {
@@ -334,35 +402,57 @@ module.exports = {
         user.authenticate();
         await isGroupMember(user.id, groupId, connection, true);
         return pubsub.asyncIterator(`MESSAGE_ADDED_${groupId}`);
-      }
+      },
     },
     messageEdited: {
       subscribe: async (_, { groupId }, { user, connection, pubsub }) => {
         user.authenticate();
         await isGroupMember(user.id, groupId, connection, true);
         return pubsub.asyncIterator(`MESSAGE_EDITED_${groupId}`);
-      }
+      },
     },
-    messageDeleted: {
+    messagesDeleted: {
       subscribe: async (_, { groupId }, { user, connection, pubsub }) => {
         user.authenticate();
         await isGroupMember(user.id, groupId, connection, true);
-        return pubsub.asyncIterator(`MESSAGE_DELETED_${groupId}`);
-      }
+        return pubsub.asyncIterator(`MESSAGES_DELETED_${groupId}`);
+      },
     },
     messageReacted: {
       subscribe: async (_, { messageId }, { user, connection, pubsub }) => {
         user.authenticate();
-        await isGroupMember(user.id, (await module.exports.Query.message({}, { messageId }, { user, connection })).group_id, connection, true);
+        await isGroupMember(
+          user.id,
+          (
+            await module.exports.Query.message(
+              {},
+              { messageId },
+              { user, connection }
+            )
+          ).group_id,
+          connection,
+          true
+        );
         return pubsub.asyncIterator(`MESSAGE_REACTED_${messageId}`);
-      }
+      },
     },
     messageVoted: {
       subscribe: async (_, { messageId }, { user, connection, pubsub }) => {
         user.authenticate();
-        await isGroupMember(user.id, (await module.exports.Query.message({}, { messageId }, { user, connection })).group_id, connection, true);
+        await isGroupMember(
+          user.id,
+          (
+            await module.exports.Query.message(
+              {},
+              { messageId },
+              { user, connection }
+            )
+          ).group_id,
+          connection,
+          true
+        );
         return pubsub.asyncIterator(`MESSAGE_VOTED_${messageId}`);
-      }
-    }
-  }
-}
+      },
+    },
+  },
+};
