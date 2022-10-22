@@ -98,57 +98,6 @@ export const Group = ({ groupId, onlyInterestedInMessageId }: IGroupProps) => {
     return <div>Error!</div>;
   }
 
-  const messageVotedUpdateFunc = (
-    prev: IGroupQueryGQLData,
-    { subscriptionData }: IMessageVotedSubscriptionData,
-    messageId: string
-  ) => {
-    if (!subscriptionData.data) return prev;
-    const { messageVoted } = subscriptionData.data;
-    return {
-      ...prev,
-      group: {
-        ...prev.group,
-        messages: prev.group.messages.map((message: IMessageGQLData) => {
-          if (message.messageId === messageId) {
-            return {
-              ...message,
-              upVotes: messageVoted.upVotes,
-              downVotes: messageVoted.downVotes,
-            };
-          } else {
-            return message;
-          }
-        }),
-      },
-    };
-  };
-
-  const messageReactedUpdateFunc = (
-    prev: IGroupQueryGQLData,
-    { subscriptionData }: IMessageReactedSubscriptionData,
-    messageId: string
-  ) => {
-    if (!subscriptionData.data) return prev;
-    const { messageReacted } = subscriptionData.data;
-    return {
-      ...prev,
-      group: {
-        ...prev.group,
-        messages: prev.group.messages.map((message: IMessageGQLData) => {
-          if (message.messageId === messageId) {
-            return {
-              ...message,
-              reactions: messageReacted,
-            };
-          } else {
-            return message;
-          }
-        }),
-      },
-    };
-  };
-
   return (
     <>
       <h1>
@@ -164,8 +113,6 @@ export const Group = ({ groupId, onlyInterestedInMessageId }: IGroupProps) => {
               subscribeToMore={subscribeToMore}
               className='root-message'
               key={message.messageId}
-              messageVotedUpdateFunc={messageVotedUpdateFunc}
-              messageReactedUpdateFunc={messageReactedUpdateFunc}
               groupId={groupId}
             />
           )

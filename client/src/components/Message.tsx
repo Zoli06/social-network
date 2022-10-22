@@ -19,8 +19,6 @@ export function Message({
   responseTree,
   userRelationShipWithGroup,
   subscribeToMore,
-  messageVotedUpdateFunc,
-  messageReactedUpdateFunc,
   className = '',
   groupId,
 }: IMessageProps) {
@@ -40,8 +38,6 @@ export function Message({
           <MessageActions
             messageData={messageData}
             subscribeToMore={subscribeToMore}
-            messageReactedUpdateFunc={messageReactedUpdateFunc}
-            messageVotedUpdateFunc={messageVotedUpdateFunc}
           />
         </div>
         <div className='response-tree'>
@@ -54,8 +50,6 @@ export function Message({
                   responseTree={responseTree}
                   userRelationShipWithGroup={userRelationShipWithGroup}
                   subscribeToMore={subscribeToMore}
-                  messageReactedUpdateFunc={messageReactedUpdateFunc}
-                  messageVotedUpdateFunc={messageVotedUpdateFunc}
                   groupId={groupId}
                 />
               )
@@ -105,8 +99,6 @@ export interface IMessageProps {
   responseTree: IMessageGQLData[];
   userRelationShipWithGroup: { type: string };
   subscribeToMore: Function;
-  messageVotedUpdateFunc: Function;
-  messageReactedUpdateFunc: Function;
   className?: string;
   groupId: string;
 }

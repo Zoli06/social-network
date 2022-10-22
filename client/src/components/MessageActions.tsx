@@ -7,6 +7,8 @@ import { v4 as uuidv4 } from "uuid";
 import { IGroupQueryGQLData } from "./Group";
 import { EditorActions, openEditor } from "./Editor";
 
+import { IMessageGQLData } from "./Message";
+
 const VOTE_MUTATION = gql`
   mutation VoteMutation($messageId: ID!, $type: VoteType) {
     createVote(messageId: $messageId, type: $type)
@@ -50,8 +52,6 @@ export const MessageActions = ({
     group: { groupId },
   },
   subscribeToMore,
-  messageVotedUpdateFunc,
-  messageReactedUpdateFunc,
 }: IMessageActionsProps) => {
   const [voteMutation] = useMutation(VOTE_MUTATION, {
     update(cache, { data: { createVote } }) {
@@ -84,7 +84,27 @@ export const MessageActions = ({
       updateQuery: (
         prev: IGroupQueryGQLData,
         { subscriptionData }: IMessageVotedSubscriptionData
-      ) => messageVotedUpdateFunc(prev, { subscriptionData }, messageId),
+      ) => {
+        if (!subscriptionData.data) return prev;
+        const { messageVoted } = subscriptionData.data;
+        return {
+          ...prev,
+          group: {
+            ...prev.group,
+            messages: prev.group.messages.map((message: IMessageGQLData) => {
+              if (message.messageId === messageId) {
+                return {
+                  ...message,
+                  upVotes: messageVoted.upVotes,
+                  downVotes: messageVoted.downVotes,
+                };
+              } else {
+                return message;
+              }
+            }),
+          },
+        };
+      },
     });
 
     subscribeToMore({
@@ -95,13 +115,30 @@ export const MessageActions = ({
       updateQuery: (
         prev: IGroupQueryGQLData,
         { subscriptionData }: IMessageReactedSubscriptionData
-      ) => messageReactedUpdateFunc(prev, { subscriptionData }, messageId),
+      ) => {
+        if (!subscriptionData.data) return prev;
+        const { messageReacted } = subscriptionData.data;
+        return {
+          ...prev,
+          group: {
+            ...prev.group,
+            messages: prev.group.messages.map((message: IMessageGQLData) => {
+              if (message.messageId === messageId) {
+                return {
+                  ...message,
+                  reactions: messageReacted,
+                };
+              } else {
+                return message;
+              }
+            }),
+          },
+        };
+      },
     });
   }, [
     subscribeToMore,
     messageId,
-    messageVotedUpdateFunc,
-    messageReactedUpdateFunc,
   ]);
 
   const possibleReactions = ["👍", "❤", "🥰", "🤣", "😲", "😢", "😠"];
@@ -124,9 +161,8 @@ export const MessageActions = ({
         onClick={() => handleVote("up")}
       >
         <use
-          href={`./assets/images/svg-bundle.svg#upvote${
-            vote === "up" ? "-active" : ""
-          }`}
+          href={`./assets/images/svg-bundle.svg#upvote${vote === "up" ? "-active" : ""
+            }`}
         />
       </svg>
       <p className="upvote-count">{upVotes}</p>
@@ -135,9 +171,8 @@ export const MessageActions = ({
         onClick={() => handleVote("down")}
       >
         <use
-          href={`./assets/images/svg-bundle.svg#downvote${
-            vote === "down" ? "-active" : ""
-          }`}
+          href={`./assets/images/svg-bundle.svg#downvote${vote === "down" ? "-active" : ""
+            }`}
         />
       </svg>
       <p className="downvote-count">{downVotes}</p>
@@ -252,6 +287,4 @@ export interface IMessageActionsGQLData {
 export interface IMessageActionsProps {
   messageData: IMessageActionsGQLData;
   subscribeToMore: Function;
-  messageVotedUpdateFunc: Function;
-  messageReactedUpdateFunc: Function;
 }
