@@ -1,0 +1,29 @@
+@use "../variables" as v;
+
+.editor-container {
+  position: fixed;
+  top: 0%;
+  left: 0%;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  .editor {
+    width: 60%;
+
+    #editor-text {
+      overflow: hidden;
+    }
+
+    #submit-button,
+    #editor-close-button {
+      height: 4vw;
+      width: 100%;
+      font-size: 1.75vw;
+    }
+  }
+}

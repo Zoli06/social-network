@@ -5,14 +5,14 @@ import { MessageAuthor } from './MessageAuthor';
 import { MessageModify } from './MessageModify';
 import { MessageText } from './MessageText';
 import { MessageActions } from './MessageActions';
-import { AddResponse } from './AddResponse';
+import { Editor } from './Editor';
 import { UserContext } from '../App';
 
 import { IMessageAuthorGQLData } from './MessageAuthor';
 import { IMessageTextGQLData } from './MessageText';
 import { IMessageModifyGQLData } from './MessageModify';
 import { IMessageActionsGQLData } from './MessageActions';
-import { IAddResponseGQLData } from './AddResponse';
+import { IEditorGQLData } from './Editor';
 
 export function Message({
   messageData,
@@ -84,7 +84,7 @@ Message.fragments = {
     ${MessageActions.fragments.message}
     ${MessageAuthor.fragments.user}
     ${MessageText.fragments.message}
-    ${AddResponse.fragments.group}
+    ${Editor.fragments.message}
   `,
 };
 
@@ -93,7 +93,7 @@ export interface IMessageGQLData
   IMessageTextGQLData,
   IMessageModifyGQLData,
   IMessageActionsGQLData,
-  IAddResponseGQLData {
+  IEditorGQLData {
   responseTo?: { messageId: string };
 }
 

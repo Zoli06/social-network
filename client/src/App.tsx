@@ -3,6 +3,7 @@ import './App.scss';
 import { Group } from './components/Group';
 import { useQuery, gql } from '@apollo/client';
 import React from 'react';
+import { Editor } from './components/Editor';
 
 const ME = gql`
   query {
@@ -25,6 +26,7 @@ export function App() {
       {/* <Post messageId='1' /> */}
       {/* <Post messageId='11' /> */}
       <Group groupId='1' />
+      <Editor />
     </UserContext.Provider>
   );
 }

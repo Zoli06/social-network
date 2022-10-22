@@ -1,6 +1,7 @@
 import React from 'react';
 import './MessageModify.scss';
 import { gql, useMutation } from '@apollo/client';
+import { EditorActions, openEditor } from './Editor';
 
 const DELETE_MESSAGE_MUTATION = gql`
   mutation DeleteMessage($messageId: ID!) {
@@ -15,7 +16,7 @@ export const MessageModify = ({ messageId }: IMessageModifyProps) => {
 
   return (
     <div className='message-modify'>
-      <svg className='message-edit icon'>
+      <svg className='message-edit icon' onClick={() => openEditor(messageId, groupId, EditorActions.EDIT, messageText)}>
         <use href='./assets/images/svg-bundle.svg#edit' />
       </svg>
       <svg className='message-delete icon' onClick={() => deleteMessage({variables: {messageId}})}>

@@ -5,6 +5,7 @@ import Twemoji from "react-twemoji";
 import { v4 as uuidv4 } from "uuid";
 
 import { IGroupQueryGQLData } from "./Group";
+import { EditorActions, openEditor } from "./Editor";
 
 const VOTE_MUTATION = gql`
   mutation VoteMutation($messageId: ID!, $type: VoteType) {
@@ -46,6 +47,7 @@ export const MessageActions = ({
     vote,
     reactions,
     reaction,
+    group: { groupId },
   },
   subscribeToMore,
   messageVotedUpdateFunc,
@@ -139,7 +141,7 @@ export const MessageActions = ({
         />
       </svg>
       <p className="downvote-count">{downVotes}</p>
-      <svg className="response icon">
+      <svg className="response icon" onClick={() => openEditor(messageId, groupId, EditorActions.ADD)}>
         <use href="./assets/images/svg-bundle.svg#response" />
       </svg>
       <p className="responses-count">{responsesCount}</p>
@@ -211,6 +213,9 @@ MessageActions.fragments = {
       reaction {
         type
       }
+      group {
+        groupId
+      }
     }
   `,
 };
@@ -239,6 +244,9 @@ export interface IMessageActionsGQLData {
   reaction: {
     type: number;
   } | null;
+  group: {
+    groupId: string;
+  };
 }
 
 export interface IMessageActionsProps {
