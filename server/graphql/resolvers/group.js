@@ -1,19 +1,26 @@
 const {
   Query: { user: getUser },
 } = require("./user.js");
+const { Message: { responseTree: getMessageResponseTree }, Query: { message: getMessage } } = require("./message.js");
 const { isGroupMember, isGroupAdmin, isGroupCreator } = require("../helpers/group.js");
 
 module.exports = {
   Group: {
-    async messages({ group_id }, _, { user, connection }) {
+    async messages({ group_id }, { onlyInterestedInMessageId }, { user, connection }) {
       user.authenticate();
-      return (
-        await connection.query(
-          `SELECT * FROM messages
-          WHERE group_id = ?`,
-          [group_id]
-        )
-      )[0];
+      if (onlyInterestedInMessageId) {
+        const responseTree = await getMessageResponseTree({ message_id: onlyInterestedInMessageId }, {}, { user, connection });
+        const message = await getMessage({}, { messageId: onlyInterestedInMessageId }, { user, connection });
+        return [...responseTree, message];
+      } else {
+        return (
+          await connection.query(
+            `SELECT * FROM messages
+            WHERE group_id = ?`,
+            [group_id]
+          )
+        )[0];
+      }
     },
     async createdByUser({ created_by_user_id }, _, { user, connection }) {
       user.authenticate();
@@ -105,6 +112,36 @@ module.exports = {
         )
       )[0][0];
     },
+    async userRelationShipWithGroup({ group_id }, _, { user, connection }) {
+      user.authenticate();
+      return (
+        await connection.query(
+          `SELECT * FROM group_user_relationships
+          WHERE group_id = ? AND user_id = ?`,
+          [group_id, user.id]
+        )
+      )[0][0];
+    }
+  },
+  GroupUserRelationship: {
+    async user({ user_id }, _, { user, connection }) {
+      user.authenticate();
+      return await getUser(
+        {},
+        { userId: user_id },
+        { user, connection }
+      );
+    },
+    async group({ group_id }, _, { user, connection }) {
+      user.authenticate();
+      return (
+        await connection.query(
+          `SELECT * FROM groups
+          WHERE group_id = ?`,
+          [group_id]
+        )
+      )[0][0];
+    }
   },
   Query: {
     async group(_, { groupId }, { user, connection }) {
@@ -169,7 +206,6 @@ module.exports = {
 
     async sendGroupInvitation(_, { groupId, userId }, { user, connection }) {
       user.authenticate();
-      console.log(await isGroupAdmin(user.id, groupId, connection, true));
       await isGroupAdmin(user.id, groupId, connection, true);
       await connection.query(
         `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, 'invited')

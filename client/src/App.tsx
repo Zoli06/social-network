@@ -13,7 +13,7 @@ const ME = gql`
   }
 `;
 
-export const UserContext = React.createContext({userId: ''});
+export const UserContext = React.createContext({ userId: '' });
 
 export function App() {
   const { data, loading, error } = useQuery(ME);
@@ -23,8 +23,6 @@ export function App() {
 
   return (
     <UserContext.Provider value={data?.me}>
-      {/* <Post messageId='1' /> */}
-      {/* <Post messageId='11' /> */}
       <Group groupId='1' />
       <Editor />
     </UserContext.Provider>

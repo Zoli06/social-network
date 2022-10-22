@@ -8,9 +8,9 @@ import { IMessageGQLData } from './Message';
 import { IMessageReactedSubscriptionData, IMessageVotedSubscriptionData } from './MessageActions';
 
 const GROUP_QUERY = gql`
-  query GetGroup($groupId: ID!) {
+  query GetGroup($groupId: ID!, $onlyInterestedInMessageId: ID) {
     group(groupId: $groupId) {
-      messages {
+      messages(onlyInterestedInMessageId: $onlyInterestedInMessageId) {
         ...Message
       }
 
@@ -32,10 +32,11 @@ const MESSAGE_QUERY = gql`
   ${Message.fragments.message}
 `;
 
-export const Group = ({ groupId }: IGroupProps) => {
+export const Group = ({ groupId, onlyInterestedInMessageId }: IGroupProps) => {
   const { data, loading, error, subscribeToMore } = useQuery<IGroupQueryGQLData>(GROUP_QUERY, {
     variables: {
       groupId,
+      onlyInterestedInMessageId,
     },
   });
 
@@ -69,6 +70,7 @@ export const Group = ({ groupId }: IGroupProps) => {
               query: GROUP_QUERY,
               variables: {
                 groupId,
+                onlyInterestedInMessageId,
               },
               data: {
                 group: {
@@ -83,7 +85,7 @@ export const Group = ({ groupId }: IGroupProps) => {
         return prev;
       },
     });
-  }, [groupId, subscribeToMore, getMessage]);
+  }, [groupId, subscribeToMore, getMessage, onlyInterestedInMessageId]);
 
   if (loading) return <div>Loading...</div>;
   if (error) {
@@ -149,7 +151,7 @@ export const Group = ({ groupId }: IGroupProps) => {
       </h1>
       {data?.group.messages.map(
         (message) =>
-          message.responseTo === null && (
+          ((!onlyInterestedInMessageId && (message.responseTo === null)) || (onlyInterestedInMessageId && (onlyInterestedInMessageId === message.messageId))) && (
             <Message
               messageData={message}
               responseTree={data.group.messages}
@@ -175,6 +177,7 @@ export interface IGroupQueryGQLData {
 
 export interface IGroupGQLData {
   groupId: string;
+  onlyInterestedInMessageId?: string;
 }
 
 export interface IGroupProps extends IGroupGQLData {}
