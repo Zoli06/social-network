@@ -9,7 +9,7 @@ const DELETE_MESSAGE_MUTATION = gql`
   }
 `;
 
-export const MessageModify = ({ messageId }: IMessageModifyProps) => {
+export const MessageModify = ({ messageId, userRelationShipWithGroup: { type: userRelationShipWithGroupType }, groupId, messageText }: IMessageModifyProps) => {
   const [deleteMessage] = useMutation(DELETE_MESSAGE_MUTATION, {
     variables: { messageId },
   });
@@ -19,15 +19,40 @@ export const MessageModify = ({ messageId }: IMessageModifyProps) => {
       <svg className='message-edit icon' onClick={() => openEditor(messageId, groupId, EditorActions.EDIT, messageText)}>
         <use href='./assets/images/svg-bundle.svg#edit' />
       </svg>
-      <svg className='message-delete icon' onClick={() => deleteMessage({variables: {messageId}})}>
+      <svg className='message-delete icon' onClick={() => deleteMessage({ variables: { messageId } })}>
         <use href='./assets/images/svg-bundle.svg#delete' />
       </svg>
     </div>
   );
 };
 
-export interface IMessageModifyGQLData {
+MessageModify.fragments = {
+  message: gql`
+    fragment MessageModifyOnMessage on Message {
+      messageId
+    }
+  `,
+  group: gql`
+    fragment MessageModifyOnGroup on Group {
+      groupId
+      userRelationShipWithGroup {
+        type
+      }
+    }
+  `
+}
+
+export interface IMessageModifyMessageGQLData {
   messageId: string;
 }
 
-export interface IMessageModifyProps extends IMessageModifyGQLData {}
+export interface IMessageModifyGroupGQLData {
+  groupId: string,
+  userRelationShipWithGroup: {
+    type: string;
+  };
+}
+
+export interface IMessageModifyProps extends IMessageModifyMessageGQLData, IMessageModifyGroupGQLData {
+  messageText: string;
+}

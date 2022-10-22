@@ -10,17 +10,19 @@ import { UserContext } from '../App';
 
 import { IMessageAuthorGQLData } from './MessageAuthor';
 import { IMessageTextGQLData } from './MessageText';
-import { IMessageModifyGQLData } from './MessageModify';
+import { IMessageModifyMessageGQLData } from './MessageModify';
 import { IMessageActionsGQLData } from './MessageActions';
 import { IEditorGQLData } from './Editor';
 
 export function Message({
   messageData,
   responseTree,
+  userRelationShipWithGroup,
   subscribeToMore,
   messageVotedUpdateFunc,
   messageReactedUpdateFunc,
   className = '',
+  groupId,
 }: IMessageProps) {
   const user = React.useContext(UserContext);
 
@@ -31,7 +33,7 @@ export function Message({
           <div className='message-header'>
             <MessageAuthor user={messageData.user} />
             {user.userId === messageData.user.userId && (
-              <MessageModify messageId={messageData.messageId} />
+              <MessageModify messageId={messageData.messageId} groupId={groupId} userRelationShipWithGroup={userRelationShipWithGroup} messageText={messageData.text} />
             )}
           </div>
           <MessageText text={messageData.text} />
@@ -50,14 +52,15 @@ export function Message({
                   key={responseData.messageId}
                   messageData={responseData}
                   responseTree={responseTree}
+                  userRelationShipWithGroup={userRelationShipWithGroup}
                   subscribeToMore={subscribeToMore}
                   messageReactedUpdateFunc={messageReactedUpdateFunc}
                   messageVotedUpdateFunc={messageVotedUpdateFunc}
+                  groupId={groupId}
                 />
               )
           )}
         </div>
-        <AddResponse messageData={messageData} />
       </div>
     </>
   );
@@ -70,11 +73,10 @@ Message.fragments = {
       user {
         ...MessageAuthor
       }
-      group {
-        ...AddResponse
-      }
+      ...AddResponse
       ...MessageActions
       ...MessageText
+      ...MessageModifyOnMessage
 
       responseTo {
         messageId
@@ -85,13 +87,14 @@ Message.fragments = {
     ${MessageAuthor.fragments.user}
     ${MessageText.fragments.message}
     ${Editor.fragments.message}
+    ${MessageModify.fragments.message}
   `,
 };
 
 export interface IMessageGQLData
   extends IMessageAuthorGQLData,
   IMessageTextGQLData,
-  IMessageModifyGQLData,
+  IMessageModifyMessageGQLData,
   IMessageActionsGQLData,
   IEditorGQLData {
   responseTo?: { messageId: string };
@@ -100,8 +103,10 @@ export interface IMessageGQLData
 export interface IMessageProps {
   messageData: IMessageGQLData;
   responseTree: IMessageGQLData[];
+  userRelationShipWithGroup: { type: string };
   subscribeToMore: Function;
   messageVotedUpdateFunc: Function;
   messageReactedUpdateFunc: Function;
   className?: string;
+  groupId: string;
 }

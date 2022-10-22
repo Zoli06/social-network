@@ -2,9 +2,11 @@ import React, { useEffect } from 'react';
 import './Group.scss';
 import { useQuery, useLazyQuery, gql } from '@apollo/client';
 import { Message } from './Message';
+import { MessageModify } from './MessageModify';
 import { cache } from '../index';
 
 import { IMessageGQLData } from './Message';
+import { IMessageModifyGroupGQLData } from './MessageModify';
 import { IMessageReactedSubscriptionData, IMessageVotedSubscriptionData } from './MessageActions';
 
 const GROUP_QUERY = gql`
@@ -14,12 +16,15 @@ const GROUP_QUERY = gql`
         ...Message
       }
 
+      ...MessageModifyOnGroup
+
       groupId
       name
     }
   }
 
   ${Message.fragments.message}
+  ${MessageModify.fragments.group}
 `;
 
 const MESSAGE_QUERY = gql`
@@ -155,11 +160,13 @@ export const Group = ({ groupId, onlyInterestedInMessageId }: IGroupProps) => {
             <Message
               messageData={message}
               responseTree={data.group.messages}
+              userRelationShipWithGroup={data.group.userRelationShipWithGroup}
               subscribeToMore={subscribeToMore}
               className='root-message'
               key={message.messageId}
               messageVotedUpdateFunc={messageVotedUpdateFunc}
               messageReactedUpdateFunc={messageReactedUpdateFunc}
+              groupId={groupId}
             />
           )
       )}
@@ -172,12 +179,10 @@ export interface IGroupQueryGQLData {
     messages: IMessageGQLData[];
     groupId: string;
     name: string;
-  };
+  } & IMessageModifyGroupGQLData;
 }
 
-export interface IGroupGQLData {
+export interface IGroupProps {
   groupId: string;
   onlyInterestedInMessageId?: string;
 }
-
-export interface IGroupProps extends IGroupGQLData {}
