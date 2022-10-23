@@ -6,13 +6,12 @@ const { isGroupMember, isGroupAdmin, isGroupCreator } = require("../helpers/grou
 
 module.exports = {
   Group: {
-    async messages({ group_id }, { onlyInterestedInMessageId }, { user, connection }) {
+    async messages({ group_id }, { onlyInterestedInMessageId, maxDepth }, { user, connection }) {
       user.authenticate();
-      if (onlyInterestedInMessageId) {
-        const responseTree = await getMessageResponseTree({ message_id: onlyInterestedInMessageId }, {}, { user, connection });
-        const message = await getMessage({}, { messageId: onlyInterestedInMessageId }, { user, connection });
-        return [...responseTree, message];
-      } else {
+
+      isGroupMember(user.id, group_id, connection, true);
+
+      if (!onlyInterestedInMessageId && !maxDepth) {
         return (
           await connection.query(
             `SELECT * FROM messages
@@ -21,6 +20,18 @@ module.exports = {
           )
         )[0];
       }
+
+      // I have to do something with this spaghetti code
+
+      const _onlyInterestedInMessageId = onlyInterestedInMessageId || null; // convert undefined to null
+      const _maxDepth = _onlyInterestedInMessageId === null ? maxDepth + 1 : maxDepth;
+
+      const responseTree = await getMessageResponseTree({ message_id: _onlyInterestedInMessageId }, { maxDepth: _maxDepth }, { user, connection });
+      if (_onlyInterestedInMessageId !== null) {
+        const message = await getMessage({}, { messageId: _onlyInterestedInMessageId }, { user, connection });
+        return [...responseTree, message];
+      }
+      return responseTree;
     },
     async createdByUser({ created_by_user_id }, _, { user, connection }) {
       user.authenticate();

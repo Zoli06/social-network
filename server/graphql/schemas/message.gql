@@ -24,7 +24,7 @@ type Message {
   text: String!
   responseTo: Message
   responses: [Message!]!
-  responseTree: [Message!]!
+  responseTree(maxDepth: Int): [Message!]!
   responsesCount: Int!
   reactions: [Reaction!]!
   reaction: Reaction

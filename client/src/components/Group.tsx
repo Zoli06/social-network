@@ -11,9 +11,9 @@ import { IMessageModifyGroupGQLData } from './MessageModify';
 export const GroupQueryResultContext = React.createContext<IGroupQueryGQLData | undefined>(undefined);
 
 const GROUP_QUERY = gql`
-  query GetGroup($groupId: ID!, $onlyInterestedInMessageId: ID) {
+  query GetGroup($groupId: ID!, $onlyInterestedInMessageId: ID, $maxDepth: Int) {
     group(groupId: $groupId) {
-      messages(onlyInterestedInMessageId: $onlyInterestedInMessageId) {
+      messages(onlyInterestedInMessageId: $onlyInterestedInMessageId, maxDepth: $maxDepth) {
         ...Message
       }
 
@@ -38,11 +38,12 @@ const MESSAGE_QUERY = gql`
   ${Message.fragments.message}
 `;
 
-export const Group = ({ groupId, onlyInterestedInMessageId }: IGroupProps) => {
+export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: IGroupProps) => {
   const { data, loading, error, subscribeToMore } = useQuery<IGroupQueryGQLData>(GROUP_QUERY, {
     variables: {
       groupId,
       onlyInterestedInMessageId,
+      maxDepth,
     },
   });
 
@@ -77,6 +78,7 @@ export const Group = ({ groupId, onlyInterestedInMessageId }: IGroupProps) => {
               variables: {
                 groupId,
                 onlyInterestedInMessageId,
+                maxDepth,
               },
               data: {
                 group: {
@@ -91,7 +93,7 @@ export const Group = ({ groupId, onlyInterestedInMessageId }: IGroupProps) => {
         return prev;
       },
     });
-  }, [groupId, subscribeToMore, getMessage, onlyInterestedInMessageId]);
+  }, [groupId, subscribeToMore, getMessage, onlyInterestedInMessageId, maxDepth]);
 
   if (loading) return <div>Loading...</div>;
   if (error) {
@@ -131,5 +133,6 @@ export interface IGroupQueryGQLData {
 
 export interface IGroupProps {
   groupId: string;
-  onlyInterestedInMessageId?: string;
+  onlyInterestedInMessageId?: string | null;
+  maxDepth?: number;
 }

@@ -32,7 +32,7 @@ type Group {
   createdAt: Date!
   updatedAt: Date!
   name: String!
-  messages(onlyInterestedInMessageId: ID): [Message!]!  # onlyInterestedInMessageId replaces post
+  messages(onlyInterestedInMessageId: ID, maxDepth: Int): [Message!]!  # onlyInterestedInMessageId replaces post
   members: [User!]!
   memberRequests: [User!]!
   bannedUsers: [User!]!

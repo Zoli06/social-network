@@ -118,20 +118,27 @@ module.exports = {
         )
       )[0];
     },
-    async responseTree({ message_id }, _, { user, connection }) {
+    async responseTree({ message_id }, { maxDepth }, { user, connection }) {
       user.authenticate();
-      return (
-        await connection.query(
-          // thank you stackoverflow for this one
-          `SELECT *
-          FROM (SELECT * FROM messages
-            ORDER BY response_to_message_id, message_id) messages_sorted,
-            (SELECT @pv := ?) initialisation
-          WHERE find_in_set(response_to_message_id, @pv)
-          AND LENGTH(@pv := concat(@pv, ',', message_id))`,
-          [message_id]
+      const columns = (await connection.query(`select column_name as columns from information_schema.columns where table_schema = 'social_network' and table_name = 'messages'`))[0].map(element => element.columns);
+
+      const noMaxDepth = maxDepth === undefined;
+
+      return((
+        await connection.query(`WITH RECURSIVE message_tree (${columns}, lvl) AS
+          (
+            SELECT ${columns}, 0 lvl
+              FROM messages
+              WHERE response_to_message_id <=> ?
+            UNION ALL
+            SELECT ${columns.map(element => 'm.' + element)},mt.lvl + 1
+              FROM message_tree AS mt JOIN messages AS m
+                ON mt.message_id = m.response_to_message_id
+          )
+          SELECT * FROM message_tree WHERE lvl < ? OR ?;`,
+          [message_id, maxDepth, noMaxDepth]
         )
-      )[0];
+      )[0]);
     },
     async responsesCount({ message_id }, _, { user, connection }) {
       user.authenticate();
@@ -271,7 +278,7 @@ module.exports = {
         )
       )[0][0].group_id;
 
-      let messagesToDelete = []; 
+      let messagesToDelete = [];
 
       const findMessagesToDeleteRecursively = async (messageId) => {
         messagesToDelete.push(messageId.toString());
