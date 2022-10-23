@@ -4,10 +4,15 @@ import { gql } from '@apollo/client';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-export const MessageText = ({ text }: IMessageTextProps) => {
+import { GroupQueryResultContext } from './Group';
+
+export const MessageText = ({ messageId }: IMessageTextProps) => {
+  const { group: { messages } } = React.useContext(GroupQueryResultContext)!;
+  const { text } = messages.find((message) => message.messageId === messageId)!;
+
   return (
     <div className='message-text-container'>
-      <ReactMarkdown className='message-text' children={text} remarkPlugins={[remarkGfm]}/>
+      <ReactMarkdown className='message-text' children={text} remarkPlugins={[remarkGfm]} />
     </div>
   );
 };
@@ -24,4 +29,6 @@ export interface IMessageTextGQLData {
   text: string;
 }
 
-export interface IMessageTextProps extends IMessageTextGQLData {}
+export interface IMessageTextProps {
+  messageId: string;
+}

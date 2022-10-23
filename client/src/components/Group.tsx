@@ -7,7 +7,8 @@ import { cache } from '../index';
 
 import { IMessageGQLData } from './Message';
 import { IMessageModifyGroupGQLData } from './MessageModify';
-import { IMessageReactedSubscriptionData, IMessageVotedSubscriptionData } from './MessageActions';
+
+export const GroupQueryResultContext = React.createContext<IGroupQueryGQLData | undefined>(undefined);
 
 const GROUP_QUERY = gql`
   query GetGroup($groupId: ID!, $onlyInterestedInMessageId: ID) {
@@ -103,20 +104,19 @@ export const Group = ({ groupId, onlyInterestedInMessageId }: IGroupProps) => {
       <h1>
         Group: {data?.group.name} #{groupId}
       </h1>
+      <GroupQueryResultContext.Provider value={data}>
       {data?.group.messages.map(
         (message) =>
           ((!onlyInterestedInMessageId && (message.responseTo === null)) || (onlyInterestedInMessageId && (onlyInterestedInMessageId === message.messageId))) && (
             <Message
-              messageData={message}
-              responseTree={data.group.messages}
-              userRelationShipWithGroup={data.group.userRelationShipWithGroup}
+              messageId={message.messageId}
               subscribeToMore={subscribeToMore}
               className='root-message'
               key={message.messageId}
-              groupId={groupId}
             />
           )
-      )}
+        )}
+      </GroupQueryResultContext.Provider>
     </>
   );
 };

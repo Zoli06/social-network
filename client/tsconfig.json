@@ -8,6 +8,7 @@
       "strict": true,
       "target": "esnext",
       "jsx": "react-jsx",
-      "allowSyntheticDefaultImports": true
+      "allowSyntheticDefaultImports": true,
+      "noErrorTruncation": true
   }
 }

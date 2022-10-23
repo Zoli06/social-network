@@ -23,7 +23,8 @@ export function App() {
 
   return (
     <UserContext.Provider value={data?.me}>
-      <Group groupId='1' />
+      <Group groupId='1' onlyInterestedInMessageId='41' />
+      <Group groupId='1' onlyInterestedInMessageId='111' />
       <Editor />
     </UserContext.Provider>
   );

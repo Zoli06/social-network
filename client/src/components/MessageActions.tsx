@@ -4,10 +4,12 @@ import { gql, useMutation } from "@apollo/client";
 import Twemoji from "react-twemoji";
 import { v4 as uuidv4 } from "uuid";
 
-import { IGroupQueryGQLData } from "./Group";
 import { EditorActions, openEditor } from "./Editor";
 
+import { IGroupQueryGQLData } from "./Group";
 import { IMessageGQLData } from "./Message";
+
+import { GroupQueryResultContext } from "./Group";
 
 const VOTE_MUTATION = gql`
   mutation VoteMutation($messageId: ID!, $type: VoteType) {
@@ -41,18 +43,21 @@ const MESSAGE_REACTED_SUBSCRIPTION = gql`
 `;
 
 export const MessageActions = ({
-  messageData: {
+  messageId,
+  subscribeToMore,
+}: IMessageActionsProps) => {
+  const { group: { messages } } = React.useContext(GroupQueryResultContext)!;
+
+  const {
     upVotes,
     downVotes,
     responsesCount,
-    messageId,
     vote,
     reactions,
     reaction,
     group: { groupId },
-  },
-  subscribeToMore,
-}: IMessageActionsProps) => {
+  } = messages.find((message) => message.messageId === messageId)!;
+
   const [voteMutation] = useMutation(VOTE_MUTATION, {
     update(cache, { data: { createVote } }) {
       cache.modify({
@@ -285,6 +290,6 @@ export interface IMessageActionsGQLData {
 }
 
 export interface IMessageActionsProps {
-  messageData: IMessageActionsGQLData;
+  messageId: string;
   subscribeToMore: Function;
 }

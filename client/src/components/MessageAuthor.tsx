@@ -1,26 +1,37 @@
 import React from 'react';
 import './MessageAuthor.scss';
 import { gql } from '@apollo/client';
+import { GroupQueryResultContext } from './Group';
 
-export const MessageAuthor = ({ user }: IMessageAuthorProps) => {
+export const MessageAuthor = ({ messageId }: IMessageAuthorProps) => {
+  const { group: { messages } } = React.useContext(GroupQueryResultContext)!;
+
+  const { user: {
+    firstName,
+    lastName,
+    middleName,
+    userName,
+    intro,
+    profileImage } } = messages.find((message) => message.messageId === messageId)!;
+
   return (
     <div className='message-author-container'>
       <div className='image-container'>
         {/* eslint-disable-next-line */}
         <img
-          src={!!user.profileImage?.url ? user.profileImage?.url : './assets/images/blank-profile-image.webp'}
+          src={!!profileImage?.url ? profileImage?.url : './assets/images/blank-profile-image.webp'}
           className='profile-image'
           alt='profile image'
         />
       </div>
       <div className='text-container'>
         <p className='name'>
-          <span className='first-name'>{user.firstName} </span>
-          <span className='middle-name'>{user.middleName} </span>
-          <span className='last-name'>{user.lastName}</span>
+          <span className='first-name'>{firstName} </span>
+          <span className='middle-name'>{middleName} </span>
+          <span className='last-name'>{lastName}</span>
         </p>
-        <p className='user-name'>@{user.userName}</p>
-        <p className='intro'>{user.intro}</p>
+        <p className='user-name'>@{userName}</p>
+        <p className='intro'>{intro}</p>
       </div>
     </div>
   );
@@ -56,4 +67,6 @@ export interface IMessageAuthorGQLData {
   };
 }
 
-export interface IMessageAuthorProps extends IMessageAuthorGQLData {}
+export interface IMessageAuthorProps {
+  messageId: string;
+}

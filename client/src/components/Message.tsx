@@ -7,6 +7,7 @@ import { MessageText } from './MessageText';
 import { MessageActions } from './MessageActions';
 import { Editor } from './Editor';
 import { UserContext } from '../App';
+import { GroupQueryResultContext } from './Group';
 
 import { IMessageAuthorGQLData } from './MessageAuthor';
 import { IMessageTextGQLData } from './MessageText';
@@ -15,42 +16,34 @@ import { IMessageActionsGQLData } from './MessageActions';
 import { IEditorGQLData } from './Editor';
 
 export function Message({
-  messageData,
-  responseTree,
-  userRelationShipWithGroup,
+  messageId,
   subscribeToMore,
   className = '',
-  groupId,
 }: IMessageProps) {
-  const user = React.useContext(UserContext);
+  const { group: { messages } } = React.useContext(GroupQueryResultContext)!;
 
   return (
     <>
       <div className={`message-container ${className}`}>
         <div className='message-content'>
           <div className='message-header'>
-            <MessageAuthor user={messageData.user} />
-            {user.userId === messageData.user.userId && (
-              <MessageModify messageId={messageData.messageId} groupId={groupId} userRelationShipWithGroup={userRelationShipWithGroup} messageText={messageData.text} />
-            )}
+            <MessageAuthor messageId={messageId} />
+            <MessageModify messageId={messageId} />
           </div>
-          <MessageText text={messageData.text} />
+          <MessageText messageId={messageId} />
           <MessageActions
-            messageData={messageData}
+            messageId={messageId}
             subscribeToMore={subscribeToMore}
           />
         </div>
         <div className='response-tree'>
-          {responseTree.map(
-            (responseData: IMessageGQLData) =>
-              responseData.responseTo?.messageId === messageData.messageId && (
+          {messages.map(
+            (message: IMessageGQLData) =>
+              message.responseTo?.messageId === messageId && (
                 <Message
-                  key={responseData.messageId}
-                  messageData={responseData}
-                  responseTree={responseTree}
-                  userRelationShipWithGroup={userRelationShipWithGroup}
+                  messageId={message.messageId}
+                  key={message.messageId}
                   subscribeToMore={subscribeToMore}
-                  groupId={groupId}
                 />
               )
           )}
@@ -95,10 +88,7 @@ export interface IMessageGQLData
 }
 
 export interface IMessageProps {
-  messageData: IMessageGQLData;
-  responseTree: IMessageGQLData[];
-  userRelationShipWithGroup: { type: string };
+  messageId: string;
   subscribeToMore: Function;
   className?: string;
-  groupId: string;
 }
