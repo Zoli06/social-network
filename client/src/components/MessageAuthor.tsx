@@ -3,7 +3,7 @@ import './MessageAuthor.scss';
 import { gql } from '@apollo/client';
 import { GroupQueryResultContext } from './Group';
 
-export const MessageAuthor = ({ messageId }: IMessageAuthorProps) => {
+export const MessageAuthor = ({ messageId }: MessageAuthorProps) => {
   const { group: { messages } } = React.useContext(GroupQueryResultContext)!;
 
   const { user: {
@@ -53,7 +53,7 @@ MessageAuthor.fragments = {
   `,
 };
 
-export interface IMessageAuthorGQLData {
+export type MessageAuthorGQLData = {
   user: {
     userId: string;
     firstName: string;
@@ -67,6 +67,6 @@ export interface IMessageAuthorGQLData {
   };
 }
 
-export interface IMessageAuthorProps {
+export type MessageAuthorProps = {
   messageId: string;
 }

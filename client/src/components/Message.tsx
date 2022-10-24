@@ -9,17 +9,17 @@ import { Editor } from './Editor';
 import { UserContext } from '../App';
 import { GroupQueryResultContext } from './Group';
 
-import { IMessageAuthorGQLData } from './MessageAuthor';
-import { IMessageTextGQLData } from './MessageText';
-import { IMessageModifyMessageGQLData } from './MessageModify';
-import { IMessageActionsGQLData } from './MessageActions';
+import { MessageAuthorGQLData } from './MessageAuthor';
+import { MessageTextGQLData } from './MessageText';
+import { MessageModifyMessageGQLData } from './MessageModify';
+import { MessageActionsGQLData } from './MessageActions';
 import { IEditorGQLData } from './Editor';
 
 export function Message({
   messageId,
   subscribeToMore,
   className = '',
-}: IMessageProps) {
+}: MessageProps) {
   const { group: { messages } } = React.useContext(GroupQueryResultContext)!;
 
   return (
@@ -38,7 +38,7 @@ export function Message({
         </div>
         <div className='response-tree'>
           {messages.map(
-            (message: IMessageGQLData) =>
+            (message: MessageGQLData) =>
               message.responseTo?.messageId === messageId && (
                 <Message
                   messageId={message.messageId}
@@ -78,16 +78,15 @@ Message.fragments = {
   `,
 };
 
-export interface IMessageGQLData
-  extends IMessageAuthorGQLData,
-  IMessageTextGQLData,
-  IMessageModifyMessageGQLData,
-  IMessageActionsGQLData,
-  IEditorGQLData {
+export type MessageGQLData = MessageAuthorGQLData &
+  MessageTextGQLData &
+  MessageModifyMessageGQLData &
+  MessageActionsGQLData &
+  IEditorGQLData & {
   responseTo?: { messageId: string };
 }
 
-export interface IMessageProps {
+export type MessageProps = {
   messageId: string;
   subscribeToMore: Function;
   className?: string;

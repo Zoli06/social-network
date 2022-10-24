@@ -5,10 +5,10 @@ import { Message } from './Message';
 import { MessageModify } from './MessageModify';
 import { cache } from '../index';
 
-import { IMessageGQLData } from './Message';
-import { IMessageModifyGroupGQLData } from './MessageModify';
+import { MessageGQLData } from './Message';
+import { MessageModifyGroupGQLData } from './MessageModify';
 
-export const GroupQueryResultContext = React.createContext<IGroupQueryGQLData | undefined>(undefined);
+export const GroupQueryResultContext = React.createContext<GroupQueryGQLData | undefined>(undefined);
 
 const GROUP_QUERY = gql`
   query GetGroup($groupId: ID!, $onlyInterestedInMessageId: ID, $maxDepth: Int) {
@@ -38,8 +38,8 @@ const MESSAGE_QUERY = gql`
   ${Message.fragments.message}
 `;
 
-export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: IGroupProps) => {
-  const { data, loading, error, subscribeToMore } = useQuery<IGroupQueryGQLData>(GROUP_QUERY, {
+export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: GroupProps) => {
+  const { data, loading, error, subscribeToMore } = useQuery<GroupQueryGQLData>(GROUP_QUERY, {
     variables: {
       groupId,
       onlyInterestedInMessageId,
@@ -59,7 +59,7 @@ export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: IGroupPr
       variables: {
         groupId,
       },
-      updateQuery: (prev, { subscriptionData }: { subscriptionData: { data: { messageAdded: IMessageGQLData } } }) => {
+      updateQuery: (prev, { subscriptionData }: { subscriptionData: { data: { messageAdded: MessageGQLData } } }) => {
         if (!subscriptionData.data) {
           return prev;
         }
@@ -123,15 +123,15 @@ export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: IGroupPr
   );
 };
 
-export interface IGroupQueryGQLData {
+export type GroupQueryGQLData = {
   group: {
-    messages: IMessageGQLData[];
+    messages: MessageGQLData[];
     groupId: string;
     name: string;
-  } & IMessageModifyGroupGQLData;
+  } & MessageModifyGroupGQLData;
 }
 
-export interface IGroupProps {
+export type GroupProps = {
   groupId: string;
   onlyInterestedInMessageId?: string | null;
   maxDepth?: number;

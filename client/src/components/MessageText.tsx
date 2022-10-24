@@ -6,7 +6,7 @@ import remarkGfm from 'remark-gfm';
 
 import { GroupQueryResultContext } from './Group';
 
-export const MessageText = ({ messageId }: IMessageTextProps) => {
+export const MessageText = ({ messageId }: MessageTextProps) => {
   const { group: { messages } } = React.useContext(GroupQueryResultContext)!;
   const { text } = messages.find((message) => message.messageId === messageId)!;
 
@@ -25,10 +25,10 @@ MessageText.fragments = {
   `,
 };
 
-export interface IMessageTextGQLData {
+export type MessageTextGQLData = {
   text: string;
 }
 
-export interface IMessageTextProps {
+export type MessageTextProps = {
   messageId: string;
 }

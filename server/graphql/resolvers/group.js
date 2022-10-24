@@ -9,8 +9,6 @@ module.exports = {
     async messages({ group_id }, { onlyInterestedInMessageId, maxDepth }, { user, connection }) {
       user.authenticate();
 
-      isGroupMember(user.id, group_id, connection, true);
-
       if (!onlyInterestedInMessageId && !maxDepth) {
         return (
           await connection.query(
@@ -23,7 +21,9 @@ module.exports = {
 
       // I have to do something with this spaghetti code
 
-      const _onlyInterestedInMessageId = onlyInterestedInMessageId || null; // convert undefined to null
+      // convert undefined to null
+      const _onlyInterestedInMessageId = onlyInterestedInMessageId || null;
+      // if we interested in all messages, there is no root message
       const _maxDepth = _onlyInterestedInMessageId === null ? maxDepth + 1 : maxDepth;
 
       const responseTree = await getMessageResponseTree({ message_id: _onlyInterestedInMessageId }, { maxDepth: _maxDepth }, { user, connection });

@@ -99,9 +99,9 @@ Editor.fragments = {
   `,
 };
 
-export interface IEditorGQLData {
+export type IEditorGQLData = {
   messageId: string;
   group: { groupId: string };
 }
 
-export interface IEditorProps {}
+export type EditorProps = {}

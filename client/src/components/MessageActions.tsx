@@ -6,8 +6,8 @@ import { v4 as uuidv4 } from "uuid";
 
 import { EditorActions, openEditor } from "./Editor";
 
-import { IGroupQueryGQLData } from "./Group";
-import { IMessageGQLData } from "./Message";
+import { GroupQueryGQLData } from "./Group";
+import { MessageGQLData } from "./Message";
 
 import { GroupQueryResultContext } from "./Group";
 
@@ -45,7 +45,7 @@ const MESSAGE_REACTED_SUBSCRIPTION = gql`
 export const MessageActions = ({
   messageId,
   subscribeToMore,
-}: IMessageActionsProps) => {
+}: MessageActionsProps) => {
   const { group: { messages } } = React.useContext(GroupQueryResultContext)!;
 
   const {
@@ -87,8 +87,8 @@ export const MessageActions = ({
         messageId,
       },
       updateQuery: (
-        prev: IGroupQueryGQLData,
-        { subscriptionData }: IMessageVotedSubscriptionData
+        prev: GroupQueryGQLData,
+        { subscriptionData }: MessageVotedSubscriptionData
       ) => {
         if (!subscriptionData.data) return prev;
         const { messageVoted } = subscriptionData.data;
@@ -96,7 +96,7 @@ export const MessageActions = ({
           ...prev,
           group: {
             ...prev.group,
-            messages: prev.group.messages.map((message: IMessageGQLData) => {
+            messages: prev.group.messages.map((message: MessageGQLData) => {
               if (message.messageId === messageId) {
                 return {
                   ...message,
@@ -118,8 +118,8 @@ export const MessageActions = ({
         messageId,
       },
       updateQuery: (
-        prev: IGroupQueryGQLData,
-        { subscriptionData }: IMessageReactedSubscriptionData
+        prev: GroupQueryGQLData,
+        { subscriptionData }: MessageReactedSubscriptionData
       ) => {
         if (!subscriptionData.data) return prev;
         const { messageReacted } = subscriptionData.data;
@@ -127,7 +127,7 @@ export const MessageActions = ({
           ...prev,
           group: {
             ...prev.group,
-            messages: prev.group.messages.map((message: IMessageGQLData) => {
+            messages: prev.group.messages.map((message: MessageGQLData) => {
               if (message.messageId === messageId) {
                 return {
                   ...message,
@@ -260,19 +260,19 @@ MessageActions.fragments = {
   `,
 };
 
-export interface IMessageVotedSubscriptionData {
+export type MessageVotedSubscriptionData = {
   subscriptionData: {
     data: { messageVoted: { upVotes: number; downVotes: number } };
   };
 }
 
-export interface IMessageReactedSubscriptionData {
+export type MessageReactedSubscriptionData = {
   subscriptionData: {
     data: { messageReacted: number }
   }
 }
 
-export interface IMessageActionsGQLData {
+export type MessageActionsGQLData = {
   upVotes: number;
   downVotes: number;
   responsesCount: number;
@@ -289,7 +289,7 @@ export interface IMessageActionsGQLData {
   };
 }
 
-export interface IMessageActionsProps {
+export type MessageActionsProps = {
   messageId: string;
   subscribeToMore: Function;
 }

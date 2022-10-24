@@ -238,7 +238,7 @@ module.exports = {
         )
       )[0][0].group_id;
       await isGroupMember(user.id, groupId, connection, true);
-      await isMessageCreator(user.id, messageId, connection, true, true);
+      await isMessageCreator(user.id, messageId, connection, false, true);
       await connection.query(
         `UPDATE messages
           SET text = ?, response_to_message_id = ?, updated_at = DEFAULT
