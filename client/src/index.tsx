@@ -89,13 +89,30 @@ export const cache = new InMemoryCache({
   },
   typePolicies: {
     Message: {
+      keyFields: ["messageId"],
       fields: {
         reactions: {
           merge(_existing, incoming) {
             return incoming;
-          },
+          }
         },
       },
+    },
+    Group: {
+      keyFields: ["groupId"],
+      fields: {
+        messages: {
+          merge(_existing, incoming) {
+            return incoming;
+          }
+        },
+      },
+    },
+    Media: {
+      keyFields: ["mediaId"],
+    },
+    User: {
+      keyFields: ["userId"],
     },
     Subscription: {
       fields: {

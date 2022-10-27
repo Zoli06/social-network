@@ -47,6 +47,7 @@ MessageAuthor.fragments = {
       userName
       intro
       profileImage {
+        mediaId
         url
       }
     }
@@ -62,6 +63,7 @@ export type MessageAuthorGQLData = {
     userName: string;
     intro: string;
     profileImage: {
+      mediaId: string;
       url: string;
     };
   };

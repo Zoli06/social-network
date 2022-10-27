@@ -24,7 +24,6 @@ export function App() {
   return (
     <UserContext.Provider value={data?.me}>
       <Group groupId='1' />
-      <Group groupId='1' onlyInterestedInMessageId='111' maxDepth={1} />
       <Editor />
     </UserContext.Provider>
   );

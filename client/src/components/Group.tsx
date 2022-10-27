@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './Group.scss';
 import { useQuery, useLazyQuery, gql } from '@apollo/client';
 import { Message } from './Message';
@@ -38,6 +38,28 @@ const MESSAGE_QUERY = gql`
   ${Message.fragments.message}
 `;
 
+const MESSAGE_ADDED_SUBSCRIPTION = gql`
+  subscription MessageAdded($groupId: ID!) {
+    messageAdded(groupId: $groupId) {
+      ...Message
+    }
+  }
+`;
+
+const MESSAGES_DELETED_SUBSCRIPTION = gql`
+  subscription MessagesDeleted($groupId: ID!) {
+    messagesDeleted(groupId: $groupId)
+  }
+`;
+
+//create your forceUpdate hook
+function useForceUpdate(){
+  const [value, setValue] = useState(0); // integer state
+  return () => setValue(value => value + 1); // update state to force render
+  // An function that increment 👆🏻 the previous state like here 
+  // is better than directly setting `value + 1`
+}
+
 export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: GroupProps) => {
   const { data, loading, error, subscribeToMore } = useQuery<GroupQueryGQLData>(GROUP_QUERY, {
     variables: {
@@ -47,15 +69,13 @@ export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: GroupPro
     },
   });
 
+  const forceUpdate = useForceUpdate();
+
   const [getMessage] = useLazyQuery(MESSAGE_QUERY);
 
   useEffect(() => {
     subscribeToMore({
-      document: gql`
-        subscription OnMessageAdded($groupId: ID!) {
-          messageAdded(groupId: $groupId)
-        }
-      `,
+      document: MESSAGE_ADDED_SUBSCRIPTION,
       variables: {
         groupId,
       },
@@ -92,6 +112,26 @@ export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: GroupPro
 
         return prev;
       },
+    });
+
+    subscribeToMore({
+      document: MESSAGES_DELETED_SUBSCRIPTION,
+      variables: {
+        groupId,
+      },
+      updateQuery: (prev, { subscriptionData }: { subscriptionData: { data: { messagesDeleted: string[] } } }) => {
+        if (!subscriptionData.data) {
+          return prev;
+        }
+
+        // remove messages from apollo cache in group messages
+        return {
+          group: {
+            ...prev.group,
+            messages: prev.group.messages.filter((message) => !subscriptionData.data.messagesDeleted.includes(message.messageId)),
+          },
+        };
+      }
     });
   }, [groupId, subscribeToMore, getMessage, onlyInterestedInMessageId, maxDepth]);
 
