@@ -40,9 +40,7 @@ const MESSAGE_QUERY = gql`
 
 const MESSAGE_ADDED_SUBSCRIPTION = gql`
   subscription MessageAdded($groupId: ID!) {
-    messageAdded(groupId: $groupId) {
-      ...Message
-    }
+    messageAdded(groupId: $groupId)
   }
 `;
 
