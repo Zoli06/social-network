@@ -44,19 +44,17 @@ const MESSAGE_ADDED_SUBSCRIPTION = gql`
   }
 `;
 
+const MESSAGE_EDITED_SUBSCRIPTION = gql`
+  subscription MessageEdited($groupId: ID!) {
+    messageEdited(groupId: $groupId)
+  }
+`
+
 const MESSAGES_DELETED_SUBSCRIPTION = gql`
   subscription MessagesDeleted($groupId: ID!) {
     messagesDeleted(groupId: $groupId)
   }
 `;
-
-//create your forceUpdate hook
-function useForceUpdate(){
-  const [value, setValue] = useState(0); // integer state
-  return () => setValue(value => value + 1); // update state to force render
-  // An function that increment 👆🏻 the previous state like here 
-  // is better than directly setting `value + 1`
-}
 
 export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: GroupProps) => {
   const { data, loading, error, subscribeToMore } = useQuery<GroupQueryGQLData>(GROUP_QUERY, {
@@ -67,9 +65,7 @@ export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: GroupPro
     },
   });
 
-  const forceUpdate = useForceUpdate();
-
-  const [getMessage] = useLazyQuery(MESSAGE_QUERY);
+  const [getMessage] = useLazyQuery(MESSAGE_QUERY, {fetchPolicy: "no-cache"});
 
   useEffect(() => {
     subscribeToMore({
@@ -113,6 +109,51 @@ export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: GroupPro
     });
 
     subscribeToMore({
+      document: MESSAGE_EDITED_SUBSCRIPTION,
+      variables: {
+        groupId,
+      },
+      updateQuery: (prev, { subscriptionData }: { subscriptionData: { data: { messageEdited: MessageGQLData } } }) => {
+        if (!subscriptionData.data) {
+          return prev;
+        }
+
+        getMessage({
+          variables: {
+            messageId: subscriptionData.data.messageEdited,
+          },
+          onCompleted: (data) => {
+            // edit message in apollo cache
+            const { message } = data;
+
+            cache.writeQuery({
+              query: GROUP_QUERY,
+              variables: {
+                groupId,
+                onlyInterestedInMessageId,
+                maxDepth,
+              },
+              data: {
+                group: {
+                  ...prev.group,
+                  messages: prev.group.messages.map((m) => {
+                    if (m.messageId === message.messageId) {
+                      return message;
+                    }
+
+                    return m;
+                  }),
+                },
+              },
+            });
+          },
+        });
+
+        return prev;
+      }
+    })
+
+    subscribeToMore({
       document: MESSAGES_DELETED_SUBSCRIPTION,
       variables: {
         groupId,
@@ -145,16 +186,16 @@ export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: GroupPro
         Group: {data?.group.name} #{groupId}
       </h1>
       <GroupQueryResultContext.Provider value={data}>
-      {data?.group.messages.map(
-        (message) =>
-          ((!onlyInterestedInMessageId && (message.responseTo === null)) || (onlyInterestedInMessageId && (onlyInterestedInMessageId === message.messageId))) && (
-            <Message
-              messageId={message.messageId}
-              subscribeToMore={subscribeToMore}
-              className='root-message'
-              key={message.messageId}
-            />
-          )
+        {data?.group.messages.map(
+          (message) =>
+            ((!onlyInterestedInMessageId && (message.responseTo === null)) || (onlyInterestedInMessageId && (onlyInterestedInMessageId === message.messageId))) && (
+              <Message
+                messageId={message.messageId}
+                subscribeToMore={subscribeToMore}
+                className='root-message'
+                key={message.messageId}
+              />
+            )
         )}
       </GroupQueryResultContext.Provider>
     </>

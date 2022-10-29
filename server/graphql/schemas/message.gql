@@ -43,13 +43,20 @@ input MessageInput {
   mediaIds: [String!]
 }
 
+input MessageEditInput {
+  messageId: ID!
+  text: String!
+  mentionedUserIds: [ID!]
+  mediaIds: [String!]
+}
+
 type Query {
   message(messageId: ID!): Message
 }
 
 type Mutation {
   sendMessage(message: MessageInput!): Message
-  editMessage(messageId: ID!, message: MessageInput!): Message
+  editMessage(message: MessageEditInput!): Message
   deleteMessage(messageId: ID!): [ID!]
   createReaction(messageId: ID!, type: Int): Reaction # also can be used to delete and update
   createVote(messageId: ID!, type: VoteType): VoteType # also can be used to delete and update

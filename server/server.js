@@ -58,7 +58,7 @@ const getUser = token => {
       try {
         return jwt.verify(token, process.env.JWT_SECRET);
       } catch (err) {
-        if (process.env.NODE_ENV === 'development') return { id: token };
+        if (process.env.NODE_ENV === 'development') return { id: parseInt(token) };
       }
     }
     return null

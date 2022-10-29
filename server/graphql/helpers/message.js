@@ -4,7 +4,7 @@ module.exports = {
   isMessageCreator: async (userId, messageId, connection, isGroupAdminAcceptable, _break) => {
     const message = (await connection.query(
       `SELECT * FROM messages
-    WHERE message_id = ?`,
+      WHERE message_id = ?`,
       [messageId]
     ))[0][0];
 

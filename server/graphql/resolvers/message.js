@@ -124,7 +124,7 @@ module.exports = {
 
       const noMaxDepth = maxDepth === undefined;
 
-      return((
+      return ((
         await connection.query(`WITH RECURSIVE message_tree (${columns}, lvl) AS
           (
             SELECT ${columns}, 0 lvl
@@ -225,8 +225,7 @@ module.exports = {
     async editMessage(
       _,
       {
-        message: { text, responseToMessageId, mentionedUserIds, mediaIds },
-        messageId,
+        message: { messageId, text, mentionedUserIds, mediaIds },
       },
       { user, connection, pubsub }
     ) {
@@ -241,26 +240,30 @@ module.exports = {
       await isMessageCreator(user.id, messageId, connection, false, true);
       await connection.query(
         `UPDATE messages
-          SET text = ?, response_to_message_id = ?, updated_at = DEFAULT
+          SET text = ?, updated_at = DEFAULT
           WHERE message_id = ? `,
-        [text, responseToMessageId, messageId]
+        [text, messageId]
       );
       await connection.query(
         `DELETE FROM mentioned_users WHERE message_id = ? `,
         [messageId]
       );
-      await connection.query(
-        `INSERT INTO mentioned_users(message_id, user_id) VALUES ? `,
-        [mentionedUserIds.map((userId) => [messageId, userId])]
-      );
+      if (mentionedUserIds) {
+        await connection.query(
+          `INSERT INTO mentioned_users(message_id, user_id) VALUES ? `,
+          [mentionedUserIds.map((userId) => [messageId, userId])]
+        );
+      }
       await connection.query(
         `DELETE FROM message_medias WHERE message_id = ? `,
         [messageId]
       );
-      await connection.query(
-        `INSERT INTO message_medias(message_id, media_id) VALUES ? `,
-        [mediaIds.map((mediaId) => [messageId, mediaId])]
-      );
+      if (mediaIds) {
+        await connection.query(
+          `INSERT INTO message_medias(message_id, media_id) VALUES ? `,
+          [mediaIds.map((mediaId) => [messageId, mediaId])]
+        );
+      }
       pubsub.publish(`MESSAGE_EDITED_${groupId}`, { messageEdited: messageId });
       const editedMessage = (
         await connection.query(`SELECT * FROM messages WHERE message_id = ? `, [

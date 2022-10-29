@@ -13,6 +13,14 @@ const ADD_RESPONSE_MUTATION = gql`
   }
 `;
 
+const EDIT_MESSAGE_MUTATION = gql`
+  mutation EditMessageMutation($message: MessageEditInput!) {
+    editMessage(message: $message) {
+      messageId
+    }
+  }
+`;
+
 export enum EditorActions {
   ADD,
   EDIT,
@@ -23,6 +31,7 @@ export let openEditor = (_messageId: string, _groupId: string, _action: EditorAc
 
 export const Editor = () => {
   const [addResponseMutation] = useMutation(ADD_RESPONSE_MUTATION);
+  const [editMessageMutation] = useMutation(EDIT_MESSAGE_MUTATION);
   const [textValue, setTextValue] = useState("");
 
   const [displayEditor, setDisplayEditor] = useState(false);
@@ -45,7 +54,7 @@ export const Editor = () => {
     if (textValue === "") return;
     setTextValue("");
 
-    editorAction === EditorActions.ADD &&
+    if (editorAction === EditorActions.ADD) {
       addResponseMutation({
         variables: {
           message: {
@@ -55,6 +64,16 @@ export const Editor = () => {
           },
         },
       });
+    } else if (editorAction === EditorActions.EDIT) {
+      editMessageMutation({
+        variables: {
+          message: {
+            text: textValue,
+            messageId,
+          },
+        },
+      });
+    }
 
     setDisplayEditor(false);
   };
