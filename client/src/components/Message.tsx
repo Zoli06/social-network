@@ -6,7 +6,6 @@ import { MessageModify } from './MessageModify';
 import { MessageText } from './MessageText';
 import { MessageActions } from './MessageActions';
 import { Editor } from './Editor';
-import { UserContext } from '../App';
 import { GroupQueryResultContext } from './Group';
 
 import { MessageAuthorGQLData } from './MessageAuthor';

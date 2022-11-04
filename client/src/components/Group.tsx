@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import './Group.scss';
 import { useQuery, useLazyQuery, gql } from '@apollo/client';
 import { Message } from './Message';
