@@ -1,10 +1,21 @@
-@use 'variables' as v;
+@use './variables' as v;
 
 * {
   box-sizing: border-box;
 }
 
+body {
+  @include v.theme() {
+    background-color: v.theme-get('main-color');
+  }
+}
+
+h1, h2, h3, h4, h5, h6, p {
+  @include v.theme() {
+    color: v.theme-get('main-text-color');
+  }
+}
+
 p {
-  color: v.$main-text-color;
   font-size: 1.6vw;
 }

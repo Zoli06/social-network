@@ -1,8 +1,10 @@
 @use '../variables' as v;
 
 .message-container {
-  border-color: v.$secondary-color;
-  border-width: .1vw;
+  border-width: 0.1vw;
+  @include v.theme() {
+    border-color: v.theme-get('secondary-color');
+  }
 
   &.root-message {
     border-radius: 1vw;

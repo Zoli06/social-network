@@ -48,8 +48,7 @@ export const MessageModify = ({ messageId }: MessageModifyProps) => {
       )}
       {(isAdmin || isOwner) && (
         <svg
-          className='message-delete icon'
-          {...((isAdmin && !isOwner) && { style: { fill: 'red' } })}
+          className={`message-delete icon ${((isAdmin && !isOwner) && 'danger')}`}
           onClick={() => deleteMessage({ variables: { messageId } })}
         >
           <use href='./assets/images/svg-bundle.svg#delete' />

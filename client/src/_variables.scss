@@ -1,13 +1,53 @@
-$main-color: #eee;
-$secondary-color: #ccc;
-$main-text-color: #222;
-$secondary-text-color: #888;
-$link-color: #509;
-$link-hover-color: #70b;
-$link-visited-color: #70b;
-$upvote-color: red;
-$downvote-color: blue;
-$close-color: red;
+$themes: (
+  lightTheme: (
+    'main-color': #fff,
+    'secondary-color': #ccc,
+    'main-text-color': #222,
+    'secondary-text-color': #888,
+    'link-color': #509,
+    'link-hover-color': #70b,
+    'link-visited-color': #70b,
+    'upvote-color': red,
+    'downvote-color': blue,
+    'close-color': red,
+    'close-hover-color': #a00,
+    'editor-cover-color': rgba(0, 0, 0, 0.5),
+    'danger-color': red,
+    'danger-hover-color': #a00,
+  ),
+  darkTheme: (
+    'main-color': #222,
+    'secondary-color': #ccc,
+    'main-text-color': #bbb,
+    'secondary-text-color': #666,
+    'link-color': #509,
+    'link-hover-color': #70b,
+    'link-visited-color': #70b,
+    'upvote-color': red,
+    'downvote-color': blue,
+    'close-color': red,
+    'close-hover-color': #a00,
+    'editor-cover-color': rgba(0, 0, 0, 0.5),
+    'danger-color': red,
+    'danger-hover-color': #a00,
+  ),
+);
+
+$theme-map: null;
+
+@mixin theme() {
+  @each $theme, $map in $themes {
+    $theme-map: $map !global;
+    .#{$theme} & {
+      @content;
+    }
+  }
+  $theme-map: null !global;
+}
+
+@function theme-get($key) {
+  @return map-get($theme-map, $key);
+}
 
 $reaction-icon-size: 3vw;
 $reaction-add-popup-space: 0.5vw;

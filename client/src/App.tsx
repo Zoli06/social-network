@@ -18,8 +18,23 @@ export const UserContext = React.createContext({ userId: '' });
 export function App() {
   const { data, loading, error } = useQuery(ME);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error!</div>;
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.documentElement.className = 'darkTheme';
+  } else {
+    document.documentElement.className = 'lightTheme';
+  }
+
+  // detect if the user has changed their preferred color scheme
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    const newColorScheme = e.matches ? 'darkTheme' : 'lightTheme';
+    document.documentElement.className = newColorScheme;
+  });
+
+  if (loading) return <p>Loading...</p>;
+  if (error) {
+    console.log(error);
+    return <p>Error!</p>;
+  }
 
   return (
     <UserContext.Provider value={data?.me}>

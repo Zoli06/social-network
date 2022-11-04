@@ -174,10 +174,10 @@ export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: GroupPro
     });
   }, [groupId, subscribeToMore, getMessage, onlyInterestedInMessageId, maxDepth]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <p>Loading...</p>;
   if (error) {
     console.log(error);
-    return <div>Error!</div>;
+    return <p>Error!</p>;
   }
 
   return (

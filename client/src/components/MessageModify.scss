@@ -8,3 +8,17 @@
     height: 2vw;
   }
 }
+
+.message-delete {
+  &.danger {
+    @include v.theme() {
+      fill: v.theme-get('danger-color');
+    }
+
+    &:hover {
+      @include v.theme() {
+        fill: v.theme-get('danger-hover-color');
+      }
+    }
+  }
+}

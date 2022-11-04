@@ -1,25 +1,27 @@
 @use '../variables' as v;
 
 .message-author-container {
-  display: inline-flex;
-  height: 6vw;
+    display: inline-flex;
+    height: 6vw;
 
-  .profile-image {
-    aspect-ratio: 1 / 1;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 1vw;
-  }
+    .profile-image {
+      aspect-ratio: 1 / 1;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 1vw;
+    }
 
-  .intro {
-    color: v.$secondary-text-color;
-  }
+    .intro {
+      @include v.theme() {
+        color: v.theme-get('secondary-text-color');
+      }
+    }
 
-  .text-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    font-size: max(1.5vw, 12px);
+    .text-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      font-size: max(1.5vw, 12px);
+    }
   }
-}

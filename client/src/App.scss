@@ -11,20 +11,28 @@
 .icon {
   height: v.$reaction-icon-size;
   aspect-ratio: 1 / 1;
-  fill: v.$main-text-color;
+  @include v.theme() {
+    fill: v.theme-get('main-text-color');
+  }
 
   &:hover {
     cursor: pointer;
-    fill: v.$secondary-text-color;
+    @include v.theme() {
+      fill: v.theme-get('secondary-text-color');
+    }
   }
 
   &.active {
     &.upvote {
-      fill: v.$upvote-color;
+      @include v.theme() {
+        fill: v.theme-get('upvote-color');
+      }
     }
 
     &.downvote {
-      fill: v.$downvote-color;
+      @include v.theme() {
+        fill: v.theme-get('downvote-color');
+      }
     }
   }
 }

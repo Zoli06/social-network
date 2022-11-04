@@ -20,7 +20,9 @@
       .common-reaction-emoji {
         img {
           height: v.$reaction-icon-size;
-          filter: drop-shadow(0.1vw 0 0 v.$main-color);
+          @include v.theme() {
+            filter: drop-shadow(0.1vw 0 0 v.theme-get('main-color'));
+          }
         }
 
         &:not(:first-child) {
@@ -36,10 +38,12 @@
         right: calc(v.$reaction-icon-size / 2 - 10vw);
         height: v.$reaction-icon-size;
         width: calc(v.$reaction-icon-size * 7);
-        background-color: v.$secondary-color;
         border-radius: 1vw;
         display: none;
         justify-content: space-around;
+        @include v.theme() {
+          background-color: v.theme-get('secondary-color');
+        }
 
         .add-reaction-popup-emoji {
           height: calc(v.$reaction-icon-size * 0.75);
@@ -57,10 +61,6 @@
 
       .add-reaction-button {
         margin-left: calc(v.$reaction-icon-size / 2);
-        // height: 200%;
-        // transform: translateY(-50%);
-        // display: flex;
-        // align-items: flex-end;
 
         &:hover {
           cursor: pointer;
@@ -70,16 +70,14 @@
           }
         }
 
-        .add-reaction-icon:hover {
-          fill: v.$main-text-color;
-        }
-
         .user-have-reaction {
           .remove-reaction {
             position: absolute;
             right: calc(0px - v.$reaction-icon-size / 2);
             top: calc(0px - v.$reaction-icon-size / 2);
-            fill: v.$close-color;
+            @include v.theme() {
+              fill: v.theme-get('close-color');
+            }
           }
         }
       }
