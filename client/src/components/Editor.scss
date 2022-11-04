@@ -15,17 +15,46 @@
   }
 
   .editor {
-    width: 60%;
+    width: 100%;
+    padding: 0 15vw;
 
     #editor-text {
       overflow: hidden;
     }
 
-    #submit-button,
-    #editor-close-button {
+    #submit-button, #close-button {
+      position: absolute;
+      right: 5vw;
       height: 4vw;
-      width: 100%;
-      font-size: 1.75vw;
+      width: 4vw;
+    }
+
+    #submit-button {
+      bottom: 45vh;
+      @include v.theme() {
+        fill: v.theme-get('success-color');
+      }
+  
+      &:hover {
+        cursor: pointer;
+        @include v.theme() {
+          fill: v.theme-get('success-hover-color');
+        }
+      }
+    }
+
+    #close-button {
+      top: 45vh;
+      @include v.theme() {
+        fill: v.theme-get('danger-color');
+      }
+  
+      &:hover {
+        cursor: pointer;
+        @include v.theme() {
+          fill: v.theme-get('danger-hover-color');
+        }
+      }
     }
   }
 }

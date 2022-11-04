@@ -54,6 +54,12 @@
           }
         }
 
+        .remove-reaction {
+          @include v.theme() {
+            fill: v.theme-get('danger-color');
+          }
+        }
+
         &:hover {
           display: flex;
         }
@@ -67,17 +73,6 @@
 
           & ~ .add-reaction-popup {
             display: flex;
-          }
-        }
-
-        .user-have-reaction {
-          .remove-reaction {
-            position: absolute;
-            right: calc(0px - v.$reaction-icon-size / 2);
-            top: calc(0px - v.$reaction-icon-size / 2);
-            @include v.theme() {
-              fill: v.theme-get('close-color');
-            }
           }
         }
       }

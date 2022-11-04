@@ -205,12 +205,6 @@ export const MessageActions = ({
               <div className="add-reaction-icon icon user-have-reaction">
                 <Twemoji options={{ className: "icon" }} noWrapper>
                   <span>{String.fromCodePoint(reaction.type)}</span>
-                  <svg
-                    className="remove-reaction icon"
-                    onClick={() => handleAddReaction(null)}
-                  >
-                    <use href="./assets/images/svg-bundle.svg#close-button" />
-                  </svg>
                 </Twemoji>
               </div>
             ) : (
@@ -233,6 +227,14 @@ export const MessageActions = ({
                 </span>
               ))}
             </Twemoji>
+            {reaction &&
+              <svg
+                className="remove-reaction add-reaction-popup-emoji icon"
+                onClick={() => handleAddReaction(null)}
+              >
+                <use href="./assets/images/svg-bundle.svg#close-button-3" />
+              </svg>
+            }
           </div>
         </div>
       </div>

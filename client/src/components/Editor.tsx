@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import "./Editor.scss";
 import { useMutation, gql } from "@apollo/client";
 import MDEditor from "@uiw/react-md-editor";
@@ -85,23 +85,24 @@ export const Editor = () => {
 
   return displayEditor ? (
     <div className="editor-container">
-      <form onSubmit={handleSubmit} className="editor">
+      <form onSubmit={handleSubmit} className="editor" id="editor" name="editor">
         <MDEditor
           value={textValue}
           // @ts-ignore
           onChange={setTextValue}
           id="editor-text"
           previewOptions={{ rehypePlugins: [[rehypeSanitize]] }}
+          style={{ height: "25vh" }}
         />
-        <button
-          id="editor-close-button"
-          onClick={handleClose}
-        >
-          Close editor
-        </button>
-        <button type="submit" id="submit-button">
-          Submit
-        </button>
+        <svg id="close-button" onClick={handleClose}>
+          <use href="./assets/images/svg-bundle.svg#close-button-2" />
+        </svg>
+        <label>
+          <input type="submit" style={{display: "none"}} />
+          <svg id="submit-button">
+            <use href="./assets/images/svg-bundle.svg#ok" onClick={handleSubmit} />
+          </svg>
+        </label>
       </form>
     </div>
   ) : <></>;
