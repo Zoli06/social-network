@@ -1,0 +1,18 @@
+@use '../variables' as v;
+
+.group-member-element {
+  display: flex;
+  height: 3vw;
+
+  &:not(:last-of-type) {
+    margin-bottom: 1vw;
+  }
+
+  .name-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 66%;
+    overflow: hidden;
+  }
+}

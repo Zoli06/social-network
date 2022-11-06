@@ -1,0 +1,16 @@
+@use '../variables' as v;
+
+.group-members {
+  @include v.theme() {
+    border: 1px solid v.theme-get('secondary-color');
+  }
+
+  border-radius: 1vw;
+  padding: 1vw;
+  width: 22vw;
+
+  h1 {
+    margin-bottom: 2vw;
+    font-size: 2vw;
+  }
+}

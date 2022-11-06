@@ -4,14 +4,14 @@
   position: fixed;
   bottom: 5vw;
   right: 5vw;
-
   height: 4vh;
   width: 4vh;
+  background-color: white;
+  border-radius: 50%;
 
   @media screen and (max-width: v.$small-screen) {
     height: 20vw;
     width: 20vw;
-    background-color: white;
   }
   
   svg {
@@ -32,6 +32,4 @@
       }
     }
   }
-
-  border-radius: 50%;
 }

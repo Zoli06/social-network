@@ -1,7 +1,21 @@
 @use '../variables' as v;
 
-h1 {
-  width: 100%;
-  text-align: center;
-  font-size: 2rem;
+.group {
+  .group-columns {
+    display: flex;
+    gap: 2vw;
+  }
+
+  h1 {
+    width: 100%;
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 2vw;
+  }
+
+  .center-column {
+    display: flex;
+    flex-direction: column;
+    gap: 2vw;
+  }
 }

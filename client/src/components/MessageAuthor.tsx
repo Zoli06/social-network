@@ -2,6 +2,7 @@ import React from 'react';
 import './MessageAuthor.scss';
 import { gql } from '@apollo/client';
 import { GroupQueryResultContext } from './Group';
+import { ProfileImage } from './ProfileImage';
 
 export const MessageAuthor = ({ messageId }: MessageAuthorProps) => {
   const { group: { messages } } = React.useContext(GroupQueryResultContext)!;
@@ -17,12 +18,7 @@ export const MessageAuthor = ({ messageId }: MessageAuthorProps) => {
   return (
     <div className='message-author-container'>
       <div className='image-container'>
-        {/* eslint-disable-next-line */}
-        <img
-          src={!!profileImage?.url ? profileImage?.url : './assets/images/blank-profile-image.webp'}
-          className='profile-image'
-          alt='profile image'
-        />
+        <ProfileImage url={profileImage?.url} />
       </div>
       <div className='text-container'>
         <p className='name'>
@@ -65,7 +61,7 @@ export type MessageAuthorGQLData = {
     profileImage: {
       mediaId: string;
       url: string;
-    };
+    }
   };
 }
 

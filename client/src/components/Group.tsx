@@ -4,11 +4,13 @@ import { useQuery, useLazyQuery, gql } from '@apollo/client';
 import { Message } from './Message';
 import { MessageModify } from './MessageModify';
 import { AddRootMessage } from './AddRootMessage';
+import { GroupMembers } from './GroupMembers';
 import { cache } from '../index';
 
 import { MessageGQLData } from './Message';
 import { MessageModifyGroupGQLData } from './MessageModify';
 import { AddRootMessageGQLData } from './AddRootMessage';
+import { GroupMembersGQLData } from './GroupMembers';
 
 export const GroupQueryResultContext = React.createContext<GroupQueryGQLData | undefined>(undefined);
 
@@ -21,6 +23,7 @@ const GROUP_QUERY = gql`
 
       ...MessageModifyOnGroup
       ...AddRootMessage
+      ...GroupMembers
 
       groupId
       name
@@ -30,6 +33,7 @@ const GROUP_QUERY = gql`
   ${Message.fragments.message}
   ${MessageModify.fragments.group}
   ${AddRootMessage.fragments.group}
+  ${GroupMembers.fragments.group}
 `;
 
 const MESSAGE_QUERY = gql`
@@ -69,7 +73,7 @@ export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: GroupPro
     },
   });
 
-  const [getMessage] = useLazyQuery(MESSAGE_QUERY, {fetchPolicy: "no-cache"});
+  const [getMessage] = useLazyQuery(MESSAGE_QUERY, { fetchPolicy: "no-cache" });
 
   useEffect(() => {
     subscribeToMore({
@@ -185,25 +189,32 @@ export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: GroupPro
   }
 
   return (
-    <>
-      <h1>
-        Group: {data?.group.name} #{groupId}
-      </h1>
-      <GroupQueryResultContext.Provider value={data}>
-        {data?.group.messages.map(
-          (message) =>
-            ((!onlyInterestedInMessageId && (message.responseTo === null)) || (onlyInterestedInMessageId && (onlyInterestedInMessageId === message.messageId))) && (
-              <Message
-                messageId={message.messageId}
-                subscribeToMore={subscribeToMore}
-                className='root-message'
-                key={message.messageId}
-              />
-            )
-        )}
+    <GroupQueryResultContext.Provider value={data}>
+      <div className="group">
+        <h1>
+          Group: {data?.group.name} #{groupId}
+        </h1>
+        <div className="group-columns">
+          <div className="left-column">
+            <GroupMembers />
+          </div>
+          <div className="center-column">
+            {data?.group.messages.map(
+              (message) =>
+                ((!onlyInterestedInMessageId && (message.responseTo === null)) || (onlyInterestedInMessageId && (onlyInterestedInMessageId === message.messageId))) && (
+                  <Message
+                    messageId={message.messageId}
+                    subscribeToMore={subscribeToMore}
+                    className='root-message'
+                    key={message.messageId}
+                  />
+                )
+            )}
+          </div>
+        </div>
         <AddRootMessage />
-      </GroupQueryResultContext.Provider>
-    </>
+      </div>
+    </GroupQueryResultContext.Provider>
   );
 };
 
@@ -212,7 +223,7 @@ export type GroupQueryGQLData = {
     messages: MessageGQLData[];
     groupId: string;
     name: string;
-  } & MessageModifyGroupGQLData & AddRootMessageGQLData;
+  } & MessageModifyGroupGQLData & AddRootMessageGQLData & GroupMembersGQLData;
 }
 
 export type GroupProps = {

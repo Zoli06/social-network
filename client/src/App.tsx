@@ -4,7 +4,6 @@ import { Group } from './components/Group';
 import { useQuery, gql } from '@apollo/client';
 import React from 'react';
 import { Editor } from './components/Editor';
-import { AddRootMessage } from './components/AddRootMessage';
 
 const ME = gql`
   query {

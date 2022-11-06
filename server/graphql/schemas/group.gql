@@ -53,7 +53,6 @@ input GroupInput {
 
 type Query {
   group(groupId: ID): Group
-
 }
 
 type Mutation {
