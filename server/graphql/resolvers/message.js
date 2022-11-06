@@ -185,15 +185,17 @@ module.exports = {
     ) {
       user.authenticate();
 
-      // TODO: lot's of sql query like this, maybe we should make a helper function
-      const _groupId = (
-        await connection.query(
-          `SELECT group_id FROM messages WHERE message_id = ? `,
-          [responseToMessageId]
-        )
-      )[0][0].group_id.toString();
+      if (responseToMessageId != null) {
+        // TODO: lot's of sql query like this, maybe we should make a helper function
+        const _parentGroupId = (
+          await connection.query(
+            `SELECT group_id FROM messages WHERE message_id = ? `,
+            [responseToMessageId]
+          )
+        )[0][0].group_id.toString();
 
-      if (!!responseToMessageId && groupId !== _groupId) throw new Error("Parent message is in different group!");
+        if (!!responseToMessageId && groupId !== _parentGroupId) throw new Error("Parent message is in different group!");
+      }
 
       await isGroupMember(user.id, groupId, connection, true);
       const messageId = (

@@ -25,7 +25,7 @@ export const MessageModify = ({ messageId }: MessageModifyProps) => {
     user: { userId: messageOwnerUserId },
   } = messages.find((message) => message.messageId === messageId)!;
 
-  const { userId } = React.useContext(UserContext)!;
+  const { me: { userId } } = React.useContext(UserContext)!;
 
   const [deleteMessage] = useMutation(DELETE_MESSAGE_MUTATION, {
     variables: { messageId },

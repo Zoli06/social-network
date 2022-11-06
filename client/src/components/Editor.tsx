@@ -27,7 +27,7 @@ export enum EditorActions {
 }
 
 // TODO: make this code DRY
-export let openEditor = (_messageId: string, _groupId: string, _action: EditorActions, _textValue = '') => { };
+export let openEditor = (_messageId: string | null, _groupId: string, _action: EditorActions, _textValue = '') => { };
 
 export const Editor = () => {
   const [addResponseMutation] = useMutation(ADD_RESPONSE_MUTATION);
@@ -36,10 +36,10 @@ export const Editor = () => {
 
   const [displayEditor, setDisplayEditor] = useState(false);
   const [editorAction, setEditorAction] = useState<EditorActions>(EditorActions.ADD);
-  const [messageId, setMessageId] = useState('');
+  const [messageId, setMessageId] = useState<string| null>('');
   const [groupId, setGroupId] = useState('');
 
-  openEditor = (_messageId: string, _groupId: string, _editorAction: EditorActions, _textValue = '') => {
+  openEditor = (_messageId: string | null, _groupId: string, _editorAction: EditorActions, _textValue = '') => {
     setMessageId(_messageId);
     setGroupId(_groupId);
     setEditorAction(_editorAction);
@@ -92,7 +92,7 @@ export const Editor = () => {
           onChange={setTextValue}
           id="editor-text"
           previewOptions={{ rehypePlugins: [[rehypeSanitize]] }}
-          style={{ height: "25vh" }}
+          height={"25vh"}
         />
         <svg id="close-button" onClick={handleClose}>
           <use href="./assets/images/svg-bundle.svg#close-button-2" />
@@ -119,7 +119,7 @@ Editor.fragments = {
   `,
 };
 
-export type IEditorGQLData = {
+export type EditorGQLData = {
   messageId: string;
   group: { groupId: string };
 }

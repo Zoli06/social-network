@@ -4,6 +4,7 @@ import { Group } from './components/Group';
 import { useQuery, gql } from '@apollo/client';
 import React from 'react';
 import { Editor } from './components/Editor';
+import { AddRootMessage } from './components/AddRootMessage';
 
 const ME = gql`
   query {
@@ -13,10 +14,10 @@ const ME = gql`
   }
 `;
 
-export const UserContext = React.createContext({ userId: '' });
+export const UserContext = React.createContext<MeQueryGQLData | undefined>(undefined);
 
 export function App() {
-  const { data, loading, error } = useQuery(ME);
+  const { data, loading, error } = useQuery<MeQueryGQLData>(ME);
 
   if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
     document.documentElement.className = 'darkTheme';
@@ -37,9 +38,15 @@ export function App() {
   }
 
   return (
-    <UserContext.Provider value={data?.me}>
+    <UserContext.Provider value={data!}>
       <Group groupId='1' />
       <Editor />
     </UserContext.Provider>
   );
+}
+
+type MeQueryGQLData = {
+  me: {
+    userId: string;
+  }
 }

@@ -3,10 +3,12 @@ import './Group.scss';
 import { useQuery, useLazyQuery, gql } from '@apollo/client';
 import { Message } from './Message';
 import { MessageModify } from './MessageModify';
+import { AddRootMessage } from './AddRootMessage';
 import { cache } from '../index';
 
 import { MessageGQLData } from './Message';
 import { MessageModifyGroupGQLData } from './MessageModify';
+import { AddRootMessageGQLData } from './AddRootMessage';
 
 export const GroupQueryResultContext = React.createContext<GroupQueryGQLData | undefined>(undefined);
 
@@ -18,6 +20,7 @@ const GROUP_QUERY = gql`
       }
 
       ...MessageModifyOnGroup
+      ...AddRootMessage
 
       groupId
       name
@@ -26,6 +29,7 @@ const GROUP_QUERY = gql`
 
   ${Message.fragments.message}
   ${MessageModify.fragments.group}
+  ${AddRootMessage.fragments.group}
 `;
 
 const MESSAGE_QUERY = gql`
@@ -197,6 +201,7 @@ export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: GroupPro
               />
             )
         )}
+        <AddRootMessage />
       </GroupQueryResultContext.Provider>
     </>
   );
@@ -207,7 +212,7 @@ export type GroupQueryGQLData = {
     messages: MessageGQLData[];
     groupId: string;
     name: string;
-  } & MessageModifyGroupGQLData;
+  } & MessageModifyGroupGQLData & AddRootMessageGQLData;
 }
 
 export type GroupProps = {

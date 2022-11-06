@@ -12,7 +12,7 @@ import { MessageAuthorGQLData } from './MessageAuthor';
 import { MessageTextGQLData } from './MessageText';
 import { MessageModifyMessageGQLData } from './MessageModify';
 import { MessageActionsGQLData } from './MessageActions';
-import { IEditorGQLData } from './Editor';
+import { EditorGQLData } from './Editor';
 
 export function Message({
   messageId,
@@ -81,7 +81,7 @@ export type MessageGQLData = MessageAuthorGQLData &
   MessageTextGQLData &
   MessageModifyMessageGQLData &
   MessageActionsGQLData &
-  IEditorGQLData & {
+  EditorGQLData & {
   responseTo?: { messageId: string };
 }
 
