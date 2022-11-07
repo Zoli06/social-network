@@ -13,9 +13,9 @@ export const GroupMembers = () => {
 
   return (
     <div className='group-members'>
-      <h1>
+      <h2>
         Members
-      </h1>
+      </h2>
       {users.map((user) => (
         <GroupMemberElement key={user.userId} userId={user.userId} />
       ))}

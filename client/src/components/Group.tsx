@@ -5,25 +5,37 @@ import { Message } from './Message';
 import { MessageModify } from './MessageModify';
 import { AddRootMessage } from './AddRootMessage';
 import { GroupMembers } from './GroupMembers';
+import { GroupInfos } from './GroupInfos';
 import { cache } from '../index';
 
 import { MessageGQLData } from './Message';
 import { MessageModifyGroupGQLData } from './MessageModify';
 import { AddRootMessageGQLData } from './AddRootMessage';
 import { GroupMembersGQLData } from './GroupMembers';
+import { GroupInfosGQLData } from './GroupInfos';
 
-export const GroupQueryResultContext = React.createContext<GroupQueryGQLData | undefined>(undefined);
+export const GroupQueryResultContext = React.createContext<
+  GroupQueryGQLData | undefined
+>(undefined);
 
 const GROUP_QUERY = gql`
-  query GetGroup($groupId: ID!, $onlyInterestedInMessageId: ID, $maxDepth: Int) {
+  query GetGroup(
+    $groupId: ID!
+    $onlyInterestedInMessageId: ID
+    $maxDepth: Int
+  ) {
     group(groupId: $groupId) {
-      messages(onlyInterestedInMessageId: $onlyInterestedInMessageId, maxDepth: $maxDepth) {
+      messages(
+        onlyInterestedInMessageId: $onlyInterestedInMessageId
+        maxDepth: $maxDepth
+      ) {
         ...Message
       }
 
       ...MessageModifyOnGroup
       ...AddRootMessage
       ...GroupMembers
+      ...GroupInfos
 
       groupId
       name
@@ -34,6 +46,7 @@ const GROUP_QUERY = gql`
   ${MessageModify.fragments.group}
   ${AddRootMessage.fragments.group}
   ${GroupMembers.fragments.group}
+  ${GroupInfos.fragments.group}
 `;
 
 const MESSAGE_QUERY = gql`
@@ -56,7 +69,7 @@ const MESSAGE_EDITED_SUBSCRIPTION = gql`
   subscription MessageEdited($groupId: ID!) {
     messageEdited(groupId: $groupId)
   }
-`
+`;
 
 const MESSAGES_DELETED_SUBSCRIPTION = gql`
   subscription MessagesDeleted($groupId: ID!) {
@@ -64,16 +77,23 @@ const MESSAGES_DELETED_SUBSCRIPTION = gql`
   }
 `;
 
-export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: GroupProps) => {
-  const { data, loading, error, subscribeToMore } = useQuery<GroupQueryGQLData>(GROUP_QUERY, {
-    variables: {
-      groupId,
-      onlyInterestedInMessageId,
-      maxDepth,
-    },
-  });
+export const Group = ({
+  groupId,
+  onlyInterestedInMessageId,
+  maxDepth,
+}: GroupProps) => {
+  const { data, loading, error, subscribeToMore } = useQuery<GroupQueryGQLData>(
+    GROUP_QUERY,
+    {
+      variables: {
+        groupId,
+        onlyInterestedInMessageId,
+        maxDepth,
+      },
+    }
+  );
 
-  const [getMessage] = useLazyQuery(MESSAGE_QUERY, { fetchPolicy: "no-cache" });
+  const [getMessage] = useLazyQuery(MESSAGE_QUERY, { fetchPolicy: 'no-cache' });
 
   useEffect(() => {
     subscribeToMore({
@@ -81,7 +101,12 @@ export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: GroupPro
       variables: {
         groupId,
       },
-      updateQuery: (prev, { subscriptionData }: { subscriptionData: { data: { messageAdded: MessageGQLData } } }) => {
+      updateQuery: (
+        prev,
+        {
+          subscriptionData,
+        }: { subscriptionData: { data: { messageAdded: MessageGQLData } } }
+      ) => {
         if (!subscriptionData.data) {
           return prev;
         }
@@ -121,7 +146,12 @@ export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: GroupPro
       variables: {
         groupId,
       },
-      updateQuery: (prev, { subscriptionData }: { subscriptionData: { data: { messageEdited: MessageGQLData } } }) => {
+      updateQuery: (
+        prev,
+        {
+          subscriptionData,
+        }: { subscriptionData: { data: { messageEdited: MessageGQLData } } }
+      ) => {
         if (!subscriptionData.data) {
           return prev;
         }
@@ -158,15 +188,20 @@ export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: GroupPro
         });
 
         return prev;
-      }
-    })
+      },
+    });
 
     subscribeToMore({
       document: MESSAGES_DELETED_SUBSCRIPTION,
       variables: {
         groupId,
       },
-      updateQuery: (prev, { subscriptionData }: { subscriptionData: { data: { messagesDeleted: string[] } } }) => {
+      updateQuery: (
+        prev,
+        {
+          subscriptionData,
+        }: { subscriptionData: { data: { messagesDeleted: string[] } } }
+      ) => {
         if (!subscriptionData.data) {
           return prev;
         }
@@ -175,12 +210,23 @@ export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: GroupPro
         return {
           group: {
             ...prev.group,
-            messages: prev.group.messages.filter((message) => !subscriptionData.data.messagesDeleted.includes(message.messageId)),
+            messages: prev.group.messages.filter(
+              (message) =>
+                !subscriptionData.data.messagesDeleted.includes(
+                  message.messageId
+                )
+            ),
           },
         };
-      }
+      },
     });
-  }, [groupId, subscribeToMore, getMessage, onlyInterestedInMessageId, maxDepth]);
+  }, [
+    groupId,
+    subscribeToMore,
+    getMessage,
+    onlyInterestedInMessageId,
+    maxDepth,
+  ]);
 
   if (loading) return <p>Loading...</p>;
   if (error) {
@@ -190,18 +236,20 @@ export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: GroupPro
 
   return (
     <GroupQueryResultContext.Provider value={data}>
-      <div className="group">
+      <div className='group'>
         <h1>
           Group: {data?.group.name} #{groupId}
         </h1>
-        <div className="group-columns">
-          <div className="left-column">
+        <div className='group-columns'>
+          <div className='left-column'>
             <GroupMembers />
           </div>
-          <div className="center-column">
+          <div className='center-column'>
             {data?.group.messages.map(
               (message) =>
-                ((!onlyInterestedInMessageId && (message.responseTo === null)) || (onlyInterestedInMessageId && (onlyInterestedInMessageId === message.messageId))) && (
+                ((!onlyInterestedInMessageId && message.responseTo === null) ||
+                  (onlyInterestedInMessageId &&
+                    onlyInterestedInMessageId === message.messageId)) && (
                   <Message
                     messageId={message.messageId}
                     subscribeToMore={subscribeToMore}
@@ -210,6 +258,9 @@ export const Group = ({ groupId, onlyInterestedInMessageId, maxDepth }: GroupPro
                   />
                 )
             )}
+          </div>
+          <div className='right-column'>
+            <GroupInfos />
           </div>
         </div>
         <AddRootMessage />
@@ -223,11 +274,14 @@ export type GroupQueryGQLData = {
     messages: MessageGQLData[];
     groupId: string;
     name: string;
-  } & MessageModifyGroupGQLData & AddRootMessageGQLData & GroupMembersGQLData;
-}
+  } & MessageModifyGroupGQLData &
+    AddRootMessageGQLData &
+    GroupMembersGQLData &
+    GroupInfosGQLData;
+};
 
 export type GroupProps = {
   groupId: string;
   onlyInterestedInMessageId?: string | null;
   maxDepth?: number;
-}
+};

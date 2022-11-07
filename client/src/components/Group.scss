@@ -18,4 +18,10 @@
     flex-direction: column;
     gap: 2vw;
   }
+
+  .left-column, .right-column {
+    position: sticky;
+    align-self: flex-start;
+    top: 5vw;
+  }
 }

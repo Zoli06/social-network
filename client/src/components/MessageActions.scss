@@ -41,6 +41,7 @@
         border-radius: 1vw;
         display: none;
         justify-content: space-around;
+        z-index: 999;
         @include v.theme() {
           background-color: v.theme-get('secondary-color');
         }

@@ -15,12 +15,12 @@
   }
   
   svg {
-    height: calc(100% + .5vw);
-    width: calc(100% + .5vw);
+    height: calc(100% + .3vh);
+    width: calc(100% + .3vh);
 
     position: relative;
-    top: -.25vw;
-    left: -.25vw;
+    top: -.15vh;
+    left: -.15vh;
 
     @include v.theme() {
       fill: v.theme-get('success-color');
