@@ -2,10 +2,10 @@
 
 .group-member-element {
   display: flex;
-  height: 3vw;
+  height: v.$icon-size;
 
   &:not(:last-of-type) {
-    margin-bottom: 1vw;
+    margin-bottom: 20px;
   }
 
   .name-container {

@@ -1,27 +1,20 @@
 @use '../variables' as v;
 
 .group-infos {
-  @include v.theme() {
-    border: 1px solid v.theme-get('secondary-color');
-  }
-
-  border-radius: 1vw;
-  padding: 1vw;
+  padding: v.$response-indent;
   width: 22vw;
 
   h2 {
-    margin-bottom: 2vw;
-    font-size: 2vw;
+    margin-bottom: 30px;
     text-align: center;
   }
 
   div {
-    margin-bottom: 2vw;
+    margin-bottom: .5rem;
 
     h3 {
       text-align: center;
       font-weight: bold;
-      font-size: 1.6vw;
     }
   }
 }

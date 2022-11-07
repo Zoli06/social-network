@@ -49,11 +49,21 @@ $theme-map: null;
   @return map-get($theme-map, $key);
 }
 
-$reaction-icon-size: 3vw;
+$icon-size: 40px;
 $reaction-add-popup-space: 0.5vw;
 
-$response-indent: 1.5vw;
+$response-indent: 30px;
 
 $small-screen: 600px;
-$medium-screen: 900px;
+$medium-screen: 950px;
 $large-screen: 1200px;
+
+$h1-font-size: 2.5rem;
+$h2-font-size: 2.3rem;
+$h3-font-size: 2.1rem;
+$h4-font-size: 1.9rem;
+$h5-font-size: 1.8rem;
+$h6-font-size: 1.7rem;
+$p-font-size: 1.7rem;
+
+$border-radius: 20px;

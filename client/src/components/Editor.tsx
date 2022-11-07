@@ -109,7 +109,7 @@ export const Editor = () => {
           onChange={setTextValue}
           id='editor-text'
           previewOptions={{ rehypePlugins: [[rehypeSanitize]] }}
-          height={'25vh'}
+          height={'50vh'}
         />
         <svg id='close-button' onClick={handleClose}>
           <use href='./assets/images/svg-bundle.svg#close-button-2' />

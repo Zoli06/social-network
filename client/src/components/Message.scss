@@ -7,9 +7,8 @@
   }
 
   &.root-message {
-    border-radius: 1vw;
+    border-radius: v.$border-radius;
     border-style: solid;
-    width: 100%;
     padding-bottom: v.$response-indent;
   }
 
@@ -20,7 +19,7 @@
   }
 
   .message-content {
-    padding: 1.5vw;
+    padding: v.$response-indent;
   }
 
   .message-header {

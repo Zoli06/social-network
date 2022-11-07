@@ -1,15 +1,67 @@
 @use 'variables' as v;
 
+* {
+  box-sizing: border-box;
+}
+
 #root {
   justify-content: center;
-  padding: 5vw 5vw;
   display: flex;
   flex-direction: column;
   row-gap: 5vw;
+  display: flex;
+  padding: 5vw 0;
+  align-items: center;
+}
+
+body {
+  @include v.theme() {
+    background-color: v.theme-get('main-color');
+  }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  @include v.theme() {
+    color: v.theme-get('main-text-color');
+  }
+}
+
+h1 {
+  font-size: v.$h1-font-size;
+}
+
+h2 {
+  font-size: v.$h2-font-size;
+}
+
+h3 {
+  font-size: v.$h3-font-size;
+}
+
+h4 {
+  font-size: v.$h4-font-size;
+}
+
+h5 {
+  font-size: v.$h5-font-size;
+}
+
+h6 {
+  font-size: v.$h6-font-size;
+}
+
+p {
+  font-size: v.$p-font-size;
 }
 
 .icon {
-  height: v.$reaction-icon-size;
+  height: v.$icon-size;
   aspect-ratio: 1 / 1;
   @include v.theme() {
     fill: v.theme-get('main-text-color');

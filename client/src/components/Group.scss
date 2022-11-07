@@ -9,19 +9,45 @@
   h1 {
     width: 100%;
     text-align: center;
-    font-size: 2rem;
     margin-bottom: 2vw;
   }
 
-  .center-column {
-    display: flex;
-    flex-direction: column;
-    gap: 2vw;
-  }
+  .group-columns {
+    .center-column {
+      display: flex;
+      flex-direction: column;
+      gap: 2vw;
 
-  .left-column, .right-column {
-    position: sticky;
-    align-self: flex-start;
-    top: 5vw;
+      & > div {
+        width: 30vw;
+        max-width: 1000px;
+        min-width: 450px;
+
+        @media screen and (max-width: v.$medium-screen) {
+          width: 80vw;
+        }
+      }
+    }
+
+    .left-column,
+    .right-column {
+      position: sticky;
+      align-self: flex-start;
+      top: 5vw;
+      border-radius: 20px;
+      @include v.theme() {
+        border: 0.1vw solid v.theme-get('secondary-color');
+      }
+
+      & > div {
+        width: 15vw;
+        max-width: 500px;
+        min-width: 200px;
+      }
+
+      @media screen and (max-width: v.$medium-screen) {
+        display: none;
+      }
+    }
   }
 }

@@ -18,7 +18,7 @@ export const GroupInfos = () => {
     }
   }
 
-  return <div className='group-infos right-column'>
+  return <div className='group-infos'>
     <h2>Group Infos</h2>
     <div className='description'>
       <h3>Description</h3>

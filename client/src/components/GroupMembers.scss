@@ -1,17 +1,11 @@
 @use '../variables' as v;
 
 .group-members {
-  @include v.theme() {
-    border: 1px solid v.theme-get('secondary-color');
-  }
-
-  border-radius: 1vw;
   padding: 1vw;
-  width: 22vw;
+  height: fit-content;
 
   h2 {
     text-align: center;
-    margin-bottom: 2vw;
-    font-size: 2vw;
+    margin-bottom: 30px;
   }
 }

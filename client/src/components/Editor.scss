@@ -15,22 +15,25 @@
   }
 
   .editor {
-    width: 100%;
+    width: 60vw;
     padding: 0 15vw;
+
+    @media screen and (max-width: v.$medium-screen) {
+      width: 100vw;
+    }
 
     #editor-text {
       overflow: hidden;
     }
 
     #submit-button, #close-button {
-      position: absolute;
-      right: 5vw;
-      height: 4vh;
-      width: 4vh;
+      height: calc(2 * v.$icon-size);
+      width: calc(2 * v.$icon-size);
+        position: static;
+        margin-top: 25px;
     }
 
     #submit-button {
-      bottom: 45vh;
       @include v.theme() {
         fill: v.theme-get('success-color');
       }
@@ -44,7 +47,6 @@
     }
 
     #close-button {
-      top: 45vh;
       @include v.theme() {
         fill: v.theme-get('danger-color');
       }
@@ -55,6 +57,9 @@
           fill: v.theme-get('danger-hover-color');
         }
       }
+
+      margin-left: calc(50% - v.$icon-size * 2.5);
+      margin-right: v.$icon-size;
     }
   }
 }

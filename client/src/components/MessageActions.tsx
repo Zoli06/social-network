@@ -190,7 +190,7 @@ export const MessageActions = ({
         <Twemoji noWrapper>
           <div className="common-reactions">
             {[...new Set(reactions.map((reaction) => reaction.type))]
-              .slice(0, 3)
+              .slice(0, 2)
               .map((reactionType) => (
                 <div className="common-reaction-emoji" key={uuidv4()}>
                   {String.fromCodePoint(reactionType)}

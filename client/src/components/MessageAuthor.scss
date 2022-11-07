@@ -2,7 +2,7 @@
 
 .message-author-container {
   display: inline-flex;
-  height: 6vw;
+  height: calc(2 * v.$icon-size);
 
   .intro {
     @include v.theme() {
@@ -14,6 +14,22 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    font-size: max(1.5vw, 12px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    .name {
+      @media (max-width: v.$medium-screen) {
+        display: none;
+      }
+    }
+
+    .user-name,
+    .intro {
+      @media screen and (max-width: v.$medium-screen) {
+        font-size: calc(v.$p-font-size * 1.25);
+        line-height: calc(v.$p-font-size * 1.4);
+      }
+    }
   }
 }

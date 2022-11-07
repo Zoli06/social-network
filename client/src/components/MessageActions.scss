@@ -4,7 +4,7 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  column-gap: calc(v.$reaction-icon-size / 2);
+  column-gap: calc(v.$icon-size / 2);
   position: relative;
 
   .reactions-container {
@@ -19,14 +19,14 @@
 
       .common-reaction-emoji {
         img {
-          height: v.$reaction-icon-size;
+          height: v.$icon-size;
           @include v.theme() {
             filter: drop-shadow(0.1vw 0 0 v.theme-get('main-color'));
           }
         }
 
         &:not(:first-child) {
-          margin-right: -0.85vw;
+          margin-right: calc(v.$icon-size / -2);
         }
       }
     }
@@ -34,10 +34,10 @@
     .add-reaction-container {
       .add-reaction-popup {
         position: absolute;
-        bottom: calc(v.$reaction-icon-size + 0.5vw);
-        right: calc(v.$reaction-icon-size / 2 - 10vw);
-        height: v.$reaction-icon-size;
-        width: calc(v.$reaction-icon-size * 7);
+        bottom: calc(v.$icon-size + 0.5vw);
+        right: calc(v.$icon-size / 2 - 10vw);
+        height: v.$icon-size;
+        width: calc(v.$icon-size * 7);
         border-radius: 1vw;
         display: none;
         justify-content: space-around;
@@ -47,8 +47,8 @@
         }
 
         .add-reaction-popup-emoji {
-          height: calc(v.$reaction-icon-size * 0.75);
-          transform: translateY(calc(v.$reaction-icon-size * 0.125));
+          height: calc(v.$icon-size * 0.75);
+          transform: translateY(calc(v.$icon-size * 0.125));
 
           &:hover {
             transform: scale(1.1);
@@ -67,7 +67,7 @@
       }
 
       .add-reaction-button {
-        margin-left: calc(v.$reaction-icon-size / 2);
+        margin-left: calc(v.$icon-size / 2);
 
         &:hover {
           cursor: pointer;
@@ -80,8 +80,8 @@
 
       .space-holder {
         height: v.$reaction-add-popup-space;
-        width: v.$reaction-icon-size;
-        bottom: v.$reaction-icon-size;
+        width: v.$icon-size;
+        bottom: v.$icon-size;
         position: absolute;
 
         & ~ .add-reaction-popup {
