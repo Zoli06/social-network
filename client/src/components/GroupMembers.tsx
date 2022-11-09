@@ -6,13 +6,13 @@ import './GroupMembers.scss'
 
 import { GroupMemberElementGQLData } from './GroupMemberElement'
 
-export const GroupMembers = () => {
+export const GroupMembers = ({ className = '' }: GroupMembersProps) => {
   const { group: { members, admins } } = React.useContext(GroupQueryResultContext)!
 
   const users = [...members, ...admins]
 
   return (
-    <div className='group-members'>
+    <div className={`group-members ${className}`}>
       <h2>
         Members
       </h2>
@@ -48,4 +48,8 @@ export type GroupMembersGQLData = {
   admins: {
     userId: string;
   } & GroupMemberElementGQLData[];
+}
+
+export type GroupMembersProps = {
+  className?: string;
 }

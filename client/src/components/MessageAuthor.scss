@@ -2,7 +2,7 @@
 
 .message-author-container {
   display: inline-flex;
-  height: calc(2 * v.$icon-size);
+  height: var(--profile-image-size);
 
   .intro {
     @include v.theme() {
@@ -27,8 +27,8 @@
     .user-name,
     .intro {
       @media screen and (max-width: v.$medium-screen) {
-        font-size: calc(v.$p-font-size * 1.25);
-        line-height: calc(v.$p-font-size * 1.4);
+        font-size: calc(var(--p-font-size) * 1.25);
+        line-height: calc(var(--p-font-size) * 1.4);
       }
     }
   }

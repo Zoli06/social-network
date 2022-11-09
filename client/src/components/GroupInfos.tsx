@@ -3,7 +3,7 @@ import './GroupInfos.scss';
 import { GroupQueryResultContext } from './Group';
 import { gql } from '@apollo/client';
 
-export const GroupInfos = () => {
+export const GroupInfos = ({ className='' }: GroupInfosProps) => {
   const { group: { description, visibility, createdAt } } = useContext(GroupQueryResultContext)!;
 
   const renderVisibilityText = (visibility: string) => {
@@ -18,7 +18,7 @@ export const GroupInfos = () => {
     }
   }
 
-  return <div className='group-infos'>
+  return <div className={`group-infos ${className}`}>
     <h2>Group Infos</h2>
     <div className='description'>
       <h3>Description</h3>
@@ -57,4 +57,8 @@ export type GroupInfosGQLData = {
   description: string;
   visibility: string;
   createdAt: string;
+};
+
+export type GroupInfosProps = {
+  className?: string;
 };

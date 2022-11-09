@@ -242,7 +242,7 @@ export const Group = ({
         </h1>
         <div className='group-columns'>
           <div className='left-column'>
-            <GroupMembers />
+            <GroupMembers className="box" />
           </div>
           <div className='center-column'>
             {data?.group.messages.map(
@@ -253,14 +253,14 @@ export const Group = ({
                   <Message
                     messageId={message.messageId}
                     subscribeToMore={subscribeToMore}
-                    className='root-message'
+                    className='root-message box'
                     key={message.messageId}
                   />
                 )
             )}
           </div>
           <div className='right-column'>
-            <GroupInfos />
+            <GroupInfos className='box' />
           </div>
         </div>
         <AddRootMessage />

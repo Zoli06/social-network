@@ -49,21 +49,48 @@ $theme-map: null;
   @return map-get($theme-map, $key);
 }
 
-$icon-size: 40px;
-$reaction-add-popup-space: 0.5vw;
-
-$response-indent: 30px;
-
 $small-screen: 600px;
 $medium-screen: 950px;
 $large-screen: 1200px;
 
-$h1-font-size: 2.5rem;
-$h2-font-size: 2.3rem;
-$h3-font-size: 2.1rem;
-$h4-font-size: 1.9rem;
-$h5-font-size: 1.8rem;
-$h6-font-size: 1.7rem;
-$p-font-size: 1.7rem;
+:root {
+  --h1-font-size: 2.5rem;
+  --h2-font-size: 2.3rem;
+  --h3-font-size: 2.1rem;
+  --h4-font-size: 1.9rem;
+  --h5-font-size: 1.8rem;
+  --h6-font-size: 1.7rem;
+  --p-font-size: 1.7rem;
+  --profile-image-size: 80px;
+  --icon-size: min(3vw, 40px);
 
-$border-radius: 20px;
+  --reaction-add-popup-space: 0.5vw;
+  --indent: min(30px, 1.5vw);
+  --border-radius: 20px;
+}
+
+@media screen and (max-width: $medium-screen) {
+  :root {
+    --h1-font-size: 1.8rem;
+    --h2-font-size: 1.6rem;
+    --h3-font-size: 1.5rem;
+    --h4-font-size: 1.4rem;
+    --h5-font-size: 1.3rem;
+    --h6-font-size: 1.2rem;
+    --p-font-size: 1.2rem;
+    --profile-image-size: 60px;
+    --icon-size: min(7vw, 30px);
+  }
+}
+
+@media screen and (max-width: $small-screen) {
+  :root {
+    --h1-font-size: 1.5rem;
+    --h2-font-size: 1.4rem;
+    --h3-font-size: 1.3rem;
+    --h4-font-size: 1.2rem;
+    --h5-font-size: 1.1rem;
+    --h6-font-size: 1rem;
+    --p-font-size: 1rem;
+  }
+}

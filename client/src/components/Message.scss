@@ -2,24 +2,24 @@
 
 .message-container {
   border-width: 0.1vw;
+  min-width: 100px;
+
   @include v.theme() {
     border-color: v.theme-get('secondary-color');
   }
 
   &.root-message {
-    border-radius: v.$border-radius;
-    border-style: solid;
-    padding-bottom: v.$response-indent;
+    padding-bottom: var(--indent);
   }
 
   &:not(.root-message) {
     border-left-style: solid;
-    width: calc(100% - v.$response-indent);
-    margin-left: v.$response-indent;
+    width: calc(100% - var(--indent));
+    margin-left: var(--indent);
   }
 
   .message-content {
-    padding: v.$response-indent;
+    padding: var(--indent);
   }
 
   .message-header {

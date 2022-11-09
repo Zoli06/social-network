@@ -2,11 +2,7 @@
 
 .group-member-element {
   display: flex;
-  height: v.$icon-size;
-
-  &:not(:last-of-type) {
-    margin-bottom: 20px;
-  }
+  height: calc(var(--profile-image-size) / 2);
 
   .name-container {
     display: flex;

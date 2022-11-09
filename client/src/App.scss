@@ -10,7 +10,7 @@
   flex-direction: column;
   row-gap: 5vw;
   display: flex;
-  padding: 5vw 0;
+  padding: 5vw 20px;
   align-items: center;
 }
 
@@ -32,36 +32,47 @@ p {
   }
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-align: center;
+}
+
 h1 {
-  font-size: v.$h1-font-size;
+  font-size: var(--h1-font-size);
 }
 
 h2 {
-  font-size: v.$h2-font-size;
+  font-size: var(--h2-font-size);
+  margin-bottom: 30px;
 }
 
 h3 {
-  font-size: v.$h3-font-size;
+  font-size: var(--h3-font-size);
+  font-weight: bold;
 }
 
 h4 {
-  font-size: v.$h4-font-size;
+  font-size: var(--h4-font-size);
 }
 
 h5 {
-  font-size: v.$h5-font-size;
+  font-size: var(--h5-font-size);
 }
 
 h6 {
-  font-size: v.$h6-font-size;
+  font-size: var(--h6-font-size);
 }
 
 p {
-  font-size: v.$p-font-size;
+  font-size: var(--p-font-size);
 }
 
 .icon {
-  height: v.$icon-size;
+  height: var(--icon-size);
   aspect-ratio: 1 / 1;
   @include v.theme() {
     fill: v.theme-get('main-text-color');
@@ -87,4 +98,11 @@ p {
       }
     }
   }
+}
+
+.box {
+  @include v.theme() {
+    border: 0.1vw solid v.theme-get('secondary-color');
+  }
+  border-radius: var(--border-radius);
 }

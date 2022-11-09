@@ -4,23 +4,23 @@
   position: fixed;
   bottom: 5vw;
   right: 5vw;
-  height: 4vh;
-  width: 4vh;
+  height: calc(var(--icon-size) * 2);
+  width: calc(var(--icon-size) * 2);
   background-color: white;
   border-radius: 50%;
 
   @media screen and (max-width: v.$small-screen) {
-    height: 20vw;
-    width: 20vw;
+    height: calc(var(--icon-size) * 3);
+    width: calc(var(--icon-size) * 3);
   }
-  
+
   svg {
-    height: calc(100% + .3vh);
-    width: calc(100% + .3vh);
+    height: calc(100% + 0.3vh);
+    width: calc(100% + 0.3vh);
 
     position: relative;
-    top: -.15vh;
-    left: -.15vh;
+    top: -0.15vh;
+    left: -0.15vh;
 
     @include v.theme() {
       fill: v.theme-get('success-color');

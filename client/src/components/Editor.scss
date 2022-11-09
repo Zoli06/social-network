@@ -26,18 +26,19 @@
       overflow: hidden;
     }
 
-    #submit-button, #close-button {
-      height: calc(2 * v.$icon-size);
-      width: calc(2 * v.$icon-size);
-        position: static;
-        margin-top: 25px;
+    #submit-button,
+    #close-button {
+      height: calc(2 * var(--icon-size));
+      width: calc(2 * var(--icon-size));
+      position: static;
+      margin-top: 25px;
     }
 
     #submit-button {
       @include v.theme() {
         fill: v.theme-get('success-color');
       }
-  
+
       &:hover {
         cursor: pointer;
         @include v.theme() {
@@ -50,7 +51,7 @@
       @include v.theme() {
         fill: v.theme-get('danger-color');
       }
-  
+
       &:hover {
         cursor: pointer;
         @include v.theme() {
@@ -58,8 +59,8 @@
         }
       }
 
-      margin-left: calc(50% - v.$icon-size * 2.5);
-      margin-right: v.$icon-size;
+      margin-left: calc(50% - var(--icon-size) * 2.5);
+      margin-right: var(--icon-size);
     }
   }
 }

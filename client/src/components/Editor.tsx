@@ -32,7 +32,7 @@ export let openEditor = (
   _groupId: string,
   _action: EditorActions,
   _textValue = ''
-) => {};
+) => { };
 
 export const Editor = () => {
   const [addResponseMutation] = useMutation(ADD_RESPONSE_MUTATION);

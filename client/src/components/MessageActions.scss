@@ -4,7 +4,7 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  column-gap: calc(v.$icon-size / 2);
+  column-gap: calc(var(--icon-size) / 2);
   position: relative;
 
   .reactions-container {
@@ -17,16 +17,20 @@
       display: flex;
       flex-direction: row-reverse;
 
+      @media screen and (max-width: v.$small-screen) {
+        display: none;
+      }
+
       .common-reaction-emoji {
         img {
-          height: v.$icon-size;
+          height: var(--icon-size);
           @include v.theme() {
-            filter: drop-shadow(0.1vw 0 0 v.theme-get('main-color'));
+            filter: drop-shadow(2px 0 0 v.theme-get('main-color'));
           }
         }
 
         &:not(:first-child) {
-          margin-right: calc(v.$icon-size / -2);
+          margin-right: calc(var(--icon-size) / -2);
         }
       }
     }
@@ -34,10 +38,10 @@
     .add-reaction-container {
       .add-reaction-popup {
         position: absolute;
-        bottom: calc(v.$icon-size + 0.5vw);
-        right: calc(v.$icon-size / 2 - 10vw);
-        height: v.$icon-size;
-        width: calc(v.$icon-size * 7);
+        transform: translateX(calc(-50% + var(--icon-size)));
+        bottom: calc(var(--icon-size) + var(--reaction-add-popup-space));
+        height: var(--icon-size);
+        width: calc(var(--icon-size) * 7);
         border-radius: 1vw;
         display: none;
         justify-content: space-around;
@@ -46,9 +50,14 @@
           background-color: v.theme-get('secondary-color');
         }
 
+        @media screen and (max-width: v.$medium-screen) {
+          transform: none;
+          right: 0
+        }
+
         .add-reaction-popup-emoji {
-          height: calc(v.$icon-size * 0.75);
-          transform: translateY(calc(v.$icon-size * 0.125));
+          height: calc(var(--icon-size) * 0.75);
+          transform: translateY(calc(var(--icon-size) * 0.125));
 
           &:hover {
             transform: scale(1.1);
@@ -67,7 +76,7 @@
       }
 
       .add-reaction-button {
-        margin-left: calc(v.$icon-size / 2);
+        margin-left: calc(var(--icon-size) / 2);
 
         &:hover {
           cursor: pointer;
@@ -79,9 +88,9 @@
       }
 
       .space-holder {
-        height: v.$reaction-add-popup-space;
-        width: v.$icon-size;
-        bottom: v.$icon-size;
+        height: var(--reaction-add-popup-space);
+        width: var(--icon-size);
+        bottom: var(--icon-size);
         position: absolute;
 
         & ~ .add-reaction-popup {

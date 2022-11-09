@@ -8,7 +8,6 @@
 
   h1 {
     width: 100%;
-    text-align: center;
     margin-bottom: 2vw;
   }
 
@@ -17,14 +16,19 @@
       display: flex;
       flex-direction: column;
       gap: 2vw;
+      margin: 0 auto;
+
+      @media screen and (min-width: v.$medium-screen) and (max-width: v.$large-screen) {
+        width: 100%;
+        margin: 0;
+      }
 
       & > div {
-        width: 30vw;
+        width: 100%;
         max-width: 1000px;
-        min-width: 450px;
 
         @media screen and (max-width: v.$medium-screen) {
-          width: 80vw;
+          min-width: 0;
         }
       }
     }
@@ -34,15 +38,16 @@
       position: sticky;
       align-self: flex-start;
       top: 5vw;
-      border-radius: 20px;
-      @include v.theme() {
-        border: 0.1vw solid v.theme-get('secondary-color');
-      }
 
       & > div {
-        width: 15vw;
+        width: 22.5vw;
         max-width: 500px;
         min-width: 200px;
+        padding: var(--indent);
+
+        & > div:not(:last-of-type) {
+          margin-bottom: 1rem;
+        }
       }
 
       @media screen and (max-width: v.$medium-screen) {
