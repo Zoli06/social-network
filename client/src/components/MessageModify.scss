@@ -1,4 +1,4 @@
-@use '../variables' as v;
+@use "../variables" as v;
 
 .message-modify {
   display: flex;
@@ -8,12 +8,12 @@
 .message-delete {
   &.danger {
     @include v.theme() {
-      fill: v.theme-get('danger-color');
+      fill: v.theme-get("danger-color");
     }
 
     &:hover {
       @include v.theme() {
-        fill: v.theme-get('danger-hover-color');
+        fill: v.theme-get("danger-hover-color");
       }
     }
   }

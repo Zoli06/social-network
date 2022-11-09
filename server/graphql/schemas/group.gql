@@ -32,7 +32,7 @@ type Group {
   createdAt: Date!
   updatedAt: Date!
   name: String!
-  messages(onlyInterestedInMessageId: ID, maxDepth: Int): [Message!]!  # onlyInterestedInMessageId replaces post
+  messages(onlyInterestedInMessageId: ID, maxDepth: Int): [Message!]! # onlyInterestedInMessageId replaces post
   members: [User!]!
   memberRequests: [User!]!
   bannedUsers: [User!]!
@@ -74,5 +74,8 @@ type Mutation {
   leaveGroup(groupId: ID!): Boolean
   kickUser(groupId: ID!, userId: ID!): Boolean
 
-  setNotificationFrequency(groupId: ID!, frequency: NotificationFrequency!): Boolean
+  setNotificationFrequency(
+    groupId: ID!
+    frequency: NotificationFrequency!
+  ): Boolean
 }

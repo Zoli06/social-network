@@ -1,4 +1,4 @@
-const camelcase = require('lodash.camelcase');
+const camelcase = require("lodash.camelcase");
 
 module.exports = {
   resolveFields: (source) => {
@@ -11,5 +11,5 @@ module.exports = {
       result[camelcase(key)] = newValue;
     }
     return result;
-  }
-}
+  },
+};

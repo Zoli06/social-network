@@ -1,5 +1,5 @@
-const jsonwebtoken = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const jsonwebtoken = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 module.exports = {
   Query: {
@@ -13,8 +13,12 @@ module.exports = {
     },
     async me(_, __, { user, connection }) {
       user.authenticate();
-      return await module.exports.Query.user(_, { userId: user.id }, { user, connection });
-    }
+      return await module.exports.Query.user(
+        _,
+        { userId: user.id },
+        { user, connection }
+      );
+    },
   },
   Mutation: {
     async register(
@@ -29,7 +33,7 @@ module.exports = {
           email,
           password,
           intro,
-          profileImageMediaId
+          profileImageMediaId,
         },
       },
       { connection }
@@ -47,7 +51,7 @@ module.exports = {
             email,
             await bcrypt.hash(password, 10),
             intro,
-            profileImageMediaId
+            profileImageMediaId,
           ]
         )
       )[0].insertId;
@@ -59,7 +63,7 @@ module.exports = {
       const token = jsonwebtoken.sign(
         { id: user.user_id },
         process.env.JWT_SECRET,
-        { expiresIn: '1y' }
+        { expiresIn: "1y" }
       );
       return { token, user };
     },
@@ -68,11 +72,11 @@ module.exports = {
         await connection.query(`SELECT * FROM users WHERE email = ?`, [email])
       )[0][0];
       if (!user) {
-        throw new Error('No user with that email');
+        throw new Error("No user with that email");
       }
       const isValid = await bcrypt.compare(password, user.password);
       if (!isValid) {
-        throw new Error('Incorrect password');
+        throw new Error("Incorrect password");
       }
       await connection.query(
         `UPDATE users SET last_login_at = DEFAULT WHERE user_id = ?`,
@@ -81,7 +85,7 @@ module.exports = {
       const token = jsonwebtoken.sign(
         { id: user.user_id },
         process.env.JWT_SECRET,
-        { expiresIn: '1d' }
+        { expiresIn: "1d" }
       );
       return {
         token,
@@ -123,9 +127,17 @@ module.exports = {
           user.id,
         ]
       );
-      return await module.exports.Query.user({}, { userId: user.id }, { user, connection });
+      return await module.exports.Query.user(
+        {},
+        { userId: user.id },
+        { user, connection }
+      );
     },
-    async createUserUserRelationship(_, { userId, type }, { user, connection }) {
+    async createUserUserRelationship(
+      _,
+      { userId, type },
+      { user, connection }
+    ) {
       user.authenticate();
       if (type === "none") type = null;
       await connection.query(
@@ -138,7 +150,7 @@ module.exports = {
         {},
         { user, connection }
       );
-    }
+    },
   },
   User: {
     async userRelationships(parent, _, { user, connection }) {
@@ -195,7 +207,7 @@ module.exports = {
         )
       )[0].map((record) => ({
         user: record,
-        type: 'incoming_friend_request',
+        type: "incoming_friend_request",
         created_at: record.created_at,
         updated_at: record.updated_at,
       }));
@@ -219,7 +231,7 @@ module.exports = {
         )
       )[0].map((record) => ({
         user: record,
-        type: 'outgoing_friend_request',
+        type: "outgoing_friend_request",
         created_at: record.created_at,
         updated_at: record.updated_at,
       }));
@@ -244,54 +256,78 @@ module.exports = {
     },
     async relationshipWithUser({ user_id }, _, { user, connection }) {
       user.authenticate();
-      const relationship1 = (await connection.query(
-        `SELECT *
+      const relationship1 = (
+        await connection.query(
+          `SELECT *
       FROM user_user_relationships
       WHERE initiating_user_id = ? AND target_user_id = ?`,
-        [user.id, part.user_id]
-      ))[0][0];
-      const relationship2 = (await connection.query(
-        `SELECT *
+          [user.id, part.user_id]
+        )
+      )[0][0];
+      const relationship2 = (
+        await connection.query(
+          `SELECT *
       FROM user_user_relationships
       WHERE initiating_user_id = ? AND target_user_id = ?`,
-        [user_id, user.id]
-      ))[0][0];
+          [user_id, user.id]
+        )
+      )[0][0];
       const type1 = relationship1?.type;
       const type2 = relationship2?.type;
       const updated_at1 = relationship1?.updated_at;
       const updated_at2 = relationship2?.updated_at;
 
       let type;
-      if (type1 === 'friend' && type2 === 'friend') {
-        type = 'friend';
-      } else if (type1 === 'blocked') {
-        type = 'outgoing_blocking';
-      } else if (type2 === 'blocked') {
-        type = 'incoming_blocking';
-      } else if (type1 === 'friend' && type2 !== 'blocked' && (updated_at1 > updated_at2 || updated_at2 === undefined)) {
-        type = 'outgoing_friend_request';
-      } else if (type2 === 'friend' && type1 !== 'blocked' && (updated_at2 > updated_at1 || updated_at1 === undefined)) {
-        type = 'incoming_friend_request';
+      if (type1 === "friend" && type2 === "friend") {
+        type = "friend";
+      } else if (type1 === "blocked") {
+        type = "outgoing_blocking";
+      } else if (type2 === "blocked") {
+        type = "incoming_blocking";
+      } else if (
+        type1 === "friend" &&
+        type2 !== "blocked" &&
+        (updated_at1 > updated_at2 || updated_at2 === undefined)
+      ) {
+        type = "outgoing_friend_request";
+      } else if (
+        type2 === "friend" &&
+        type1 !== "blocked" &&
+        (updated_at2 > updated_at1 || updated_at1 === undefined)
+      ) {
+        type = "incoming_friend_request";
       } else {
-        type = 'none';
+        type = "none";
       }
 
       return {
         type,
-        created_at: Math.min(relationship1?.created_at, relationship2?.created_at),
-        updated_at: Math.max(relationship1?.updated_at, relationship2?.updated_at),
-        user: module.exports.Query.user({}, { userId: user_id }, { user, connection }),
-      }
+        created_at: Math.min(
+          relationship1?.created_at,
+          relationship2?.created_at
+        ),
+        updated_at: Math.max(
+          relationship1?.updated_at,
+          relationship2?.updated_at
+        ),
+        user: module.exports.Query.user(
+          {},
+          { userId: user_id },
+          { user, connection }
+        ),
+      };
     },
     async profileImage({ user_id }, __, { user, connection }) {
       user.authenticate();
 
-      return (await connection.query(
-        `SELECT * FROM users AS u
+      return (
+        await connection.query(
+          `SELECT * FROM users AS u
         JOIN medias
         ON profile_image_media_id = media_id AND u.user_id = ?`,
-        [user_id]
-      ))[0][0];
-    }
-  }
-}
+          [user_id]
+        )
+      )[0][0];
+    },
+  },
+};

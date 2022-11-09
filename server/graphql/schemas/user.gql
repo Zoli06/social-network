@@ -67,5 +67,8 @@ type Mutation {
   register(user: UserInput!): AuthPayload
   login(email: String!, password: String!): AuthPayload
   updateUser(user: UserInput!): User # user only can update his/her own profile
-  createUserUserRelationship(userId: ID!, type: UserUserRelationshipInputType): UserUserRelationship # also can be used to delete and update
+  createUserUserRelationship(
+    userId: ID!
+    type: UserUserRelationshipInputType
+  ): UserUserRelationship # also can be used to delete and update
 }

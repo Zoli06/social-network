@@ -1,31 +1,33 @@
-import React from 'react';
-import './Message.scss';
-import { gql } from '@apollo/client';
-import { MessageAuthor } from './MessageAuthor';
-import { MessageModify } from './MessageModify';
-import { MessageText } from './MessageText';
-import { MessageActions } from './MessageActions';
-import { Editor } from './Editor';
-import { GroupQueryResultContext } from './Group';
+import React from "react";
+import "./Message.scss";
+import { gql } from "@apollo/client";
+import { MessageAuthor } from "./MessageAuthor";
+import { MessageModify } from "./MessageModify";
+import { MessageText } from "./MessageText";
+import { MessageActions } from "./MessageActions";
+import { Editor } from "./Editor";
+import { GroupQueryResultContext } from "./Group";
 
-import { MessageAuthorGQLData } from './MessageAuthor';
-import { MessageTextGQLData } from './MessageText';
-import { MessageModifyMessageGQLData } from './MessageModify';
-import { MessageActionsGQLData } from './MessageActions';
-import { EditorGQLData } from './Editor';
+import { MessageAuthorGQLData } from "./MessageAuthor";
+import { MessageTextGQLData } from "./MessageText";
+import { MessageModifyMessageGQLData } from "./MessageModify";
+import { MessageActionsGQLData } from "./MessageActions";
+import { EditorGQLData } from "./Editor";
 
 export function Message({
   messageId,
   subscribeToMore,
-  className = '',
+  className = "",
 }: MessageProps) {
-  const { group: { messages } } = React.useContext(GroupQueryResultContext)!;
+  const {
+    group: { messages },
+  } = React.useContext(GroupQueryResultContext)!;
 
   return (
     <>
       <div className={`message-container ${className}`}>
-        <div className='message-content'>
-          <div className='message-header'>
+        <div className="message-content">
+          <div className="message-header">
             <MessageAuthor messageId={messageId} />
             <MessageModify messageId={messageId} />
           </div>
@@ -35,7 +37,7 @@ export function Message({
             subscribeToMore={subscribeToMore}
           />
         </div>
-        <div className='response-tree'>
+        <div className="response-tree">
           {messages.map(
             (message: MessageGQLData) =>
               message.responseTo?.messageId === messageId && (
@@ -82,11 +84,11 @@ export type MessageGQLData = MessageAuthorGQLData &
   MessageModifyMessageGQLData &
   MessageActionsGQLData &
   EditorGQLData & {
-  responseTo?: { messageId: string };
-}
+    responseTo?: { messageId: string };
+  };
 
 export type MessageProps = {
   messageId: string;
   subscribeToMore: Function;
   className?: string;
-}
+};

@@ -1,4 +1,4 @@
-@use '../variables' as v;
+@use "../variables" as v;
 
 .add-root-message {
   position: fixed;
@@ -23,12 +23,12 @@
     left: -0.15vh;
 
     @include v.theme() {
-      fill: v.theme-get('success-color');
+      fill: v.theme-get("success-color");
     }
     &:hover {
       cursor: pointer;
       @include v.theme() {
-        fill: v.theme-get('success-hover-color');
+        fill: v.theme-get("success-hover-color");
       }
     }
   }

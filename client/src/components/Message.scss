@@ -1,11 +1,11 @@
-@use '../variables' as v;
+@use "../variables" as v;
 
 .message-container {
   border-width: 0.1vw;
   min-width: 100px;
 
   @include v.theme() {
-    border-color: v.theme-get('secondary-color');
+    border-color: v.theme-get("secondary-color");
   }
 
   &.root-message {

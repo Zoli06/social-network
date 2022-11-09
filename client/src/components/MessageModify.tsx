@@ -1,10 +1,10 @@
-import React from 'react';
-import './MessageModify.scss';
-import { gql, useMutation } from '@apollo/client';
-import { EditorActions, openEditor } from './Editor';
+import React from "react";
+import "./MessageModify.scss";
+import { gql, useMutation } from "@apollo/client";
+import { EditorActions, openEditor } from "./Editor";
 
-import { GroupQueryResultContext } from './Group';
-import { UserContext } from '../App';
+import { GroupQueryResultContext } from "./Group";
+import { UserContext } from "../App";
 
 const DELETE_MESSAGE_MUTATION = gql`
   mutation DeleteMessage($messageId: ID!) {
@@ -25,33 +25,35 @@ export const MessageModify = ({ messageId }: MessageModifyProps) => {
     user: { userId: messageOwnerUserId },
   } = messages.find((message) => message.messageId === messageId)!;
 
-  const { me: { userId } } = React.useContext(UserContext)!;
+  const {
+    me: { userId },
+  } = React.useContext(UserContext)!;
 
   const [deleteMessage] = useMutation(DELETE_MESSAGE_MUTATION, {
     variables: { messageId },
   });
 
-  const isAdmin = userRelationShipWithGroupType === 'admin';
+  const isAdmin = userRelationShipWithGroupType === "admin";
   const isOwner = messageOwnerUserId === userId;
 
   return (
-    <div className='message-modify'>
+    <div className="message-modify">
       {isOwner && (
         <svg
-          className='message-edit icon'
+          className="message-edit icon"
           onClick={() =>
             openEditor(messageId, groupId, EditorActions.EDIT, text)
           }
         >
-          <use href='./assets/images/svg-bundle.svg#edit' />
+          <use href="./assets/images/svg-bundle.svg#edit" />
         </svg>
       )}
       {(isAdmin || isOwner) && (
         <svg
-          className={`message-delete icon ${((isAdmin && !isOwner) && 'danger')}`}
+          className={`message-delete icon ${isAdmin && !isOwner && "danger"}`}
           onClick={() => deleteMessage({ variables: { messageId } })}
         >
-          <use href='./assets/images/svg-bundle.svg#delete' />
+          <use href="./assets/images/svg-bundle.svg#delete" />
         </svg>
       )}
     </div>
@@ -82,15 +84,15 @@ export type MessageModifyMessageGQLData = {
   user: {
     userId: string;
   };
-}
+};
 
 export type MessageModifyGroupGQLData = {
   groupId: string;
   userRelationShipWithGroup: {
     type: string;
   };
-}
+};
 
 export type MessageModifyProps = {
   messageId: string;
-}
+};

@@ -1,4 +1,4 @@
-@use 'variables' as v;
+@use "variables" as v;
 
 * {
   box-sizing: border-box;
@@ -16,7 +16,7 @@
 
 body {
   @include v.theme() {
-    background-color: v.theme-get('main-color');
+    background-color: v.theme-get("main-color");
   }
 }
 
@@ -28,7 +28,7 @@ h5,
 h6,
 p {
   @include v.theme() {
-    color: v.theme-get('main-text-color');
+    color: v.theme-get("main-text-color");
   }
 }
 
@@ -75,26 +75,26 @@ p {
   height: var(--icon-size);
   aspect-ratio: 1 / 1;
   @include v.theme() {
-    fill: v.theme-get('main-text-color');
+    fill: v.theme-get("main-text-color");
   }
 
   &:hover {
     cursor: pointer;
     @include v.theme() {
-      fill: v.theme-get('secondary-text-color');
+      fill: v.theme-get("secondary-text-color");
     }
   }
 
   &.active {
     &.upvote {
       @include v.theme() {
-        fill: v.theme-get('upvote-color');
+        fill: v.theme-get("upvote-color");
       }
     }
 
     &.downvote {
       @include v.theme() {
-        fill: v.theme-get('downvote-color');
+        fill: v.theme-get("downvote-color");
       }
     }
   }
@@ -102,7 +102,7 @@ p {
 
 .box {
   @include v.theme() {
-    border: 0.1vw solid v.theme-get('secondary-color');
+    border: 0.1vw solid v.theme-get("secondary-color");
   }
   border-radius: var(--border-radius);
 }

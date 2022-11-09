@@ -1,6 +1,6 @@
-const snakeCase = require('lodash.snakecase');
-const { mergeResolvers } = require('@graphql-tools/merge');
-const { loadFilesSync } = require('@graphql-tools/load-files');
+const snakeCase = require("lodash.snakecase");
+const { mergeResolvers } = require("@graphql-tools/merge");
+const { loadFilesSync } = require("@graphql-tools/load-files");
 
 const resolverFiles = loadFilesSync(`${__dirname}/resolvers/*`);
 

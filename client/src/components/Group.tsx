@@ -1,18 +1,18 @@
-import React, { useEffect } from 'react';
-import './Group.scss';
-import { useQuery, useLazyQuery, gql } from '@apollo/client';
-import { Message } from './Message';
-import { MessageModify } from './MessageModify';
-import { AddRootMessage } from './AddRootMessage';
-import { GroupMembers } from './GroupMembers';
-import { GroupInfos } from './GroupInfos';
-import { cache } from '../index';
+import React, { useEffect } from "react";
+import "./Group.scss";
+import { useQuery, useLazyQuery, gql } from "@apollo/client";
+import { Message } from "./Message";
+import { MessageModify } from "./MessageModify";
+import { AddRootMessage } from "./AddRootMessage";
+import { GroupMembers } from "./GroupMembers";
+import { GroupInfos } from "./GroupInfos";
+import { cache } from "../index";
 
-import { MessageGQLData } from './Message';
-import { MessageModifyGroupGQLData } from './MessageModify';
-import { AddRootMessageGQLData } from './AddRootMessage';
-import { GroupMembersGQLData } from './GroupMembers';
-import { GroupInfosGQLData } from './GroupInfos';
+import { MessageGQLData } from "./Message";
+import { MessageModifyGroupGQLData } from "./MessageModify";
+import { AddRootMessageGQLData } from "./AddRootMessage";
+import { GroupMembersGQLData } from "./GroupMembers";
+import { GroupInfosGQLData } from "./GroupInfos";
 
 export const GroupQueryResultContext = React.createContext<
   GroupQueryGQLData | undefined
@@ -93,7 +93,7 @@ export const Group = ({
     }
   );
 
-  const [getMessage] = useLazyQuery(MESSAGE_QUERY, { fetchPolicy: 'no-cache' });
+  const [getMessage] = useLazyQuery(MESSAGE_QUERY, { fetchPolicy: "no-cache" });
 
   useEffect(() => {
     subscribeToMore({
@@ -236,15 +236,15 @@ export const Group = ({
 
   return (
     <GroupQueryResultContext.Provider value={data}>
-      <div className='group'>
+      <div className="group">
         <h1>
           Group: {data?.group.name} #{groupId}
         </h1>
-        <div className='group-columns'>
-          <div className='left-column'>
+        <div className="group-columns">
+          <div className="left-column">
             <GroupMembers className="box" />
           </div>
-          <div className='center-column'>
+          <div className="center-column">
             {data?.group.messages.map(
               (message) =>
                 ((!onlyInterestedInMessageId && message.responseTo === null) ||
@@ -253,14 +253,14 @@ export const Group = ({
                   <Message
                     messageId={message.messageId}
                     subscribeToMore={subscribeToMore}
-                    className='root-message box'
+                    className="root-message box"
                     key={message.messageId}
                   />
                 )
             )}
           </div>
-          <div className='right-column'>
-            <GroupInfos className='box' />
+          <div className="right-column">
+            <GroupInfos className="box" />
           </div>
         </div>
         <AddRootMessage />

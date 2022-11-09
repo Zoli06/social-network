@@ -120,25 +120,30 @@ module.exports = {
     },
     async responseTree({ message_id }, { maxDepth }, { user, connection }) {
       user.authenticate();
-      const columns = (await connection.query(`select column_name as columns from information_schema.columns where table_schema = 'social_network' and table_name = 'messages'`))[0].map(element => element.columns);
+      const columns = (
+        await connection.query(
+          `select column_name as columns from information_schema.columns where table_schema = 'social_network' and table_name = 'messages'`
+        )
+      )[0].map((element) => element.columns);
 
       const noMaxDepth = maxDepth === undefined;
 
-      return ((
-        await connection.query(`WITH RECURSIVE message_tree (${columns}, lvl) AS
+      return (
+        await connection.query(
+          `WITH RECURSIVE message_tree (${columns}, lvl) AS
           (
             SELECT ${columns}, 0 lvl
               FROM messages
               WHERE response_to_message_id <=> ?
             UNION ALL
-            SELECT ${columns.map(element => 'm.' + element)},mt.lvl + 1
+            SELECT ${columns.map((element) => "m." + element)},mt.lvl + 1
               FROM message_tree AS mt JOIN messages AS m
                 ON mt.message_id = m.response_to_message_id
           )
           SELECT * FROM message_tree WHERE lvl < ? OR ?;`,
           [message_id, maxDepth, noMaxDepth]
         )
-      )[0]);
+      )[0];
     },
     async responsesCount({ message_id }, _, { user, connection }) {
       user.authenticate();
@@ -180,7 +185,15 @@ module.exports = {
   Mutation: {
     async sendMessage(
       _,
-      { message: { text, groupId, responseToMessageId, mentionedUserIds, mediaIds } },
+      {
+        message: {
+          text,
+          groupId,
+          responseToMessageId,
+          mentionedUserIds,
+          mediaIds,
+        },
+      },
       { user, connection, pubsub }
     ) {
       user.authenticate();
@@ -194,7 +207,8 @@ module.exports = {
           )
         )[0][0].group_id.toString();
 
-        if (!!responseToMessageId && groupId !== _parentGroupId) throw new Error("Parent message is in different group!");
+        if (!!responseToMessageId && groupId !== _parentGroupId)
+          throw new Error("Parent message is in different group!");
       }
 
       await isGroupMember(user.id, groupId, connection, true);
@@ -226,9 +240,7 @@ module.exports = {
     },
     async editMessage(
       _,
-      {
-        message: { messageId, text, mentionedUserIds, mediaIds },
-      },
+      { message: { messageId, text, mentionedUserIds, mediaIds } },
       { user, connection, pubsub }
     ) {
       user.authenticate();
@@ -303,10 +315,9 @@ module.exports = {
       await findMessagesToDeleteRecursively(messageId);
 
       //TODO: maybe we can execute the first three query simultaneously
-      await connection.query(
-        `DELETE FROM reactions WHERE message_id IN (?) `,
-        [messagesToDelete]
-      );
+      await connection.query(`DELETE FROM reactions WHERE message_id IN (?) `, [
+        messagesToDelete,
+      ]);
 
       await connection.query(
         `DELETE FROM mentioned_users WHERE message_id IN (?) `,
@@ -318,18 +329,16 @@ module.exports = {
         [messagesToDelete]
       );
 
-      await connection.query(
-        `DELETE FROM votes WHERE message_id IN (?) `,
-        [messagesToDelete]
-      );
+      await connection.query(`DELETE FROM votes WHERE message_id IN (?) `, [
+        messagesToDelete,
+      ]);
 
       messagesToDelete = messagesToDelete.reverse();
 
       for (const message of messagesToDelete) {
-        await connection.query(
-          `DELETE FROM messages WHERE message_id = ? `,
-          [message]
-        );
+        await connection.query(`DELETE FROM messages WHERE message_id = ? `, [
+          message,
+        ]);
       }
 
       pubsub.publish(`MESSAGES_DELETED_${groupId}`, {

@@ -60,7 +60,7 @@ const splitLink = split(
 );
 
 export const cache = new InMemoryCache({
-  // @ts-ignore 
+  // @ts-ignore
   dataIdFromObject: ({
     __typename,
     id,
@@ -93,7 +93,7 @@ export const cache = new InMemoryCache({
         reactions: {
           merge(_existing, incoming) {
             return incoming;
-          }
+          },
         },
       },
     },
@@ -103,7 +103,7 @@ export const cache = new InMemoryCache({
         messages: {
           merge(_existing, incoming) {
             return incoming;
-          }
+          },
         },
       },
     },

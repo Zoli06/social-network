@@ -1,12 +1,23 @@
 const {
   Query: { user: getUser },
 } = require("./user.js");
-const { Message: { responseTree: getMessageResponseTree }, Query: { message: getMessage } } = require("./message.js");
-const { isGroupMember, isGroupAdmin, isGroupCreator } = require("../helpers/group.js");
+const {
+  Message: { responseTree: getMessageResponseTree },
+  Query: { message: getMessage },
+} = require("./message.js");
+const {
+  isGroupMember,
+  isGroupAdmin,
+  isGroupCreator,
+} = require("../helpers/group.js");
 
 module.exports = {
   Group: {
-    async messages({ group_id }, { onlyInterestedInMessageId, maxDepth }, { user, connection }) {
+    async messages(
+      { group_id },
+      { onlyInterestedInMessageId, maxDepth },
+      { user, connection }
+    ) {
       user.authenticate();
 
       if (!onlyInterestedInMessageId && !maxDepth) {
@@ -24,11 +35,20 @@ module.exports = {
       // convert undefined to null
       const _onlyInterestedInMessageId = onlyInterestedInMessageId || null;
       // if we interested in all messages, there is no root message
-      const _maxDepth = _onlyInterestedInMessageId === null ? maxDepth + 1 : maxDepth;
+      const _maxDepth =
+        _onlyInterestedInMessageId === null ? maxDepth + 1 : maxDepth;
 
-      const responseTree = await getMessageResponseTree({ message_id: _onlyInterestedInMessageId }, { maxDepth: _maxDepth }, { user, connection });
+      const responseTree = await getMessageResponseTree(
+        { message_id: _onlyInterestedInMessageId },
+        { maxDepth: _maxDepth },
+        { user, connection }
+      );
       if (_onlyInterestedInMessageId !== null) {
-        const message = await getMessage({}, { messageId: _onlyInterestedInMessageId }, { user, connection });
+        const message = await getMessage(
+          {},
+          { messageId: _onlyInterestedInMessageId },
+          { user, connection }
+        );
         return [...responseTree, message];
       }
       return responseTree;
@@ -132,16 +152,12 @@ module.exports = {
           [group_id, user.id]
         )
       )[0][0];
-    }
+    },
   },
   GroupUserRelationship: {
     async user({ user_id }, _, { user, connection }) {
       user.authenticate();
-      return await getUser(
-        {},
-        { userId: user_id },
-        { user, connection }
-      );
+      return await getUser({}, { userId: user_id }, { user, connection });
     },
     async group({ group_id }, _, { user, connection }) {
       user.authenticate();
@@ -152,7 +168,7 @@ module.exports = {
           [group_id]
         )
       )[0][0];
-    }
+    },
   },
   Query: {
     async group(_, { groupId }, { user, connection }) {

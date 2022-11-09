@@ -1,20 +1,22 @@
-import { useContext } from 'react';
-import { gql } from '@apollo/client';
+import { useContext } from "react";
+import { gql } from "@apollo/client";
 import "./AddRootMessage.scss";
 import { openEditor, EditorActions } from "./Editor";
-import { GroupQueryResultContext } from './Group';
+import { GroupQueryResultContext } from "./Group";
 
 export const AddRootMessage = () => {
-  const { group: { groupId } } = useContext(GroupQueryResultContext)!;
+  const {
+    group: { groupId },
+  } = useContext(GroupQueryResultContext)!;
 
   return (
-    <div className='add-root-message'>
+    <div className="add-root-message">
       <svg onClick={() => openEditor(null, groupId, EditorActions.ADD)}>
-        <use href='./assets/images/svg-bundle.svg#plus' />
+        <use href="./assets/images/svg-bundle.svg#plus" />
       </svg>
     </div>
-  )
-}
+  );
+};
 
 AddRootMessage.fragments = {
   group: gql`
@@ -22,8 +24,8 @@ AddRootMessage.fragments = {
       groupId
     }
   `,
-}
+};
 
 export type AddRootMessageGQLData = {
   groupId: string;
-}
+};

@@ -1,4 +1,4 @@
-const { isMediaCreator } = require('../helpers/media.js');
+const { isMediaCreator } = require("../helpers/media.js");
 
 module.exports = {
   Media: {
@@ -23,7 +23,7 @@ module.exports = {
           mediaId,
         ])
       )[0][0];
-    }
+    },
   },
   Mutation: {
     async createMedia(_, { media: { url, caption } }, { user, connection }) {
@@ -34,13 +34,19 @@ module.exports = {
           [user.id, url, caption]
         )
       )[0].insertId;
-      return await module.exports.Query.media({}, { mediaId }, { user, connection });
+      return await module.exports.Query.media(
+        {},
+        { mediaId },
+        { user, connection }
+      );
     },
     async deleteMedia(_, { mediaId }, { user, connection }) {
       user.authenticate();
       await isMediaCreator(user.id, mediaId, connection, true);
-      await connection.query(`DELETE FROM medias WHERE media_id = ?`, [mediaId]);
+      await connection.query(`DELETE FROM medias WHERE media_id = ?`, [
+        mediaId,
+      ]);
       return mediaId;
-    }
-  }
-}
+    },
+  },
+};

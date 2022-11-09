@@ -1,4 +1,4 @@
-@use '../variables' as v;
+@use "../variables" as v;
 
 .editor-container {
   position: fixed;
@@ -11,7 +11,7 @@
   align-items: center;
   justify-content: center;
   @include v.theme() {
-    background-color: v.theme-get('editor-cover-color');
+    background-color: v.theme-get("editor-cover-color");
   }
 
   .editor {
@@ -36,26 +36,26 @@
 
     #submit-button {
       @include v.theme() {
-        fill: v.theme-get('success-color');
+        fill: v.theme-get("success-color");
       }
 
       &:hover {
         cursor: pointer;
         @include v.theme() {
-          fill: v.theme-get('success-hover-color');
+          fill: v.theme-get("success-hover-color");
         }
       }
     }
 
     #close-button {
       @include v.theme() {
-        fill: v.theme-get('danger-color');
+        fill: v.theme-get("danger-color");
       }
 
       &:hover {
         cursor: pointer;
         @include v.theme() {
-          fill: v.theme-get('danger-hover-color');
+          fill: v.theme-get("danger-hover-color");
         }
       }
 

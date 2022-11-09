@@ -46,7 +46,9 @@ export const MessageActions = ({
   messageId,
   subscribeToMore,
 }: MessageActionsProps) => {
-  const { group: { messages } } = React.useContext(GroupQueryResultContext)!;
+  const {
+    group: { messages },
+  } = React.useContext(GroupQueryResultContext)!;
 
   const {
     upVotes,
@@ -141,10 +143,7 @@ export const MessageActions = ({
         };
       },
     });
-  }, [
-    subscribeToMore,
-    messageId,
-  ]);
+  }, [subscribeToMore, messageId]);
 
   const possibleReactions = ["👍", "❤", "🥰", "🤣", "😲", "😢", "😠"];
 
@@ -166,8 +165,9 @@ export const MessageActions = ({
         onClick={() => handleVote("up")}
       >
         <use
-          href={`./assets/images/svg-bundle.svg#upvote${vote === "up" ? "-active" : ""
-            }`}
+          href={`./assets/images/svg-bundle.svg#upvote${
+            vote === "up" ? "-active" : ""
+          }`}
         />
       </svg>
       <p className="upvote-count">{upVotes}</p>
@@ -176,12 +176,16 @@ export const MessageActions = ({
         onClick={() => handleVote("down")}
       >
         <use
-          href={`./assets/images/svg-bundle.svg#downvote${vote === "down" ? "-active" : ""
-            }`}
+          href={`./assets/images/svg-bundle.svg#downvote${
+            vote === "down" ? "-active" : ""
+          }`}
         />
       </svg>
       <p className="downvote-count">{downVotes}</p>
-      <svg className="response icon" onClick={() => openEditor(messageId, groupId, EditorActions.ADD)}>
+      <svg
+        className="response icon"
+        onClick={() => openEditor(messageId, groupId, EditorActions.ADD)}
+      >
         <use href="./assets/images/svg-bundle.svg#response" />
       </svg>
       <p className="responses-count">{responsesCount}</p>
@@ -227,14 +231,14 @@ export const MessageActions = ({
                 </span>
               ))}
             </Twemoji>
-            {reaction &&
+            {reaction && (
               <svg
                 className="remove-reaction add-reaction-popup-emoji icon"
                 onClick={() => handleAddReaction(null)}
               >
                 <use href="./assets/images/svg-bundle.svg#close-button-3" />
               </svg>
-            }
+            )}
           </div>
         </div>
       </div>
@@ -266,13 +270,13 @@ export type MessageVotedSubscriptionData = {
   subscriptionData: {
     data: { messageVoted: { upVotes: number; downVotes: number } };
   };
-}
+};
 
 export type MessageReactedSubscriptionData = {
   subscriptionData: {
-    data: { messageReacted: number }
-  }
-}
+    data: { messageReacted: number };
+  };
+};
 
 export type MessageActionsGQLData = {
   upVotes: number;
@@ -289,9 +293,9 @@ export type MessageActionsGQLData = {
   group: {
     groupId: string;
   };
-}
+};
 
 export type MessageActionsProps = {
   messageId: string;
   subscribeToMore: Function;
-}
+};

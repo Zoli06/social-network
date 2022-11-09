@@ -1,27 +1,27 @@
-import { gql } from '@apollo/client'
-import React from 'react'
-import { GroupQueryResultContext } from './Group'
-import { GroupMemberElement } from './GroupMemberElement'
-import './GroupMembers.scss'
+import { gql } from "@apollo/client";
+import React from "react";
+import { GroupQueryResultContext } from "./Group";
+import { GroupMemberElement } from "./GroupMemberElement";
+import "./GroupMembers.scss";
 
-import { GroupMemberElementGQLData } from './GroupMemberElement'
+import { GroupMemberElementGQLData } from "./GroupMemberElement";
 
-export const GroupMembers = ({ className = '' }: GroupMembersProps) => {
-  const { group: { members, admins } } = React.useContext(GroupQueryResultContext)!
+export const GroupMembers = ({ className = "" }: GroupMembersProps) => {
+  const {
+    group: { members, admins },
+  } = React.useContext(GroupQueryResultContext)!;
 
-  const users = [...members, ...admins]
+  const users = [...members, ...admins];
 
   return (
     <div className={`group-members ${className}`}>
-      <h2>
-        Members
-      </h2>
+      <h2>Members</h2>
       {users.map((user) => (
         <GroupMemberElement key={user.userId} userId={user.userId} />
       ))}
     </div>
-  )
-}
+  );
+};
 
 GroupMembers.fragments = {
   group: gql`
@@ -39,7 +39,7 @@ GroupMembers.fragments = {
 
     ${GroupMemberElement.fragments.user}
   `,
-}
+};
 
 export type GroupMembersGQLData = {
   members: {
@@ -48,8 +48,8 @@ export type GroupMembersGQLData = {
   admins: {
     userId: string;
   } & GroupMemberElementGQLData[];
-}
+};
 
 export type GroupMembersProps = {
   className?: string;
-}
+};

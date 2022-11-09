@@ -1,14 +1,12 @@
 {
-  "include": [
-      "src/*"
-  ],
+  "include": ["src/*"],
   "compilerOptions": {
-      "forceConsistentCasingInFileNames": true,
-      "moduleResolution": "node",
-      "strict": true,
-      "target": "esnext",
-      "jsx": "react-jsx",
-      "allowSyntheticDefaultImports": true,
-      "noErrorTruncation": true
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "strict": true,
+    "target": "esnext",
+    "jsx": "react-jsx",
+    "allowSyntheticDefaultImports": true,
+    "noErrorTruncation": true
   }
 }
