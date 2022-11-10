@@ -4,12 +4,20 @@ import { gql, useMutation } from "@apollo/client";
 import Twemoji from "react-twemoji";
 import { v4 as uuidv4 } from "uuid";
 
-import { EditorActions, openEditor } from "./Editor";
+import { openEditor } from "./Editor";
 
 import { GroupQueryGQLData } from "./Group";
 import { MessageGQLData } from "./Message";
 
 import { GroupQueryResultContext } from "./Group";
+
+const ADD_RESPONSE_MUTATION = gql`
+  mutation AddResponseMutation($message: MessageInput!) {
+    sendMessage(message: $message) {
+      messageId
+    }
+  }
+`;
 
 const VOTE_MUTATION = gql`
   mutation VoteMutation($messageId: ID!, $type: VoteType) {
@@ -81,6 +89,8 @@ export const MessageActions = ({
       });
     },
   });
+
+  const [addResponseMutation] = useMutation(ADD_RESPONSE_MUTATION);
 
   useEffect(() => {
     subscribeToMore({
@@ -158,6 +168,19 @@ export const MessageActions = ({
     });
   };
 
+  const handleAddResponse = (text: string) => {
+    console.log(new Error().stack)
+    addResponseMutation({
+      variables: {
+        message: {
+          text,
+          responseToMessageId: messageId,
+          groupId,
+        }
+      }
+    });
+  };
+
   return (
     <div className="message-actions">
       <svg
@@ -165,9 +188,8 @@ export const MessageActions = ({
         onClick={() => handleVote("up")}
       >
         <use
-          href={`./assets/images/svg-bundle.svg#upvote${
-            vote === "up" ? "-active" : ""
-          }`}
+          href={`./assets/images/svg-bundle.svg#upvote${vote === "up" ? "-active" : ""
+            }`}
         />
       </svg>
       <p className="upvote-count">{upVotes}</p>
@@ -176,15 +198,14 @@ export const MessageActions = ({
         onClick={() => handleVote("down")}
       >
         <use
-          href={`./assets/images/svg-bundle.svg#downvote${
-            vote === "down" ? "-active" : ""
-          }`}
+          href={`./assets/images/svg-bundle.svg#downvote${vote === "down" ? "-active" : ""
+            }`}
         />
       </svg>
       <p className="downvote-count">{downVotes}</p>
       <svg
         className="response icon"
-        onClick={() => openEditor(messageId, groupId, EditorActions.ADD)}
+        onClick={() => openEditor(handleAddResponse)}
       >
         <use href="./assets/images/svg-bundle.svg#response" />
       </svg>

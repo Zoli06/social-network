@@ -1,7 +1,7 @@
 import React from "react";
 import "./MessageModify.scss";
 import { gql, useMutation } from "@apollo/client";
-import { EditorActions, openEditor } from "./Editor";
+import { openEditor } from "./Editor";
 
 import { GroupQueryResultContext } from "./Group";
 import { UserContext } from "../App";
@@ -9,6 +9,14 @@ import { UserContext } from "../App";
 const DELETE_MESSAGE_MUTATION = gql`
   mutation DeleteMessage($messageId: ID!) {
     deleteMessage(messageId: $messageId)
+  }
+`;
+
+const EDIT_MESSAGE_MUTATION = gql`
+  mutation EditMessageMutation($message: MessageEditInput!) {
+    editMessage(message: $message) {
+      messageId
+    }
   }
 `;
 
@@ -29,12 +37,22 @@ export const MessageModify = ({ messageId }: MessageModifyProps) => {
     me: { userId },
   } = React.useContext(UserContext)!;
 
-  const [deleteMessage] = useMutation(DELETE_MESSAGE_MUTATION, {
-    variables: { messageId },
-  });
+  const [deleteMessage] = useMutation(DELETE_MESSAGE_MUTATION);
+  const [editMessage] = useMutation(EDIT_MESSAGE_MUTATION);
 
   const isAdmin = userRelationShipWithGroupType === "admin";
   const isOwner = messageOwnerUserId === userId;
+
+  const handleEditMessage = (text: string) => {
+    editMessage({
+      variables: {
+        message: {
+          messageId,
+          text,
+        },
+      },
+    });
+  };
 
   return (
     <div className="message-modify">
@@ -42,7 +60,7 @@ export const MessageModify = ({ messageId }: MessageModifyProps) => {
         <svg
           className="message-edit icon"
           onClick={() =>
-            openEditor(messageId, groupId, EditorActions.EDIT, text)
+            openEditor(handleEditMessage, text)
           }
         >
           <use href="./assets/images/svg-bundle.svg#edit" />
