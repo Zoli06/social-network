@@ -21,6 +21,7 @@ export const Editor = () => {
   ) => {
     setTextValue(_textValue);
     // Bit of hack
+    // https://medium.com/swlh/how-to-store-a-function-with-the-usestate-hook-in-react-8a88dd4eede1
     setOnSubmit(() => (textValue: string) => _onSubmit(textValue));
     setDisplayEditor(true);
   };

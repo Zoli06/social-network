@@ -23,7 +23,6 @@ const EDIT_MESSAGE_MUTATION = gql`
 export const MessageModify = ({ messageId }: MessageModifyProps) => {
   const {
     group: {
-      groupId,
       userRelationShipWithGroup: { type: userRelationShipWithGroupType },
       messages,
     },
