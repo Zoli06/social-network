@@ -164,6 +164,9 @@ export const GroupMemberModify = ({ userId }: GroupMemberModifyProps) => {
               __typename: 'Group',
               groupId,
             }),
+            // bug here: ui doesn't update
+            // no idea why
+            // TODO: fix this
             fields: {
               members: (existingMembers = []) => {
                 return existingMembers.filter(

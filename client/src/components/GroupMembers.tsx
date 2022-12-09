@@ -47,15 +47,13 @@ export const GroupMembers = ({ className = "" }: GroupMembersProps) => {
       <h2>Admins</h2>
       {admins.length > 0 ? (
         admins.map((user) => (
-          <div className="element">
+          <div className="element" key={"GroupMemberElement" + user.userId}>
             <GroupMemberElement
-              key={"GroupMemberElement" + user.userId}
               userId={user.userId}
               userList={userList}
             />
             {isGroupCreator && (
               <GroupMemberModify
-                key={"GroupMemberModify" + user.userId}
                 userId={user.userId}
               />
             )}
@@ -67,15 +65,13 @@ export const GroupMembers = ({ className = "" }: GroupMembersProps) => {
       <h2>Members</h2>
       {members.length > 0 ? (
         members.map((user) => (
-          <div className="element">
+          <div className="element" key={"GroupMemberElement" + user.userId}>
             <GroupMemberElement
-              key={"GroupMemberElement" + user.userId}
               userId={user.userId}
               userList={userList}
             />
             {isAdmin && (
               <GroupMemberModify
-                key={"GroupMemberModify" + user.userId}
                 userId={user.userId}
               />
             )}
@@ -87,15 +83,13 @@ export const GroupMembers = ({ className = "" }: GroupMembersProps) => {
       <h2>Member Requests</h2>
       {memberRequests.length > 0 ? (
         memberRequests.map((user) => (
-          <div className="element">
+          <div className="element" key={"GroupMemberElement" + user.userId}>
             <GroupMemberElement
-              key={"GroupMemberElement" + user.userId}
               userId={user.userId}
               userList={userList}
             />
             {isAdmin && (
               <GroupMemberModify
-                key={"GroupMemberModify" + user.userId}
                 userId={user.userId}
               />
             )}
@@ -107,9 +101,8 @@ export const GroupMembers = ({ className = "" }: GroupMembersProps) => {
       <h2>Rejected Users</h2>
       {rejectedUsers.length > 0 ? (
         rejectedUsers.map((user) => (
-          <div className="element">
+          <div className="element" key={"GroupMemberElement" + user.userId}>
             <GroupMemberElement
-              key={"GroupMemberElement" + user.userId}
               userId={user.userId}
               userList={userList}
             />
@@ -121,15 +114,13 @@ export const GroupMembers = ({ className = "" }: GroupMembersProps) => {
       <h2>Banned Users</h2>
       {bannedUsers.length > 0 ? (
         bannedUsers.map((user) => (
-          <div className="element">
+          <div className="element" key={"GroupMemberElement" + user.userId}>
             <GroupMemberElement
-              key={"GroupMemberElement" + user.userId}
               userId={user.userId}
               userList={userList}
             />
             {isAdmin && (
               <GroupMemberModify
-                key={"GroupMemberModify" + user.userId}
                 userId={user.userId}
               />
             )}
@@ -141,9 +132,8 @@ export const GroupMembers = ({ className = "" }: GroupMembersProps) => {
       <h2>Invited Users</h2>
       {invitedUsers.length > 0 ? (
         invitedUsers.map((user) => (
-          <div className="element">
+          <div className="element" key={"GroupMemberElement" + user.userId}>
             <GroupMemberElement
-              key={"GroupMemberElement" + user.userId}
               userId={user.userId}
               userList={userList}
             />

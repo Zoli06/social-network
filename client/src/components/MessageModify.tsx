@@ -47,8 +47,6 @@ export const MessageModify = ({ messageId }: MessageModifyProps) => {
   const userPermissionToMessageEnum =
     userPermissionToMessage.toUpperCase() as UserPermissionToMessage;
   
-  console.log(userPermissionToMessageEnum, userPermissionToMessage)
-
   return (
     <div className="message-modify">
       {userPermissionToMessageEnum === UserPermissionToMessage.AUTHOR && (
