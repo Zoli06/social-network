@@ -11,7 +11,7 @@ module.exports = {
     const message = (
       await connection.query(
         `SELECT * FROM messages
-      WHERE message_id = ?`,
+          WHERE message_id = ?`,
         [messageId]
       )
     )[0][0];

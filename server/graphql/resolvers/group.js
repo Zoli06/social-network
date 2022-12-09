@@ -53,7 +53,7 @@ module.exports = {
       }
       return responseTree;
     },
-    async createdByUser({ created_by_user_id }, _, { user, connection }) {
+    async creatorUser({ created_by_user_id }, _, { user, connection }) {
       user.authenticate();
       return await getUser(
         {},
@@ -143,13 +143,13 @@ module.exports = {
         )
       )[0][0];
     },
-    async userRelationShipWithGroup({ group_id }, _, { user, connection }) {
+    async userRelationShipWithGroup({ group_id }, { userId }, { user, connection }) {
       user.authenticate();
       return (
         await connection.query(
           `SELECT * FROM group_user_relationships
           WHERE group_id = ? AND user_id = ?`,
-          [group_id, user.id]
+          [group_id, userId || user.id]
         )
       )[0][0];
     },
@@ -163,7 +163,7 @@ module.exports = {
       user.authenticate();
       return (
         await connection.query(
-          `SELECT * FROM groups
+          `SELECT * FROM \`groups\`
           WHERE group_id = ?`,
           [group_id]
         )
@@ -175,7 +175,7 @@ module.exports = {
       user.authenticate();
 
       const group = (
-        await connection.query(`SELECT * FROM groups WHERE group_id = ?`, [
+        await connection.query(`SELECT * FROM \`groups\` WHERE group_id = ?`, [
           groupId,
         ])
       )[0][0];
@@ -194,7 +194,7 @@ module.exports = {
       user.authenticate();
       const groupId = (
         await connection.query(
-          `INSERT INTO groups (created_by_user_id, name, visibility, description) VALUES (?, ?, ?, ?)`,
+          `INSERT INTO \`groups\` (created_by_user_id, name, visibility, description) VALUES (?, ?, ?, ?)`,
           [user.id, name, visibility, description]
         )
       )[0].insertId;
@@ -211,7 +211,7 @@ module.exports = {
     ) {
       user.authenticate();
       await connection.query(
-        `UPDATE groups
+        `UPDATE \`groups\`
           SET name = ?, visibility = ?, description = ?, updated_at = DEFAULT
           WHERE group_id = ?`,
         [name, visibility, description, groupId]
@@ -225,7 +225,7 @@ module.exports = {
     async deleteGroup(_, { groupId }, { user, connection }) {
       user.authenticate();
       await isGroupCreator(user.id, groupId, connection, true);
-      await connection.query(`DELETE FROM groups WHERE group_id = ?`, [
+      await connection.query(`DELETE FROM \`groups\` WHERE group_id = ?`, [
         groupId,
       ]);
       return groupId;

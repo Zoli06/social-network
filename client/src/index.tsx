@@ -19,7 +19,7 @@ const getAuthToken = () => {
 
   // temp code
   let token = localStorage.getItem("token");
-  if (!token) token = "81";
+  if (!token) token = "45";
   return token;
 };
 
@@ -105,6 +105,36 @@ export const cache = new InMemoryCache({
             return incoming;
           },
         },
+        members: {
+          merge(_existing, incoming) {
+            return incoming;
+          }
+        },
+        memberRequests: {
+          merge(_existing, incoming) {
+            return incoming;
+          }
+        },
+        bannedUsers: {
+          merge(_existing, incoming) {
+            return incoming;
+          }
+        },
+        invitedUsers: {
+          merge(_existing, incoming) {
+            return incoming;
+          }
+        },
+        admins: {
+          merge(_existing, incoming) {
+            return incoming;
+          }
+        },
+        rejectedUsers: {
+          merge(_existing, incoming) {
+            return incoming;
+          }
+        },
       },
     },
     Media: {
@@ -125,7 +155,7 @@ export const cache = new InMemoryCache({
   },
 });
 
-const client = new ApolloClient({
+export const client = new ApolloClient({
   link: splitLink,
   cache,
 });

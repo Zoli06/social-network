@@ -1,14 +1,14 @@
 const {
   Query: { user: getUser },
 } = require("./user.js");
-const { isGroupMember } = require("../helpers/group.js");
+const { isGroupMember, isGroupAdmin } = require("../helpers/group.js");
 const { isMessageCreator } = require("../helpers/message.js");
 const Grapheme = require("grapheme-splitter");
 const splitter = new Grapheme();
 
 module.exports = {
   Message: {
-    async user({ user_id }, _, { user, connection }) {
+    async author({ user_id }, _, { user, connection }) {
       user.authenticate();
       return await getUser({}, { userId: user_id }, { user, connection });
     },
@@ -16,7 +16,7 @@ module.exports = {
       user.authenticate();
       return (
         await connection.query(
-          `SELECT * FROM groups
+          `SELECT * FROM \`groups\`
           WHERE group_id = ?`,
           [group_id]
         )
@@ -155,6 +155,13 @@ module.exports = {
         )
       )[0][0]["COUNT(*)"];
     },
+    async userPermissionToMessage({group_id, message_id}, _, { user, connection }) {
+      // author, admin or none of the above
+      user.authenticate();
+      const isAuthor = await isMessageCreator(user.id, message_id, connection, false, false);
+      const isAdmin = await isGroupAdmin(user.id, group_id, connection, false);
+      return isAuthor ? "author" : isAdmin ? "admin" : "none";
+    }
   },
   Reaction: {
     async user({ user_id }, _, { user, connection }) {

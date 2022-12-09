@@ -4,12 +4,8 @@ import { GroupQueryResultContext } from "./Group";
 import { ProfileImage } from "./ProfileImage";
 import "./GroupMemberElement.scss";
 
-export const GroupMemberElement = ({ userId }: GroupMemberElementProps) => {
-  const {
-    group: { members, admins },
-  } = React.useContext(GroupQueryResultContext)!;
-
-  const user = [...members, ...admins].find((user) => user.userId === userId)!;
+export const GroupMemberElement = ({ userId, userList }: GroupMemberElementProps) => {
+  const user = userList.find((user) => user.userId === userId)!;
 
   return (
     <div className="group-member-element">
@@ -35,11 +31,12 @@ GroupMemberElement.fragments = {
         url
       }
     }
-  `,
-};
+  `
+}
 
 export type GroupMemberElementProps = {
   userId: string;
+  userList: GroupMemberElementGQLData[];
 };
 
 export type GroupMemberElementGQLData = {

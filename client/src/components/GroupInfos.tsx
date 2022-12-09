@@ -6,17 +6,21 @@ import ReactMarkdown from "react-markdown";
 import { openEditor } from "./Editor";
 import remarkGfm from "remark-gfm";
 
+
 const UPDATE_GROUP_MUTATION = gql`
   mutation UpdateGroup($group: GroupInput!, $groupId: ID!) {
     updateGroup(group: $group, groupId: $groupId) {
       groupId
+      name
+      description
+      visibility
     }
   }
 `;
 
 const groupVisibilityOptions = [
   { value: "visible", label: "Visible to everyone" },
-  { value: "hidden", label: "Hidden from everyone" },
+  { value: "hidden", label: "Only visible to members" },
 ];
 
 export const GroupInfos = ({ className = "" }: GroupInfosProps) => {
@@ -30,8 +34,22 @@ export const GroupInfos = ({ className = "" }: GroupInfosProps) => {
       userRelationShipWithGroup: { type: userRelationShipWithGroupType },
     },
   } = useContext(GroupQueryResultContext)!;
-  const [updateGroup] = useMutation(UPDATE_GROUP_MUTATION);
-
+  const [updateGroup] = useMutation(UPDATE_GROUP_MUTATION, {
+    update(cache, { data: { updateGroup } }) {
+      cache.modify({
+        id: cache.identify({
+          __typename: "Group",
+          groupId,
+        }),
+        fields: {
+          name: () => updateGroup.name,
+          description: () => updateGroup.description,
+          visibility: () => updateGroup.visibility,
+        },
+      });
+    },
+  });
+  
   const isAdmin = userRelationShipWithGroupType === "admin";
 
   const renderVisibilityText = (visibility: string) => {
@@ -56,17 +74,15 @@ export const GroupInfos = ({ className = "" }: GroupInfosProps) => {
     <div className={`group-infos ${className}`}>
       <h2>Group Infos</h2>
       <div className="description">
-        <div className="edit-description">
-          {isAdmin && (
+          <h3>Description {isAdmin && (
             <svg
               className="message-edit icon"
               onClick={() => openEditor(handleEditDescription, description)}
             >
               <use href="./assets/images/svg-bundle.svg#edit" />
             </svg>
-          )}
-        </div>
-        <h3>Description</h3>
+          )}</h3>
+          
         <ReactMarkdown
           className="description-text"
           children={description}

@@ -1,14 +1,14 @@
 @use "../variables" as v;
 
 .group-member-element {
-  display: flex;
+  display: inline-flex;
   height: calc(var(--profile-image-size) / 2);
+  max-width: 80%;
 
   .name-container {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    max-width: 66%;
     overflow: hidden;
   }
 }

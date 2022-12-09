@@ -16,10 +16,15 @@
 
   .editor {
     width: 60vw;
-    padding: 0 15vw;
 
+    // small screen
     @media screen and (max-width: v.$medium-screen) {
-      width: 100vw;
+      width: 90vw;
+    }
+
+    // big screen
+    @media screen and (min-width: v.$large-screen) {
+      width: 40vw;
     }
 
     #editor-text {

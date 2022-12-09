@@ -1,10 +1,8 @@
-import React from "react";
+import React, { useContext } from "react";
 import "./MessageModify.scss";
 import { gql, useMutation } from "@apollo/client";
 import { openEditor } from "./Editor";
-
-import { GroupQueryResultContext } from "./Group";
-import { UserContext } from "../App";
+import { MessagesContext } from "./MessagesWrapper";
 
 const DELETE_MESSAGE_MUTATION = gql`
   mutation DeleteMessage($messageId: ID!) {
@@ -20,27 +18,20 @@ const EDIT_MESSAGE_MUTATION = gql`
   }
 `;
 
-export const MessageModify = ({ messageId }: MessageModifyProps) => {
-  const {
-    group: {
-      userRelationShipWithGroup: { type: userRelationShipWithGroupType },
-      messages,
-    },
-  } = React.useContext(GroupQueryResultContext)!;
-  const {
-    text,
-    user: { userId: messageOwnerUserId },
-  } = messages.find((message) => message.messageId === messageId)!;
+enum UserPermissionToMessage {
+  AUTHOR = "AUTHOR",
+  ADMIN = "ADMIN",
+  NONE = "NONE",
+}
 
-  const {
-    me: { userId },
-  } = React.useContext(UserContext)!;
+export const MessageModify = ({ messageId }: MessageModifyProps) => {
+  const messages = useContext(MessagesContext)!;
+  const { text, userPermissionToMessage } = messages.find(
+    (message) => message.messageId === messageId
+  )!;
 
   const [deleteMessage] = useMutation(DELETE_MESSAGE_MUTATION);
   const [editMessage] = useMutation(EDIT_MESSAGE_MUTATION);
-
-  const isAdmin = userRelationShipWithGroupType === "admin";
-  const isOwner = messageOwnerUserId === userId;
 
   const handleEditMessage = (text: string) => {
     editMessage({
@@ -53,21 +44,28 @@ export const MessageModify = ({ messageId }: MessageModifyProps) => {
     });
   };
 
+  const userPermissionToMessageEnum =
+    userPermissionToMessage.toUpperCase() as UserPermissionToMessage;
+  
+  console.log(userPermissionToMessageEnum, userPermissionToMessage)
+
   return (
     <div className="message-modify">
-      {isOwner && (
+      {userPermissionToMessageEnum === UserPermissionToMessage.AUTHOR && (
         <svg
           className="message-edit icon"
-          onClick={() =>
-            openEditor(handleEditMessage, text)
-          }
+          onClick={() => openEditor(handleEditMessage, text)}
         >
           <use href="./assets/images/svg-bundle.svg#edit" />
         </svg>
       )}
-      {(isAdmin || isOwner) && (
+      {(userPermissionToMessageEnum === UserPermissionToMessage.AUTHOR ||
+        userPermissionToMessageEnum === UserPermissionToMessage.ADMIN) && (
         <svg
-          className={`message-delete icon ${isAdmin && !isOwner && "danger"}`}
+          className={`message-delete icon ${
+            userPermissionToMessageEnum === UserPermissionToMessage.ADMIN &&
+            "danger"
+          }`}
           onClick={() => deleteMessage({ variables: { messageId } })}
         >
           <use href="./assets/images/svg-bundle.svg#delete" />
@@ -79,34 +77,21 @@ export const MessageModify = ({ messageId }: MessageModifyProps) => {
 
 MessageModify.fragments = {
   message: gql`
-    fragment MessageModifyOnMessage on Message {
+    fragment MessageModify on Message {
       messageId
-      user {
+      userPermissionToMessage
+      author {
         userId
       }
     }
   `,
-  group: gql`
-    fragment MessageModifyOnGroup on Group {
-      groupId
-      userRelationShipWithGroup {
-        type
-      }
-    }
-  `,
 };
 
-export type MessageModifyMessageGQLData = {
+export type MessageModifyGQLData = {
   messageId: string;
-  user: {
+  userPermissionToMessage: UserPermissionToMessage;
+  author: {
     userId: string;
-  };
-};
-
-export type MessageModifyGroupGQLData = {
-  groupId: string;
-  userRelationShipWithGroup: {
-    type: string;
   };
 };
 

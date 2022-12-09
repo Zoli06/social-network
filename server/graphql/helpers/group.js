@@ -2,8 +2,8 @@ module.exports = {
   isGroupCreator: async (userId, groupId, connection, _break) => {
     const group = (
       await connection.query(
-        `SELECT * FROM groups
-    WHERE group_id = ?`,
+        `SELECT * FROM \`groups\`
+          WHERE group_id = ?`,
         [groupId]
       )
     )[0][0];
@@ -19,7 +19,7 @@ module.exports = {
     const relationship = (
       await connection.query(
         `SELECT * FROM group_user_relationships
-    WHERE group_id = ? AND user_id = ?`,
+          WHERE group_id = ? AND user_id = ?`,
         [groupId, userId]
       )
     )[0][0];
@@ -38,7 +38,7 @@ module.exports = {
     const relationship = (
       await connection.query(
         `SELECT * FROM group_user_relationships
-    WHERE group_id = ? AND user_id = ?`,
+          WHERE group_id = ? AND user_id = ?`,
         [groupId, userId]
       )
     )[0][0];

@@ -1,16 +1,14 @@
 import React from "react";
 import "./MessageAuthor.scss";
 import { gql } from "@apollo/client";
-import { GroupQueryResultContext } from "./Group";
 import { ProfileImage } from "./ProfileImage";
+import { MessagesContext } from "./MessagesWrapper";
 
 export const MessageAuthor = ({ messageId }: MessageAuthorProps) => {
-  const {
-    group: { messages },
-  } = React.useContext(GroupQueryResultContext)!;
+  const messages = React.useContext(MessagesContext)!;
 
   const {
-    user: { firstName, lastName, middleName, userName, intro, profileImage },
+    author: { firstName, lastName, middleName, userName, intro, profileImage },
   } = messages.find((message) => message.messageId === messageId)!;
 
   return (
@@ -49,7 +47,7 @@ MessageAuthor.fragments = {
 };
 
 export type MessageAuthorGQLData = {
-  user: {
+  author: {
     userId: string;
     firstName: string;
     lastName: string;

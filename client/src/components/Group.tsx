@@ -2,52 +2,22 @@ import React, { useEffect } from "react";
 import "./Group.scss";
 import { useQuery, useLazyQuery, gql } from "@apollo/client";
 import { Message } from "./Message";
-import { MessageModify } from "./MessageModify";
+import { MessagesWrapper } from "./MessagesWrapper";
 import { AddRootMessage } from "./AddRootMessage";
 import { GroupMembers } from "./GroupMembers";
 import { GroupInfos } from "./GroupInfos";
+import { GroupMemberModify } from "./GroupMemberModify";
 import { cache } from "../index";
 
 import { MessageGQLData } from "./Message";
-import { MessageModifyGroupGQLData } from "./MessageModify";
 import { AddRootMessageGQLData } from "./AddRootMessage";
 import { GroupMembersGQLData } from "./GroupMembers";
 import { GroupInfosGQLData } from "./GroupInfos";
+import { GroupMemberModifyGQLData } from "./GroupMemberModify";
 
 export const GroupQueryResultContext = React.createContext<
   GroupQueryGQLData | undefined
 >(undefined);
-
-const GROUP_QUERY = gql`
-  query GetGroup(
-    $groupId: ID!
-    $onlyInterestedInMessageId: ID
-    $maxDepth: Int
-  ) {
-    group(groupId: $groupId) {
-      messages(
-        onlyInterestedInMessageId: $onlyInterestedInMessageId
-        maxDepth: $maxDepth
-      ) {
-        ...Message
-      }
-
-      ...MessageModifyOnGroup
-      ...AddRootMessage
-      ...GroupMembers
-      ...GroupInfos
-
-      groupId
-      name
-    }
-  }
-
-  ${Message.fragments.message}
-  ${MessageModify.fragments.group}
-  ${AddRootMessage.fragments.group}
-  ${GroupMembers.fragments.group}
-  ${GroupInfos.fragments.group}
-`;
 
 const MESSAGE_QUERY = gql`
   query GetMessage($messageId: ID!) {
@@ -234,6 +204,8 @@ export const Group = ({
     return <p>Error!</p>;
   }
 
+  const messages = data!.group.messages;
+
   return (
     <GroupQueryResultContext.Provider value={data}>
       <div className="group">
@@ -250,10 +222,11 @@ export const Group = ({
                 ((!onlyInterestedInMessageId && message.responseTo === null) ||
                   (onlyInterestedInMessageId &&
                     onlyInterestedInMessageId === message.messageId)) && (
-                  <Message
+                  <MessagesWrapper
                     messageId={message.messageId}
                     subscribeToMore={subscribeToMore}
                     className="root-message box"
+                    messages={messages}
                     key={message.messageId}
                   />
                 )
@@ -269,15 +242,50 @@ export const Group = ({
   );
 };
 
+const GROUP_QUERY = gql`
+  query GetGroup(
+    $groupId: ID!
+    $onlyInterestedInMessageId: ID
+    $maxDepth: Int
+  ) {
+    group(groupId: $groupId) {
+      messages(
+        onlyInterestedInMessageId: $onlyInterestedInMessageId
+        maxDepth: $maxDepth
+      ) {
+        ...Message
+      }
+
+      ...AddRootMessage
+      ...GroupMembers
+      ...GroupInfos
+      ...GroupMemberModify
+
+      groupId
+      name
+    }
+  }
+
+  ${Message.fragments.message}
+  ${AddRootMessage.fragments.group}
+  ${GroupMembers.fragments.group}
+  ${GroupInfos.fragments.group}
+  ${GroupMemberModify.fragments.group}
+`;
+
+Group.fragments = {
+  group: GROUP_QUERY,
+};
+
 export type GroupQueryGQLData = {
   group: {
     messages: MessageGQLData[];
     groupId: string;
     name: string;
-  } & MessageModifyGroupGQLData &
-    AddRootMessageGQLData &
+  } & AddRootMessageGQLData &
     GroupMembersGQLData &
-    GroupInfosGQLData;
+  GroupInfosGQLData &
+  GroupMemberModifyGQLData;
 };
 
 export type GroupProps = {

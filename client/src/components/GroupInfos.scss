@@ -1,1 +1,13 @@
-@use "../variables" as v;
+@use '../variables' as v;
+
+.description {
+  h3 {
+    position: relative;
+    svg {
+      position: absolute;
+      right: 0;
+      height: calc(var(--icon-size) * .75);
+      width: calc(var(--icon-size) * .75);
+    }
+  }
+}

@@ -3,6 +3,12 @@ enum VoteType {
   down
 }
 
+enum MessagePermission {
+  author
+  admin
+  none
+}
+
 type Reaction {
   user: User!
   createdAt: Date!
@@ -18,7 +24,7 @@ input MediaInput {
 type Message {
   messageId: ID!
   group: Group!
-  user: User!
+  author: User!
   createdAt: Date!
   updatedAt: Date!
   text: String!
@@ -33,6 +39,7 @@ type Message {
   vote: VoteType
   mentionedUsers: [User!]!
   medias: [Media!]! # urls of the medias
+  userPermissionToMessage: MessagePermission!
 }
 
 input MessageInput {

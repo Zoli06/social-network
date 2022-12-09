@@ -1,15 +1,14 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import "./MessageActions.scss";
 import { gql, useMutation } from "@apollo/client";
 import Twemoji from "react-twemoji";
 import { v4 as uuidv4 } from "uuid";
-
 import { openEditor } from "./Editor";
+import { MessagesContext } from "./MessagesWrapper";
 
 import { GroupQueryGQLData } from "./Group";
 import { MessageGQLData } from "./Message";
 
-import { GroupQueryResultContext } from "./Group";
 
 const ADD_RESPONSE_MUTATION = gql`
   mutation AddResponseMutation($message: MessageInput!) {
@@ -54,9 +53,7 @@ export const MessageActions = ({
   messageId,
   subscribeToMore,
 }: MessageActionsProps) => {
-  const {
-    group: { messages },
-  } = React.useContext(GroupQueryResultContext)!;
+  const messages = useContext(MessagesContext)!;
 
   const {
     upVotes,

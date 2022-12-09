@@ -50,17 +50,17 @@ $theme-map: null;
 }
 
 $small-screen: 600px;
-$medium-screen: 950px;
-$large-screen: 1200px;
+$medium-screen: 1200px;
+$large-screen: 1800px;
 
 :root {
-  --h1-font-size: 2.5rem;
-  --h2-font-size: 2.3rem;
-  --h3-font-size: 2.1rem;
-  --h4-font-size: 1.9rem;
-  --h5-font-size: 1.8rem;
-  --h6-font-size: 1.7rem;
-  --p-font-size: 1.7rem;
+  --h1-font-size: 2.2rem;
+  --h2-font-size: 2rem;
+  --h3-font-size: 1.8rem;
+  --h4-font-size: 1.6rem;
+  --h5-font-size: 1.5rem;
+  --h6-font-size: 1.4rem;
+  --p-font-size: 1.4rem;
   --profile-image-size: 80px;
   --icon-size: min(3vw, 40px);
 
@@ -71,13 +71,13 @@ $large-screen: 1200px;
 
 @media screen and (max-width: $medium-screen) {
   :root {
-    --h1-font-size: 1.8rem;
-    --h2-font-size: 1.6rem;
-    --h3-font-size: 1.5rem;
-    --h4-font-size: 1.4rem;
-    --h5-font-size: 1.3rem;
-    --h6-font-size: 1.2rem;
-    --p-font-size: 1.2rem;
+    --h1-font-size: 1.6rem;
+    --h2-font-size: 1.4rem;
+    --h3-font-size: 1.3rem;
+    --h4-font-size: 1.2rem;
+    --h5-font-size: 1.1rem;
+    --h6-font-size: 1rem;
+    --p-font-size: 1rem;
     --profile-image-size: 60px;
     --icon-size: min(7vw, 30px);
   }

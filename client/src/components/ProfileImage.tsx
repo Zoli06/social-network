@@ -1,5 +1,6 @@
 import "./ProfileImage.scss";
 
+// This component renders a profile image. If no url is provided, a default image is shown.
 export const ProfileImage = ({ url }: ProfileImageProps) => {
   return (
     <img

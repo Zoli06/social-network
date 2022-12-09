@@ -6,11 +6,11 @@ import { MessageModify } from "./MessageModify";
 import { MessageText } from "./MessageText";
 import { MessageActions } from "./MessageActions";
 import { Editor } from "./Editor";
-import { GroupQueryResultContext } from "./Group";
+import { MessagesContext } from "./MessagesWrapper";
 
 import { MessageAuthorGQLData } from "./MessageAuthor";
 import { MessageTextGQLData } from "./MessageText";
-import { MessageModifyMessageGQLData } from "./MessageModify";
+import { MessageModifyGQLData } from "./MessageModify";
 import { MessageActionsGQLData } from "./MessageActions";
 import { EditorGQLData } from "./Editor";
 
@@ -19,38 +19,34 @@ export function Message({
   subscribeToMore,
   className = "",
 }: MessageProps) {
-  const {
-    group: { messages },
-  } = React.useContext(GroupQueryResultContext)!;
+  const messages = React.useContext(MessagesContext)!;
 
   return (
-    <>
-      <div className={`message-container ${className}`}>
-        <div className="message-content">
-          <div className="message-header">
-            <MessageAuthor messageId={messageId} />
-            <MessageModify messageId={messageId} />
-          </div>
-          <MessageText messageId={messageId} />
-          <MessageActions
-            messageId={messageId}
-            subscribeToMore={subscribeToMore}
-          />
+    <div className={`message-container ${className}`}>
+      <div className="message-content">
+        <div className="message-header">
+          <MessageAuthor messageId={messageId} />
+          <MessageModify messageId={messageId} />
         </div>
-        <div className="response-tree">
-          {messages.map(
-            (message: MessageGQLData) =>
-              message.responseTo?.messageId === messageId && (
-                <Message
-                  messageId={message.messageId}
-                  key={message.messageId}
-                  subscribeToMore={subscribeToMore}
-                />
-              )
-          )}
-        </div>
+        <MessageText messageId={messageId} />
+        <MessageActions
+          messageId={messageId}
+          subscribeToMore={subscribeToMore}
+        />
       </div>
-    </>
+      <div className="response-tree">
+        {messages.map(
+          (message: MessageGQLData) =>
+            message.responseTo?.messageId === messageId && (
+              <Message
+                messageId={message.messageId}
+                key={message.messageId}
+                subscribeToMore={subscribeToMore}
+              />
+            )
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -58,13 +54,13 @@ Message.fragments = {
   message: gql`
     fragment Message on Message {
       messageId
-      user {
+      author {
         ...MessageAuthor
       }
       ...AddResponse
       ...MessageActions
       ...MessageText
-      ...MessageModifyOnMessage
+      ...MessageModify
 
       responseTo {
         messageId
@@ -81,7 +77,7 @@ Message.fragments = {
 
 export type MessageGQLData = MessageAuthorGQLData &
   MessageTextGQLData &
-  MessageModifyMessageGQLData &
+  MessageModifyGQLData &
   MessageActionsGQLData &
   EditorGQLData & {
     responseTo?: { messageId: string };

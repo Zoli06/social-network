@@ -28,7 +28,7 @@ type GroupUserRelationship {
 
 type Group {
   groupId: ID!
-  createdByUser: User!
+  creatorUser: User!
   createdAt: Date!
   updatedAt: Date!
   name: String!
@@ -42,7 +42,7 @@ type Group {
   notificationFrequency: NotificationFrequency
   description: String
   visibility: Visibility!
-  userRelationShipWithGroup: GroupUserRelationship!
+  userRelationShipWithGroup(userId: ID): GroupUserRelationship!
 }
 
 input GroupInput {
@@ -60,7 +60,6 @@ type Mutation {
   updateGroup(groupId: ID!, group: GroupInput!): Group
   deleteGroup(groupId: ID!): ID
 
-  # TODO: return relationship type
   sendGroupInvitation(groupId: ID!, userId: ID!): Boolean
   acceptGroupInvitation(groupId: ID!): Boolean
   rejectGroupInvitation(groupId: ID!): Boolean

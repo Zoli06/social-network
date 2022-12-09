@@ -1,15 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import "./MessageText.scss";
 import { gql } from "@apollo/client";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-
-import { GroupQueryResultContext } from "./Group";
+import { MessagesContext } from "./MessagesWrapper";
 
 export const MessageText = ({ messageId }: MessageTextProps) => {
-  const {
-    group: { messages },
-  } = React.useContext(GroupQueryResultContext)!;
+  const messages = useContext(MessagesContext)!;
   const { text } = messages.find((message) => message.messageId === messageId)!;
 
   return (

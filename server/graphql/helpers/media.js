@@ -3,7 +3,7 @@ module.exports = {
     const media = (
       await connection.query(
         `SELECT * FROM media
-    WHERE media_id = ?`,
+          WHERE media_id = ?`,
         [mediaId]
       )
     )[0][0];
