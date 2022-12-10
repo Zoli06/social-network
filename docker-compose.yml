@@ -1,0 +1,36 @@
+version: '3'
+services:
+  # Create client container
+  client: # Name of our service
+    build: ./client # path to dockerfile
+    ports: # Port binding to host from docker container
+      - "8010:8010" # Bind port 3000 of host to 3000 of container
+    container_name: client
+    restart: always # What to do if container crashes
+    links:
+      - server
+  # Create server container
+  server:
+    # Create server container  
+    build: ./server
+    ports:
+      - "8000:8000"
+    container_name: server
+    restart: always
+    links:
+      - db
+  # Create database container
+  db:
+    image: mysql
+    ports:
+    - "3306:3306"
+    container_name: database
+    restart: always
+    volumes:
+    - ./db.sql:/docker-entrypoint-initdb.d/dump.sql
+    # Set environment variables
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: social_network
+      MYSQL_USER: social_network_backend
+      MYSQL_PASSWORD: social_network_backend
