@@ -34,7 +34,7 @@ export const AddRootMessage = () => {
   return (
     <div className="add-root-message">
       <svg onClick={() => openEditor(handleAddRootMessage)}>
-        <use href="./assets/images/svg-bundle.svg#plus" />
+        <use href="/assets/images/svg-bundle.svg#plus" />
       </svg>
     </div>
   );

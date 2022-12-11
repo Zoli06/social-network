@@ -26,8 +26,8 @@ services:
     - "3306:3306"
     container_name: database
     restart: always
-    volumes:
-    - ./db.sql:/docker-entrypoint-initdb.d/dump.sql
+    # volumes:
+    # - ./db.sql:/docker-entrypoint-initdb.d/dump.sql
     # Set environment variables
     environment:
       MYSQL_ROOT_PASSWORD: root

@@ -79,7 +79,7 @@ export const GroupInfos = ({ className = "" }: GroupInfosProps) => {
               className="message-edit icon"
               onClick={() => openEditor(handleEditDescription, description)}
             >
-              <use href="./assets/images/svg-bundle.svg#edit" />
+              <use href="/assets/images/svg-bundle.svg#edit" />
             </svg>
           )}</h3>
           

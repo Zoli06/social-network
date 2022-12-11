@@ -8,6 +8,7 @@ const { makeExecutableSchema } = require("@graphql-tools/schema");
 const { WebSocketServer } = require("ws");
 const { useServer } = require("graphql-ws/lib/use/ws");
 const { PubSub } = require("graphql-subscriptions");
+const cors = require("cors");
 
 const { fieldResolver, resolvers } = require("./graphql/resolvers.js");
 const connection = require("./db/sql_connect.js");
@@ -22,6 +23,7 @@ const app = express();
 
 app.use(express.static(path));
 app.use(bodyParser.json());
+app.use(cors());
 const httpServer = createServer(app);
 
 const wsServer = new WebSocketServer({

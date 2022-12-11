@@ -11,4 +11,9 @@
     justify-content: center;
     overflow: hidden;
   }
+
+  .image-container {
+    aspect-ratio: 1 / 1;
+    margin-right: calc(var(--profile-image-size) / 8);
+  }
 }

@@ -393,7 +393,7 @@ export const GroupMemberModify = ({ userId }: GroupMemberModifyProps) => {
       {...(displayedButtons.length === 0 && { style: { display: 'none' } })}
     >
       <svg className='icon' viewBox='0 0 16 16'>
-        <use className='icon' href='./assets/images/svg-bundle.svg#options' />
+        <use className='icon' href='/assets/images/svg-bundle.svg#options' />
       </svg>
       {isEditing && (
         <div className='group-member-modify-popup'>

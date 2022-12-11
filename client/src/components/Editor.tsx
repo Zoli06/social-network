@@ -57,13 +57,13 @@ export const Editor = () => {
           height={"50vh"}
         />
         <svg id="close-button" onClick={handleClose}>
-          <use href="./assets/images/svg-bundle.svg#close-button-2" />
+          <use href="/assets/images/svg-bundle.svg#close-button-2" />
         </svg>
         <label>
           <input type="submit" style={{ display: "none" }} />
           <svg id="submit-button">
             <use
-              href="./assets/images/svg-bundle.svg#ok"
+              href="/assets/images/svg-bundle.svg#ok"
               onClick={handleSubmit}
             />
           </svg>

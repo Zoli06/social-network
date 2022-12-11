@@ -185,7 +185,7 @@ export const MessageActions = ({
         onClick={() => handleVote("up")}
       >
         <use
-          href={`./assets/images/svg-bundle.svg#upvote${vote === "up" ? "-active" : ""
+          href={`/assets/images/svg-bundle.svg#upvote${vote === "up" ? "-active" : ""
             }`}
         />
       </svg>
@@ -195,7 +195,7 @@ export const MessageActions = ({
         onClick={() => handleVote("down")}
       >
         <use
-          href={`./assets/images/svg-bundle.svg#downvote${vote === "down" ? "-active" : ""
+          href={`/assets/images/svg-bundle.svg#downvote${vote === "down" ? "-active" : ""
             }`}
         />
       </svg>
@@ -204,7 +204,7 @@ export const MessageActions = ({
         className="response icon"
         onClick={() => openEditor(handleAddResponse)}
       >
-        <use href="./assets/images/svg-bundle.svg#response" />
+        <use href="/assets/images/svg-bundle.svg#response" />
       </svg>
       <p className="responses-count">{responsesCount}</p>
       <div className="space-holder" />
@@ -231,7 +231,7 @@ export const MessageActions = ({
               </div>
             ) : (
               <svg className="add-reaction-icon icon">
-                <use href="./assets/images/svg-bundle.svg#plus" />
+                <use href="/assets/images/svg-bundle.svg#plus" />
               </svg>
             )}
           </div>
@@ -254,7 +254,7 @@ export const MessageActions = ({
                 className="remove-reaction add-reaction-popup-emoji icon"
                 onClick={() => handleAddReaction(null)}
               >
-                <use href="./assets/images/svg-bundle.svg#close-button-3" />
+                <use href="/assets/images/svg-bundle.svg#close-button-3" />
               </svg>
             )}
           </div>

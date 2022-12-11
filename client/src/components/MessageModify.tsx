@@ -54,7 +54,7 @@ export const MessageModify = ({ messageId }: MessageModifyProps) => {
           className="message-edit icon"
           onClick={() => openEditor(handleEditMessage, text)}
         >
-          <use href="./assets/images/svg-bundle.svg#edit" />
+          <use href="/assets/images/svg-bundle.svg#edit" />
         </svg>
       )}
       {(userPermissionToMessageEnum === UserPermissionToMessage.AUTHOR ||
@@ -66,7 +66,7 @@ export const MessageModify = ({ messageId }: MessageModifyProps) => {
           }`}
           onClick={() => deleteMessage({ variables: { messageId } })}
         >
-          <use href="./assets/images/svg-bundle.svg#delete" />
+          <use href="/assets/images/svg-bundle.svg#delete" />
         </svg>
       )}
     </div>

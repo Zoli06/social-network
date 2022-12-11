@@ -4,6 +4,11 @@
   display: inline-flex;
   height: var(--profile-image-size);
 
+  .image-container {
+    aspect-ratio: 1 / 1;
+    margin-right: calc(var(--profile-image-size) / 8);
+  }
+
   .intro {
     @include v.theme() {
       color: v.theme-get("secondary-text-color");
