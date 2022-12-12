@@ -1,6 +1,6 @@
 import React from 'react'
 import { useParams } from 'react-router-dom'
-import { User } from './User'
+import { User } from '../components/User/User'
 
 export const UserPage = () => {
   const { userId } = useParams<{ userId: string }>()

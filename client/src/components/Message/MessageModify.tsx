@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import "./MessageModify.scss";
 import { gql, useMutation } from "@apollo/client";
-import { openEditor } from "./Editor";
+import { openEditor } from "../Editor/Editor";
 import { MessagesContext } from "./MessagesWrapper";
 
 const DELETE_MESSAGE_MUTATION = gql`

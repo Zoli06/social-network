@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 import React from "react";
 import { GroupQueryResultContext } from "./Group";
-import { ProfileImage } from "./ProfileImage";
+import { ProfileImage } from "../User/ProfileImage";
 import "./GroupMemberElement.scss";
 
 export const GroupMemberElement = ({ userId, userList }: GroupMemberElementProps) => {
@@ -9,7 +9,7 @@ export const GroupMemberElement = ({ userId, userList }: GroupMemberElementProps
 
   return (
     <div className="group-member-element">
-      <div className="image-container">
+      <div className="profile-image-wrapper">
         <ProfileImage url={user.profileImage?.url} />
       </div>
       <div className="name-container">

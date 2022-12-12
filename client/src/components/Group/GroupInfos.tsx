@@ -3,8 +3,9 @@ import "./GroupInfos.scss";
 import { GroupQueryResultContext } from "./Group";
 import { gql, useMutation } from "@apollo/client";
 import ReactMarkdown from "react-markdown";
-import { openEditor } from "./Editor";
+import { openEditor } from "../Editor/Editor";
 import remarkGfm from "remark-gfm";
+import React from "react";
 
 
 const UPDATE_GROUP_MUTATION = gql`

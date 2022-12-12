@@ -1,4 +1,4 @@
-@use "../variables" as v;
+@use "../../variables" as v;
 
 .group-member-element {
   display: inline-flex;
@@ -12,8 +12,7 @@
     overflow: hidden;
   }
 
-  .image-container {
-    aspect-ratio: 1 / 1;
+  .profile-image-wrapper {
     margin-right: calc(var(--profile-image-size) / 8);
   }
 }

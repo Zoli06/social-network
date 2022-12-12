@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { Group } from './Group';
+import { Group } from '../components/Group/Group';
 
 export const GroupPage = () => {
   const { groupId, messageId, maxDepth } = useParams < {

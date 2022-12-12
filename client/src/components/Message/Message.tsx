@@ -5,14 +5,14 @@ import { MessageAuthor } from "./MessageAuthor";
 import { MessageModify } from "./MessageModify";
 import { MessageText } from "./MessageText";
 import { MessageActions } from "./MessageActions";
-import { Editor } from "./Editor";
+import { Editor } from "../Editor/Editor";
 import { MessagesContext } from "./MessagesWrapper";
 
 import { MessageAuthorGQLData } from "./MessageAuthor";
 import { MessageTextGQLData } from "./MessageText";
 import { MessageModifyGQLData } from "./MessageModify";
 import { MessageActionsGQLData } from "./MessageActions";
-import { EditorGQLData } from "./Editor";
+import { EditorGQLData } from "../Editor/Editor";
 
 export function Message({
   messageId,

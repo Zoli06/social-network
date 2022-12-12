@@ -2,8 +2,8 @@ import { gql, useMutation } from '@apollo/client';
 import React, { useState } from 'react';
 import { GroupQueryResultContext } from './Group';
 import './GroupMemberModify.scss';
-import { UserContext } from '../App';
-import { client } from '../index';
+import { UserContext } from '../../App';
+import { client } from '../../index';
 
 const BAN_USER_MUTATION = gql`
   mutation BanUser($groupId: ID!, $userId: ID!) {

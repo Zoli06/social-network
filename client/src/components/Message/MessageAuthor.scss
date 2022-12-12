@@ -1,11 +1,10 @@
-@use "../variables" as v;
+@use "../../variables" as v;
 
 .message-author-container {
   display: inline-flex;
   height: var(--profile-image-size);
 
-  .image-container {
-    aspect-ratio: 1 / 1;
+  .profile-image-wrapper {
     margin-right: calc(var(--profile-image-size) / 8);
   }
 

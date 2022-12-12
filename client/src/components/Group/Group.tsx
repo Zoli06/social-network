@@ -1,15 +1,15 @@
 import React, { useEffect } from "react";
 import "./Group.scss";
 import { useQuery, useLazyQuery, gql } from "@apollo/client";
-import { Message } from "./Message";
-import { MessagesWrapper } from "./MessagesWrapper";
+import { Message } from "../Message/Message";
+import { MessagesWrapper } from "../Message/MessagesWrapper";
 import { AddRootMessage } from "./AddRootMessage";
 import { GroupMembers } from "./GroupMembers";
 import { GroupInfos } from "./GroupInfos";
 import { GroupMemberModify } from "./GroupMemberModify";
-import { cache } from "../index";
+import { cache } from "../../index";
 
-import { MessageGQLData } from "./Message";
+import { MessageGQLData } from "../Message/Message";
 import { AddRootMessageGQLData } from "./AddRootMessage";
 import { GroupMembersGQLData } from "./GroupMembers";
 import { GroupInfosGQLData } from "./GroupInfos";

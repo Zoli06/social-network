@@ -2,11 +2,12 @@ import { Routes, Route, BrowserRouter as Router } from 'react-router-dom';
 
 import './App.scss';
 // import { Post } from './components/Post';
-import { GroupPage } from './components/GroupPage';
-import { HomePage } from './components/HomePage';
+import { GroupPage } from './pages/GroupPage';
+import { HomePage } from './pages/HomePage';
+import { UserPage } from './pages/UserPage';
 import { useQuery, gql } from '@apollo/client';
 import React from 'react';
-import { Editor } from './components/Editor';
+import { Editor } from './components/Editor/Editor';
 
 const ME = gql`
   query {
@@ -57,7 +58,9 @@ export function App() {
         <Routes>
           <Route path='/group/:groupId' element={<GroupPage />} />
           <Route path='/group/:groupId/:messageId' element={<GroupPage />} />
-          {/* <Route path='/' element={<HomePage />} /> */}
+          <Route path='/group/:groupId/:messageId/:maxDepth' element={<GroupPage />} />
+          <Route path='/user/:userId' element={<UserPage />} />
+          <Route path='*' element={<HomePage />} />
         </Routes>
       </UserContext.Provider>
     </Router>

@@ -3,10 +3,10 @@ import "./MessageActions.scss";
 import { gql, useMutation } from "@apollo/client";
 import Twemoji from "react-twemoji";
 import { v4 as uuidv4 } from "uuid";
-import { openEditor } from "./Editor";
+import { openEditor } from "../Editor/Editor";
 import { MessagesContext } from "./MessagesWrapper";
 
-import { GroupQueryGQLData } from "./Group";
+import { GroupQueryGQLData } from "../Group/Group";
 import { MessageGQLData } from "./Message";
 
 

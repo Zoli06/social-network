@@ -3,7 +3,7 @@ import React from "react";
 import { GroupQueryResultContext } from "./Group";
 import { GroupMemberElement } from "./GroupMemberElement";
 import { GroupMemberModify } from "./GroupMemberModify";
-import { UserContext } from "../App";
+import { UserContext } from "../../App";
 import "./GroupMembers.scss";
 
 import { GroupMemberElementGQLData } from "./GroupMemberElement";

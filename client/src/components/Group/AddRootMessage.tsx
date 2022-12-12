@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { gql, useMutation } from "@apollo/client";
 import "./AddRootMessage.scss";
-import { openEditor } from "./Editor";
+import { openEditor } from "../Editor/Editor";
 import { GroupQueryResultContext } from "./Group";
 
 // TODO: Refactor this

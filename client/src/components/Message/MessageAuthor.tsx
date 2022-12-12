@@ -1,7 +1,7 @@
 import React from "react";
 import "./MessageAuthor.scss";
 import { gql } from "@apollo/client";
-import { ProfileImage } from "./ProfileImage";
+import { ProfileImage } from "../User/ProfileImage";
 import { MessagesContext } from "./MessagesWrapper";
 
 export const MessageAuthor = ({ messageId }: MessageAuthorProps) => {
@@ -13,7 +13,7 @@ export const MessageAuthor = ({ messageId }: MessageAuthorProps) => {
 
   return (
     <div className="message-author-container">
-      <div className="image-container">
+      <div className="profile-image-wrapper">
         <ProfileImage url={profileImage?.url} />
       </div>
       <div className="text-container">
