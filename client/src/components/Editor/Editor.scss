@@ -10,6 +10,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  z-index: 1;
+
   @include v.theme() {
     background-color: v.theme-get("editor-cover-color");
   }
