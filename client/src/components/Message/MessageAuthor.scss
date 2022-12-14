@@ -6,6 +6,7 @@
 
   .profile-image-wrapper {
     margin-right: calc(var(--profile-image-size) / 8);
+    aspect-ratio: 1 / 1;
   }
 
   .intro {

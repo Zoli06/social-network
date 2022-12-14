@@ -1,40 +1,41 @@
-import { gql, useQuery } from '@apollo/client'
-import React from 'react'
-import { ProfileImage } from './ProfileImage'
+import { gql, useQuery } from '@apollo/client';
+import React, { createContext } from 'react';
+import './User.scss';
+import { ProfileImage } from './ProfileImage';
+import { UserInfos } from './UserInfos';
+
+import { UserInfosGQLData } from './UserInfos';
+
+export const UserQueryResultContext = createContext<
+  UserQueryGQLData | undefined
+>(undefined);
 
 export const User = ({ userId }: UserProps) => {
   const { data, loading, error } = useQuery<UserQueryGQLData>(USER_QUERY, {
     variables: { userId },
-  })
+  });
 
-  if (loading) return <div>Loading...</div>
+  if (loading) return <div>Loading...</div>;
   if (error) {
-    console.error(error)
-    return <div>Error</div>
+    console.error(error);
+    return <div>Error</div>;
   }
 
-  const {
-    firstName,
-    lastName,
-    middleName,
-    email,
-    profileImage: { url },
-  } = data!.user
+  const { profileImage } = data!.user;
 
   return (
-    <>
-      <ProfileImage url={url} />
-      <div>
-        <p>
-          <span>{firstName} </span>
-          <span>{middleName} </span>
-          <span>{lastName}</span>
-        </p>
-        <p>{email}</p>
+    <UserQueryResultContext.Provider value={data}>
+      <div className='user'>
+        <div className='profile-image-wrapper'>
+          <ProfileImage url={profileImage?.url} />
+        </div>
+        <div className='user-infos-wrapper'>
+          <UserInfos />
+        </div>
       </div>
-    </>
-  )
-}
+    </UserQueryResultContext.Provider>
+  );
+};
 
 const USER_QUERY = gql`
   query User($userId: ID!) {
@@ -50,22 +51,17 @@ const USER_QUERY = gql`
       }
     }
   }
-`
+`;
 
 type UserProps = {
-  userId: string
-}
+  userId: string;
+};
 
 type UserQueryGQLData = {
-  user: {
-    userId: string
-    firstName: string
-    lastName: string
-    middleName: string
-    email: string
+  user: UserInfosGQLData & {
     profileImage: {
-      mediaId: string
-      url: string
-    }
-  }
-}
+      mediaId: string;
+      url: string;
+    };
+  };
+};

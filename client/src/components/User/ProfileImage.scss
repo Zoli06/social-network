@@ -1,12 +1,10 @@
 .profile-image-container {
   aspect-ratio: 1 / 1;
-
+  margin-right: 5px;
   .profile-image {
-    aspect-ratio: 1 / 1;
+    border-radius: 50%;
     height: 100%;
     max-width: 100%;
-    border-radius: 50%;
     object-fit: cover;
-    margin-right: 5px;
   }
 }
