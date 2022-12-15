@@ -1,8 +1,6 @@
-import React, { useContext } from "react";
 import "./MessageModify.scss";
 import { gql, useMutation } from "@apollo/client";
 import { openEditor } from "../Editor/Editor";
-import { MessagesContext } from "./MessagesWrapper";
 
 const DELETE_MESSAGE_MUTATION = gql`
   mutation DeleteMessage($messageId: ID!) {
@@ -24,12 +22,7 @@ enum UserPermissionToMessage {
   NONE = "NONE",
 }
 
-export const MessageModify = ({ messageId }: MessageModifyProps) => {
-  const messages = useContext(MessagesContext)!;
-  const { text, userPermissionToMessage } = messages.find(
-    (message) => message.messageId === messageId
-  )!;
-
+export const MessageModify = ({ message: { messageId, text, userPermissionToMessage } }: MessageModifyProps) => {
   const [deleteMessage] = useMutation(DELETE_MESSAGE_MUTATION);
   const [editMessage] = useMutation(EDIT_MESSAGE_MUTATION);
 
@@ -78,6 +71,7 @@ MessageModify.fragments = {
     fragment MessageModify on Message {
       messageId
       userPermissionToMessage
+      text
       author {
         userId
       }
@@ -88,11 +82,12 @@ MessageModify.fragments = {
 export type MessageModifyGQLData = {
   messageId: string;
   userPermissionToMessage: UserPermissionToMessage;
+  text: string;
   author: {
     userId: string;
   };
 };
 
-export type MessageModifyProps = {
-  messageId: string;
+type MessageModifyProps = {
+  message: MessageModifyGQLData;
 };

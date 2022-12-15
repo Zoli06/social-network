@@ -1,6 +1,4 @@
 import { gql } from "@apollo/client";
-import React from "react";
-import { GroupQueryResultContext } from "./Group";
 import { ProfileImage } from "../User/ProfileImage";
 import "./GroupMemberElement.scss";
 
@@ -10,7 +8,7 @@ export const GroupMemberElement = ({ userId, userList }: GroupMemberElementProps
   return (
     <div className="group-member-element">
       <div className="profile-image-wrapper">
-        <ProfileImage url={user.profileImage?.url} />
+        <ProfileImage user={user} />
       </div>
       <div className="name-container">
         <p className="name">@{user.userName}</p>
@@ -34,11 +32,6 @@ GroupMemberElement.fragments = {
   `
 }
 
-export type GroupMemberElementProps = {
-  userId: string;
-  userList: GroupMemberElementGQLData[];
-};
-
 export type GroupMemberElementGQLData = {
   userId: string;
   firstName: string;
@@ -48,4 +41,9 @@ export type GroupMemberElementGQLData = {
     mediaId: string;
     url: string;
   };
+};
+
+type GroupMemberElementProps = {
+  userId: string;
+  userList: GroupMemberElementGQLData[];
 };

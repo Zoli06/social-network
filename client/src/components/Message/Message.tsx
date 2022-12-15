@@ -1,51 +1,43 @@
-import React from "react";
-import "./Message.scss";
-import { gql } from "@apollo/client";
-import { MessageAuthor } from "./MessageAuthor";
-import { MessageModify } from "./MessageModify";
-import { MessageText } from "./MessageText";
-import { MessageActions } from "./MessageActions";
-import { Editor } from "../Editor/Editor";
-import { MessagesContext } from "./MessagesWrapper";
+import './Message.scss';
+import { gql } from '@apollo/client';
+import { Editor, EditorGQLData } from '../Editor/Editor';
+import { MessageAuthor, MessageAuthorGQLData } from './MessageAuthor';
+import { MessageModify, MessageModifyGQLData } from './MessageModify';
+import { MessageText, MessageTextGQLData } from './MessageText';
+import { MessageActions, MessageActionsGQLData } from './MessageActions';
 
-import { MessageAuthorGQLData } from "./MessageAuthor";
-import { MessageTextGQLData } from "./MessageText";
-import { MessageModifyGQLData } from "./MessageModify";
-import { MessageActionsGQLData } from "./MessageActions";
-import { EditorGQLData } from "../Editor/Editor";
-
+// If messages is provided, message responses will be rendered
 export function Message({
-  messageId,
+  message,
+  messages,
   subscribeToMore,
-  className = "",
+  className = '',
 }: MessageProps) {
-  const messages = React.useContext(MessagesContext)!;
-
   return (
     <div className={`message-container ${className}`}>
-      <div className="message-content">
-        <div className="message-header">
-          <MessageAuthor messageId={messageId} />
-          <MessageModify messageId={messageId} />
+      <div className='message-content'>
+        <div className='message-header'>
+          <MessageAuthor user={message.author} />
+          <MessageModify message={message} />
         </div>
-        <MessageText messageId={messageId} />
-        <MessageActions
-          messageId={messageId}
-          subscribeToMore={subscribeToMore}
-        />
+        <MessageText message={message} />
+        <MessageActions message={message} subscribeToMore={subscribeToMore} />
       </div>
-      <div className="response-tree">
-        {messages.map(
-          (message: MessageGQLData) =>
-            message.responseTo?.messageId === messageId && (
-              <Message
-                messageId={message.messageId}
-                key={message.messageId}
-                subscribeToMore={subscribeToMore}
-              />
-            )
-        )}
-      </div>
+      {messages && (
+        <div className='response-tree'>
+          {messages.map(
+            (_message: MessageGQLData) =>
+              _message.responseTo?.messageId === message.messageId && (
+                <Message
+                  message={_message}
+                  messages={messages}
+                  key={_message.messageId}
+                  subscribeToMore={subscribeToMore}
+                />
+              )
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -75,16 +67,18 @@ Message.fragments = {
   `,
 };
 
-export type MessageGQLData = MessageAuthorGQLData &
-  MessageTextGQLData &
+export type MessageGQLData = MessageTextGQLData &
   MessageModifyGQLData &
   MessageActionsGQLData &
   EditorGQLData & {
     responseTo?: { messageId: string };
+  } & {
+    author: MessageAuthorGQLData;
   };
 
 export type MessageProps = {
-  messageId: string;
+  message: MessageGQLData;
+  messages?: MessageGQLData[];
   subscribeToMore: Function;
   className?: string;
 };

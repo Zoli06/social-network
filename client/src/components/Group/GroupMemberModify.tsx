@@ -1,9 +1,7 @@
 import { gql, useMutation } from '@apollo/client';
 import React, { useState } from 'react';
-import { GroupQueryResultContext } from './Group';
 import './GroupMemberModify.scss';
 import { UserContext } from '../../App';
-import { client } from '../../index';
 
 const BAN_USER_MUTATION = gql`
   mutation BanUser($groupId: ID!, $userId: ID!) {
@@ -47,7 +45,7 @@ const REJECT_MEMBER_REQUEST_MUTATION = gql`
   }
 `;
 
-export const GroupMemberModify = ({ userId }: GroupMemberModifyProps) => {
+export const GroupMemberModify = ({ group, userId }: GroupMemberModifyProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [banUserMutaion] = useMutation(BAN_USER_MUTATION);
   const [unbanUserMutation] = useMutation(UNBAN_USER_MUTATION);
@@ -62,15 +60,14 @@ export const GroupMemberModify = ({ userId }: GroupMemberModifyProps) => {
   );
 
   const {
-    group: {
       groupId,
       members,
       bannedUsers,
       admins,
       memberRequests,
       creatorUser: { userId: creatorUserId },
-    },
-  } = React.useContext(GroupQueryResultContext)!;
+  } = group;
+
   const { userId: loggedInUserId } = React.useContext(UserContext)!;
 
   //#region Relationship changer functions
@@ -445,10 +442,6 @@ GroupMemberModify.fragments = {
   `,
 };
 
-type GroupMemberModifyProps = {
-  userId: string;
-};
-
 export type GroupMemberModifyGQLData = {
   groupId: string;
   members: {
@@ -466,4 +459,9 @@ export type GroupMemberModifyGQLData = {
   creatorUser: {
     userId: string;
   };
+};
+
+type GroupMemberModifyProps = {
+  userId: string;
+  group: GroupMemberModifyGQLData;
 };

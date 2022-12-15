@@ -1,21 +1,25 @@
-import React, { createContext, useContext } from 'react'
-import { Message } from './Message'
+import { Message } from './Message';
+import { MessageGQLData } from './Message';
 
-import { MessageGQLData } from './Message'
-
-export const MessagesContext = createContext<MessageGQLData[] | undefined>(undefined)
-
-export const MessagesWrapper = ({ subscribeToMore, messageId, className, messages }: MessagesWrapperProps) => {
+export const MessagesWrapper = ({
+  subscribeToMore,
+  messageId,
+  className,
+  messages,
+}: MessagesWrapperProps) => {
   return (
-    <MessagesContext.Provider value={messages}>
-      <Message subscribeToMore={subscribeToMore} messageId={messageId} className={className} />
-    </MessagesContext.Provider>
-  )
-}
+    <Message
+      subscribeToMore={subscribeToMore}
+      className={className}
+      message={messages.find((message) => message.messageId === messageId)!}
+      messages={messages}
+    />
+  );
+};
 
 export type MessagesWrapperProps = {
-  subscribeToMore: Function,
-  messageId: string,
-  className?: string,
-  messages: MessageGQLData[]
-}
+  subscribeToMore: Function;
+  messageId: string;
+  className?: string;
+  messages: MessageGQLData[];
+};

@@ -1,16 +1,9 @@
 import { gql, useQuery } from '@apollo/client';
-import React, { createContext } from 'react';
 import './User.scss';
 import { ProfileImage } from './ProfileImage';
-import { UserInfos } from './UserInfos';
+import { UserInfos, UserInfosGQLData } from './UserInfos';
 
-import { UserInfosGQLData } from './UserInfos';
-
-export const UserQueryResultContext = createContext<
-  UserQueryGQLData | undefined
->(undefined);
-
-export const User = ({ userId }: UserProps) => {
+export const User = ({ userId, isMe }: UserProps) => {
   const { data, loading, error } = useQuery<UserQueryGQLData>(USER_QUERY, {
     variables: { userId },
   });
@@ -21,19 +14,15 @@ export const User = ({ userId }: UserProps) => {
     return <div>Error</div>;
   }
 
-  const { profileImage } = data!.user;
-
   return (
-    <UserQueryResultContext.Provider value={data}>
-      <div className='user'>
-        <div className='profile-image-wrapper'>
-          <ProfileImage url={profileImage?.url} />
-        </div>
-        <div className='user-infos-wrapper'>
-          <UserInfos />
-        </div>
+    <div className='user'>
+      <div className='profile-image-wrapper'>
+        <ProfileImage user={data!.user} />
       </div>
-    </UserQueryResultContext.Provider>
+      <div className='user-infos-wrapper'>
+        <UserInfos user={data!.user} />
+      </div>
+    </div>
   );
 };
 
@@ -41,27 +30,29 @@ const USER_QUERY = gql`
   query User($userId: ID!) {
     user(userId: $userId) {
       userId
-      firstName
-      lastName
-      middleName
-      email
       profileImage {
         mediaId
         url
       }
+
+      ...UserInfos
     }
   }
-`;
 
-type UserProps = {
-  userId: string;
-};
+  ${UserInfos.fragments.user}
+`;
 
 type UserQueryGQLData = {
   user: UserInfosGQLData & {
+    userId: string;
     profileImage: {
       mediaId: string;
       url: string;
     };
   };
+};
+
+type UserProps = {
+  userId: string;
+  isMe?: boolean;
 };

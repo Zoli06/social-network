@@ -2,7 +2,6 @@ import { useContext } from "react";
 import { gql, useMutation } from "@apollo/client";
 import "./AddRootMessage.scss";
 import { openEditor } from "../Editor/Editor";
-import { GroupQueryResultContext } from "./Group";
 
 // TODO: Refactor this
 // Same code is used in MessageActions.tsx
@@ -14,10 +13,8 @@ const ADD_ROOT_MESSAGE_MUTATION = gql`
   }
 `;
 
-export const AddRootMessage = () => {
-  const {
-    group: { groupId },
-  } = useContext(GroupQueryResultContext)!;
+export const AddRootMessage = ({ group }: AddRootMessageProps) => {
+  const { groupId } = group;
   const [AddRootMessageMutation] = useMutation(ADD_ROOT_MESSAGE_MUTATION);
 
   const handleAddRootMessage = (text: string) => {
@@ -51,3 +48,7 @@ AddRootMessage.fragments = {
 export type AddRootMessageGQLData = {
   groupId: string;
 };
+
+type AddRootMessageProps = {
+  group: AddRootMessageGQLData;
+}

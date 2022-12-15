@@ -1,11 +1,9 @@
-import React, { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import "./MessageActions.scss";
 import { gql, useMutation } from "@apollo/client";
 import Twemoji from "react-twemoji";
 import { v4 as uuidv4 } from "uuid";
 import { openEditor } from "../Editor/Editor";
-import { MessagesContext } from "./MessagesWrapper";
-
 import { GroupQueryGQLData } from "../Group/Group";
 import { MessageGQLData } from "./Message";
 
@@ -50,12 +48,8 @@ const MESSAGE_REACTED_SUBSCRIPTION = gql`
 `;
 
 export const MessageActions = ({
-  messageId,
-  subscribeToMore,
-}: MessageActionsProps) => {
-  const messages = useContext(MessagesContext)!;
-
-  const {
+  message: {
+    messageId,
     upVotes,
     downVotes,
     responsesCount,
@@ -63,8 +57,9 @@ export const MessageActions = ({
     reactions,
     reaction,
     group: { groupId },
-  } = messages.find((message) => message.messageId === messageId)!;
-
+  },
+  subscribeToMore,
+}: MessageActionsProps) => {
   const [voteMutation] = useMutation(VOTE_MUTATION, {
     update(cache, { data: { createVote } }) {
       cache.modify({
@@ -166,7 +161,6 @@ export const MessageActions = ({
   };
 
   const handleAddResponse = (text: string) => {
-    console.log(new Error().stack)
     addResponseMutation({
       variables: {
         message: {
@@ -264,6 +258,18 @@ export const MessageActions = ({
   );
 };
 
+type MessageVotedSubscriptionData = {
+  subscriptionData: {
+    data: { messageVoted: { upVotes: number; downVotes: number } };
+  };
+};
+
+type MessageReactedSubscriptionData = {
+  subscriptionData: {
+    data: { messageReacted: number };
+  };
+};
+
 MessageActions.fragments = {
   message: gql`
     fragment MessageActions on Message {
@@ -284,18 +290,6 @@ MessageActions.fragments = {
   `,
 };
 
-export type MessageVotedSubscriptionData = {
-  subscriptionData: {
-    data: { messageVoted: { upVotes: number; downVotes: number } };
-  };
-};
-
-export type MessageReactedSubscriptionData = {
-  subscriptionData: {
-    data: { messageReacted: number };
-  };
-};
-
 export type MessageActionsGQLData = {
   upVotes: number;
   downVotes: number;
@@ -313,7 +307,7 @@ export type MessageActionsGQLData = {
   };
 };
 
-export type MessageActionsProps = {
-  messageId: string;
+type MessageActionsProps = {
+  message: MessageActionsGQLData;
   subscribeToMore: Function;
 };

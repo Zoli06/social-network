@@ -1,12 +1,8 @@
-import { useContext } from "react";
 import "./GroupInfos.scss";
-import { GroupQueryResultContext } from "./Group";
 import { gql, useMutation } from "@apollo/client";
 import ReactMarkdown from "react-markdown";
 import { openEditor } from "../Editor/Editor";
 import remarkGfm from "remark-gfm";
-import React from "react";
-
 
 const UPDATE_GROUP_MUTATION = gql`
   mutation UpdateGroup($group: GroupInput!, $groupId: ID!) {
@@ -24,17 +20,18 @@ const groupVisibilityOptions = [
   { value: "hidden", label: "Only visible to members" },
 ];
 
-export const GroupInfos = ({ className = "" }: GroupInfosProps) => {
+export const GroupInfos = ({
+  className = "",
+  group
+}: GroupInfosProps) => {
   const {
-    group: {
-      groupId,
-      name,
-      description,
-      visibility,
-      createdAt,
-      userRelationShipWithGroup: { type: userRelationShipWithGroupType },
-    },
-  } = useContext(GroupQueryResultContext)!;
+    groupId,
+    name,
+    description,
+    visibility,
+    createdAt,
+    userRelationShipWithGroup: { type: userRelationShipWithGroupType },
+  } = group;
   const [updateGroup] = useMutation(UPDATE_GROUP_MUTATION, {
     update(cache, { data: { updateGroup } }) {
       cache.modify({
@@ -162,6 +159,7 @@ export type GroupInfosGQLData = {
   };
 };
 
-export type GroupInfosProps = {
+type GroupInfosProps = {
   className?: string;
+  group: GroupInfosGQLData;
 };

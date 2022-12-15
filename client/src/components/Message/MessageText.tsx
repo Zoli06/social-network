@@ -1,14 +1,9 @@
-import React, { useContext } from "react";
 import "./MessageText.scss";
 import { gql } from "@apollo/client";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { MessagesContext } from "./MessagesWrapper";
 
-export const MessageText = ({ messageId }: MessageTextProps) => {
-  const messages = useContext(MessagesContext)!;
-  const { text } = messages.find((message) => message.messageId === messageId)!;
-
+export const MessageText = ({ message: { text } }: MessageTextProps) => {
   return (
     <div className="message-text-container">
       <ReactMarkdown
@@ -23,15 +18,17 @@ export const MessageText = ({ messageId }: MessageTextProps) => {
 MessageText.fragments = {
   message: gql`
     fragment MessageText on Message {
+      messageId
       text
     }
   `,
 };
 
 export type MessageTextGQLData = {
+  messageId: string;
   text: string;
 };
 
-export type MessageTextProps = {
-  messageId: string;
+type MessageTextProps = {
+  message: MessageTextGQLData;
 };

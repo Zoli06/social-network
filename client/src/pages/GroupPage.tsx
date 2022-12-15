@@ -8,14 +8,13 @@ export const GroupPage = () => {
     messageId?: string;
     maxDepth?: string;
   }>();
-  
   return (
     <>
       {groupId && (
         <Group
           groupId={groupId}
           onlyInterestedInMessageId={messageId}
-          maxDepth={maxDepth ? parseInt(maxDepth, 10) : undefined}
+          maxDepth={maxDepth ? parseInt(maxDepth) : undefined}
         />
       )}
     </>
