@@ -1,15 +1,18 @@
-import './UserFriends.scss';
+import './UserCard.scss';
 import { ProfileImage } from './ProfileImage';
 import { gql } from '@apollo/client';
+import { Link } from 'react-router-dom';
 
 export const UserCard = ({ user }: UserCardProps) => {
   return (
-    <div className='user-card'>
-      <ProfileImage user={user} />
+    <Link to={`/user/${user.userId}`} key={user.userId} className='user-card' style={{textDecoration: 'none'}}>
+      <div className='profile-image-wrapper'>
+        <ProfileImage user={user} />
+      </div>
       <p className='name'>
         {user.firstName} {user.middleName} {user.lastName}
       </p>
-    </div>
+    </Link>
   );
 };
 

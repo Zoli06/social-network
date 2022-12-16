@@ -1,0 +1,20 @@
+@use '../../variables.scss' as v;
+
+.user-card {
+  @include v.theme() {
+    border: 1px solid v.theme-get("secondary-color");
+  }
+  border-radius: var(--border-radius);
+
+  margin: 10px;
+  padding: 10px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  .profile-image-wrapper {
+    width: 50%;
+    margin-bottom: 10px;
+  }
+}

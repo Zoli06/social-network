@@ -166,7 +166,7 @@ module.exports = {
     async friends({ user_id }, _, { user, connection }) {
       user.authenticate();
       return (
-        (await connection.query(
+        await connection.query(
           `SELECT users.*, uur1.*, LEAST(uur1.created_at, uur2.created_at) AS real_created_at, GREATEST(uur1.updated_at, uur2.updated_at) AS real_updated_at
       FROM user_user_relationships AS uur1
       JOIN user_user_relationships AS uur2
@@ -181,7 +181,7 @@ module.exports = {
       GROUP BY user_id`,
           { id: user_id }
         )
-      ))[0].map((record) => ({
+      )[0].map((record) => ({
         user: record,
         type: record.type,
         created_at: record.real_created_at,
@@ -191,7 +191,7 @@ module.exports = {
     async incomingFriendRequests({ user_id }, _, { user, connection }) {
       user.authenticate();
       return (
-        (await connection.query(
+        await connection.query(
           `SELECT *
         FROM user_user_relationships AS uur1
         LEFT JOIN user_user_relationships AS uur2
@@ -205,7 +205,7 @@ module.exports = {
           AND user_id != :id`,
           { id: user_id }
         )
-      ))[0].map((record) => ({
+      )[0].map((record) => ({
         user: record,
         type: "incoming_friend_request",
         created_at: record.created_at,
@@ -215,7 +215,7 @@ module.exports = {
     async outgoingFriendRequests({ user_id }, _, { user, connection }) {
       user.authenticate();
       return (
-        (await connection.query(
+        await connection.query(
           `SELECT *
         FROM user_user_relationships AS uur1
         LEFT JOIN user_user_relationships AS uur2
@@ -229,7 +229,7 @@ module.exports = {
           AND user_id != :id`,
           { id: user_id }
         )
-      ))[0].map((record) => ({
+      )[0].map((record) => ({
         user: record,
         type: "outgoing_friend_request",
         created_at: record.created_at,
@@ -239,7 +239,7 @@ module.exports = {
     async blockedUsers({ user_id }, _, { user, connection }) {
       user.authenticate();
       return (
-        (await connection.query(
+        await connection.query(
           `SELECT *
         FROM user_user_relationships
         JOIN users
@@ -247,7 +247,7 @@ module.exports = {
         WHERE type = 'outgoing_blocking' AND initiating_user_id = ?`,
           [user_id]
         )
-      ))[0].map((record) => ({
+      )[0].map((record) => ({
         user: record,
         type: record.type,
         created_at: record.created_at,
@@ -257,21 +257,21 @@ module.exports = {
     async relationshipWithUser({ user_id }, _, { user, connection }) {
       user.authenticate();
       const relationship1 = (
-        (await connection.query(
+        await connection.query(
           `SELECT *
       FROM user_user_relationships
       WHERE initiating_user_id = ? AND target_user_id = ?`,
           [user.id, part.user_id]
         )
-      ))[0][0];
+      )[0][0];
       const relationship2 = (
-        (await connection.query(
+        await connection.query(
           `SELECT *
       FROM user_user_relationships
       WHERE initiating_user_id = ? AND target_user_id = ?`,
           [user_id, user.id]
         )
-      ))[0][0];
+      )[0][0];
       const type1 = relationship1?.type;
       const type2 = relationship2?.type;
       const updated_at1 = relationship1?.updated_at;
