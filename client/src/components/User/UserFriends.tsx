@@ -1,7 +1,6 @@
 import './UserFriends.scss';
 import { UserCard, UserCardGQLData } from './UserCard';
 import { gql } from '@apollo/client';
-import { Link } from 'react-router-dom';
 
 export const UserFriends = ({ user: { friends } }: UserFriendsProps) => {
   return (

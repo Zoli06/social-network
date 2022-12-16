@@ -3,6 +3,8 @@ import './User.scss';
 import { ProfileImage } from './ProfileImage';
 import { UserInfos, UserInfosGQLData } from './UserInfos';
 
+// import { Theme, Button } from 'react-daisyui'
+
 export const User = ({ userId, isMe }: UserProps) => {
   const { data, loading, error } = useQuery<UserQueryGQLData>(USER_QUERY, {
     variables: { userId },
@@ -22,6 +24,9 @@ export const User = ({ userId, isMe }: UserProps) => {
       <div className='user-infos-wrapper'>
         <UserInfos user={data!.user} />
       </div>
+      {/* <Theme dataTheme="dark">
+        <Button color="primary">Click me, dark!</Button>
+      </Theme> */}
     </div>
   );
 };
