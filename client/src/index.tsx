@@ -19,7 +19,7 @@ const getAuthToken = () => {
 
   // temp code
   let token = localStorage.getItem("token");
-  if (!token) token = "45";
+  // if (!token) token = "45";
   return token;
 };
 

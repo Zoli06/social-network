@@ -1,10 +1,13 @@
-import { Routes, Route, BrowserRouter as Router } from 'react-router-dom';
+import { Routes, Route, BrowserRouter as Router, Navigate } from 'react-router-dom';
 
 import './App.scss';
 // import { Post } from './components/Post';
 import { GroupPage } from './pages/GroupPage';
 import { HomePage } from './pages/HomePage';
 import { UserPage } from './pages/UserPage';
+import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
+import { LogoutPage } from './pages/LogoutPage';
 import { useQuery, gql } from '@apollo/client';
 import React from 'react';
 import { Editor } from './components/Editor/Editor';
@@ -47,19 +50,40 @@ export function App() {
 
   if (loading) return <p>Loading...</p>;
   if (error) {
+    if (error.message === 'You are not authenticated!') {
+      return (
+        <Router>
+          <Routes>
+            <Route path='/login' element={<LoginPage />} />
+            <Route path='/register' element={<RegisterPage />} />
+            <Route path='*' element={<LoginPage />} />
+          </Routes>
+        </Router>
+      );
+    }
+
     console.log(error);
     return <p>Error!</p>;
   }
 
+  const { me } = data!;
+
   return (
     <Router>
-      <UserContext.Provider value={data!.me}>
+      <UserContext.Provider value={me}>
         <Editor />
         <Routes>
           <Route path='/group/:groupId' element={<GroupPage />} />
           <Route path='/group/:groupId/:messageId' element={<GroupPage />} />
-          <Route path='/group/:groupId/:messageId/:maxDepth' element={<GroupPage />} />
+          <Route
+            path='/group/:groupId/:messageId/:maxDepth'
+            element={<GroupPage />}
+          />
           <Route path='/user/:userId' element={<UserPage />} />
+          <Route path='/login' element={<LoginPage />} />
+          <Route path='/register' element={<RegisterPage />} />
+          <Route path='/me' element={<Navigate to={`/user/${me.userId}`} />} />
+          <Route path='/logout' element={<LogoutPage />} />
           <Route path='*' element={<HomePage />} />
         </Routes>
       </UserContext.Provider>

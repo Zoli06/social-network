@@ -1,4 +1,4 @@
-@use "../../variables" as v;
+@use '../../variables' as v;
 
 .message-author-container {
   display: inline-flex;
@@ -9,12 +9,6 @@
     aspect-ratio: 1 / 1;
   }
 
-  .intro {
-    @include v.theme() {
-      color: v.theme-get("secondary-text-color");
-    }
-  }
-
   .text-container {
     display: flex;
     flex-direction: column;
@@ -22,10 +16,17 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    line-height: 1;
 
     .name {
       @media (max-width: v.$medium-screen) {
         display: none;
+      }
+    }
+
+    .intro {
+      @include v.theme() {
+        color: v.theme-get('secondary-text-color');
       }
     }
 

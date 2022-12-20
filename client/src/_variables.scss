@@ -35,7 +35,7 @@ $themes: (
 
 $theme-map: null;
 
-@mixin theme() {
+@mixin theme {
   @each $theme, $map in $themes {
     $theme-map: $map !global;
     .#{$theme} & {
@@ -67,6 +67,8 @@ $large-screen: 1800px;
   --reaction-add-popup-space: 0.5vw;
   --indent: min(30px, 1.5vw);
   --border-radius: 20px;
+
+  --main-content-width: 750px;
 }
 
 @media screen and (max-width: $medium-screen) {

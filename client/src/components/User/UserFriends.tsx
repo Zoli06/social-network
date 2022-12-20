@@ -5,7 +5,7 @@ import { gql } from '@apollo/client';
 export const UserFriends = ({ user: { friends } }: UserFriendsProps) => {
   return (
     <div className='friends-list-container'>
-      {friends ? <h3>Friends</h3> : <h3>No friends</h3>}
+      {friends.length > 0 ? <h3>Friends</h3> : <h3>No friends</h3>}
       <div className='friends-list'>
         {friends?.map(({ user }) => (
           <div className='friend' key={user.userId}>

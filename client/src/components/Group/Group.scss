@@ -13,6 +13,7 @@
 
   .group-columns {
     .center-column {
+      width: var(--main-content-width);
       display: flex;
       flex-direction: column;
       gap: 2vw;
