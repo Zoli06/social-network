@@ -2,10 +2,11 @@ import { gql, useQuery } from '@apollo/client';
 import './User.scss';
 import { ProfileImage } from './ProfileImage';
 import { UserInfos, UserInfosGQLData } from './UserInfos';
+import { UserActions, UserActionsGQLData } from './UserActions';
 
 // import { Theme, Button } from 'react-daisyui'
 
-export const User = ({ userId, isMe }: UserProps) => {
+export const User = ({ userId, isMe = false }: UserProps) => {
   const { data, loading, error } = useQuery<UserQueryGQLData>(USER_QUERY, {
     variables: { userId },
   });
@@ -18,6 +19,9 @@ export const User = ({ userId, isMe }: UserProps) => {
 
   return (
     <div className='user'>
+      <div className='user-actions-wrapper'>
+        <UserActions isMe={isMe} user={data!.user} />
+      </div>
       <div className='profile-image-wrapper'>
         <ProfileImage user={data!.user} />
       </div>
@@ -41,14 +45,16 @@ const USER_QUERY = gql`
       }
 
       ...UserInfos
+      ...UserActions
     }
   }
 
   ${UserInfos.fragments.user}
+  ${UserActions.fragments.user}
 `;
 
 type UserQueryGQLData = {
-  user: UserInfosGQLData & {
+  user: UserInfosGQLData & UserActionsGQLData & {
     userId: string;
     profileImage: {
       mediaId: string;

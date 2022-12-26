@@ -110,20 +110,25 @@ module.exports = {
       { user, connection }
     ) {
       user.authenticate();
+      const _user = (
+        await connection.query(`SELECT * FROM users WHERE user_id = ?`, [
+          user.id,
+        ])
+      )[0][0];
       await connection.query(
         `UPDATE users
           SET first_name = ?, last_name = ?, middle_name = ?, user_name = ?, mobile_number = ?, email = ?, password = ?, updated_at = DEFAULT, intro = ?, profile_image_media_id = ?
           WHERE user_id = ?`,
         [
-          firstName,
-          lastName,
-          middleName,
-          userName,
-          mobileNumber,
-          email,
-          await bcrypt.hash(password, 10),
-          intro,
-          profileImageMediaId,
+          firstName || _user.first_name,
+          lastName || _user.last_name,
+          middleName || _user.middle_name,
+          userName || _user.user_name,
+          mobileNumber || _user.mobile_number,
+          email || _user.email,
+          password ? await bcrypt.hash(password, 10) : _user.password,
+          intro || _user.intro,
+          profileImageMediaId || _user.profile_image_media_id,
           user.id,
         ]
       );
@@ -261,7 +266,7 @@ module.exports = {
           `SELECT *
       FROM user_user_relationships
       WHERE initiating_user_id = ? AND target_user_id = ?`,
-          [user.id, part.user_id]
+          [user.id, user_id]
         )
       )[0][0];
       const relationship2 = (

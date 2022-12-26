@@ -42,7 +42,7 @@ type User {
   outgoingFriendRequests: [UserUserRelationship!]!
   blockedUsers: [UserUserRelationship!]!
   userRelationships: [UserUserRelationship!]! # all relationships
-  relationshipWithUser: UserUserRelationship
+  relationshipWithUser: UserUserRelationship!
   profileImage: Media
 }
 
@@ -58,6 +58,18 @@ input UserInput {
   profileImageMediaId: ID
 }
 
+input UserUpdateInput {
+  firstName: String
+  lastName: String
+  middleName: String
+  userName: String
+  mobileNumber: String
+  email: String
+  intro: String
+  password: String
+  profileImageMediaId: ID
+}
+
 type Query {
   user(userId: ID!): User
   me: User
@@ -66,7 +78,7 @@ type Query {
 type Mutation {
   register(user: UserInput!): AuthPayload
   login(email: String!, password: String!): AuthPayload
-  updateUser(user: UserInput!): User # user only can update his/her own profile
+  updateUser(user: UserUpdateInput!): User # user only can update his/her own profile
   createUserUserRelationship(
     userId: ID!
     type: UserUserRelationshipInputType

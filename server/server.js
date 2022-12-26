@@ -1,5 +1,3 @@
-console.log("Hello world");
-
 const { ApolloServer } = require("apollo-server-express");
 const { createServer } = require("http");
 const express = require("express");
@@ -63,12 +61,18 @@ const serverCleanup = useServer(
 );
 
 const getUser = (token) => {
+  const isNumeric = (str) => {
+    if (typeof str != "string") return false // we only process strings!  
+    return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+           !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+  }
+
   try {
     if (token) {
       try {
         return jwt.verify(token, process.env.JWT_SECRET);
       } catch (err) {
-        if (process.env.NODE_ENV === "development")
+        if (process.env.NODE_ENV === "development" && isNumeric(token))
           return { id: parseInt(token) };
       }
     }

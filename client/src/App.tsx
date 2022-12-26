@@ -8,6 +8,7 @@ import { UserPage } from './pages/UserPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { LogoutPage } from './pages/LogoutPage';
+import { EditProfilePage } from './pages/EditProfilePage';
 import { useQuery, gql } from '@apollo/client';
 import React from 'react';
 import { Editor } from './components/Editor/Editor';
@@ -80,6 +81,7 @@ export function App() {
             element={<GroupPage />}
           />
           <Route path='/user/:userId' element={<UserPage />} />
+          <Route path='/edit-profile' element={<EditProfilePage />} />
           <Route path='/login' element={<LoginPage />} />
           <Route path='/register' element={<RegisterPage />} />
           <Route path='/me' element={<Navigate to={`/user/${me.userId}`} />} />
