@@ -1,28 +1,34 @@
-const jsonwebtoken = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
+import jsonwebtoken from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import { Context } from '../context';
 
-module.exports = {
+const resolvers = {
   Query: {
-    async user(_, { userId }, { user, connection }) {
-      user.authenticate();
+    async user(
+      _: any,
+      { userId }: { userId: number },
+      {
+        connection,
+      }: Context
+    ) {
       return (
         await connection.query(`SELECT * FROM users WHERE user_id = ?`, [
           userId,
         ])
       )[0][0];
     },
-    async me(_, __, { user, connection }) {
-      user.authenticate();
-      return await module.exports.Query.user(
-        _,
-        { userId: user.id },
-        { user, connection }
-      );
+    async me(
+      _: any,
+      __: any,
+      context: Context
+    ) {
+      console.log('me', context.user)
+      return await resolvers.Query.user(_, { userId: context.user.userId }, context);
     },
   },
   Mutation: {
     async register(
-      _,
+      _: any,
       {
         user: {
           firstName,
@@ -35,9 +41,22 @@ module.exports = {
           intro,
           profileImageMediaId,
         },
+      }: {
+        user: {
+          firstName: string;
+          lastName: string;
+          middleName: string;
+          userName: string;
+          mobileNumber: string;
+          email: string;
+          password: string;
+          intro: string;
+          profileImageMediaId: number;
+        };
       },
-      { connection }
+      context: Context
     ) {
+      const { connection } = context;
       const userId = (
         await connection.query(
           `INSERT INTO users (first_name, last_name, middle_name, user_name, mobile_number, email, password, intro, profile_image_media_id)
@@ -55,37 +74,38 @@ module.exports = {
           ]
         )
       )[0].insertId;
-      const user = await module.exports.Query.user(
-        {},
-        { userId },
-        { user: { userId, authenticate: () => true }, connection }
-      );
+      const user = await resolvers.Query.user({}, { userId }, context);
       const token = jsonwebtoken.sign(
-        { id: user.user_id },
-        process.env.JWT_SECRET,
-        { expiresIn: "1y" }
+        { userId: user.user_id },
+        process.env.JWT_SECRET!,
+        // TODO: move expiresIn to config
+        { expiresIn: '1d' }
       );
       return { token, user };
     },
-    async login(_, { email, password }, { connection }) {
+    async login(
+      _: any,
+      { email, password }: { email: string; password: string },
+      { connection }: Context
+    ) {
       const user = (
         await connection.query(`SELECT * FROM users WHERE email = ?`, [email])
       )[0][0];
       if (!user) {
-        throw new Error("No user with that email");
+        throw new Error('No user with that email');
       }
       const isValid = await bcrypt.compare(password, user.password);
       if (!isValid) {
-        throw new Error("Incorrect password");
+        throw new Error('Incorrect password');
       }
       await connection.query(
         `UPDATE users SET last_login_at = DEFAULT WHERE user_id = ?`,
         [user.user_id]
       );
       const token = jsonwebtoken.sign(
-        { id: user.user_id },
-        process.env.JWT_SECRET,
-        { expiresIn: "1d" }
+        { userId: user.user_id },
+        process.env.JWT_SECRET!,
+        { expiresIn: '1d' }
       );
       return {
         token,
@@ -93,7 +113,7 @@ module.exports = {
       };
     },
     async updateUser(
-      _,
+      _: any,
       {
         user: {
           firstName,
@@ -106,13 +126,25 @@ module.exports = {
           intro,
           profileImageMediaId,
         },
+      }: {
+        user: {
+          firstName: string;
+          lastName: string;
+          middleName: string;
+          userName: string;
+          mobileNumber: string;
+          email: string;
+          password: string;
+          intro: string;
+          profileImageMediaId: number;
+        };
       },
-      { user, connection }
+      context: Context
     ) {
-      user.authenticate();
+      const { user, connection } = context;
       const _user = (
         await connection.query(`SELECT * FROM users WHERE user_id = ?`, [
-          user.id,
+          user.userId,
         ])
       )[0][0];
       await connection.query(
@@ -129,47 +161,52 @@ module.exports = {
           password ? await bcrypt.hash(password, 10) : _user.password,
           intro || _user.intro,
           profileImageMediaId || _user.profile_image_media_id,
-          user.id,
+          user.userId,
         ]
       );
-      return await module.exports.Query.user(
+      return await resolvers.Query.user(
         {},
-        { userId: user.id },
-        { user, connection }
+        { userId: user.userId },
+        context
       );
     },
     async createUserUserRelationship(
-      _,
-      { userId, type },
-      { user, connection }
+      _: any,
+      { userId, type }: { userId: number; type: string | null },
+      context: Context
     ) {
-      user.authenticate();
-      if (type === "none") type = null;
+      const { user, connection } = context;
+      if (type === 'none') type = null;
       await connection.query(
         `INSERT INTO user_user_relationships (initiating_user_id, target_user_id, type) VALUES (?, ?, ?)
         ON DUPLICATE KEY UPDATE type = ?, updated_at = DEFAULT`,
-        [user.id, userId, type, type]
+        [user.userId, userId, type, type]
       );
-      return await module.exports.User.relationshipWithUser(
+      return await resolvers.User.myRelationshipWithUser(
         { user_id: userId },
         {},
-        { user, connection }
+        context
       );
     },
   },
   User: {
-    async userRelationships(parent, _, { user, connection }) {
-      user.authenticate();
-
+    async userRelationships(
+      parent: any,
+      _: any,
+      context: Context
+    ) {
       return [
-        ...(await this.friends(parent, _, { user, connection })),
-        ...(await this.incomingFriendRequests(parent, _, { user, connection })),
-        ...(await this.outgoingFriendRequests(parent, _, { user, connection })),
-        ...(await this.blockedUsers(parent, _, { user, connection })),
+        ...(await this.friends(parent, _, context)),
+        ...(await this.incomingFriendRequests(parent, _, context)),
+        ...(await this.outgoingFriendRequests(parent, _, context)),
+        ...(await this.blockedUsers(parent, _, context)),
       ];
     },
-    async friends({ user_id }, _, { user, connection }) {
-      user.authenticate();
+    async friends(
+      { user_id }: { user_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT users.*, uur1.*, LEAST(uur1.created_at, uur2.created_at) AS real_created_at, GREATEST(uur1.updated_at, uur2.updated_at) AS real_updated_at
@@ -186,15 +223,25 @@ module.exports = {
       GROUP BY user_id`,
           { id: user_id }
         )
-      )[0].map((record) => ({
-        user: record,
-        type: record.type,
-        created_at: record.real_created_at,
-        updated_at: record.real_updated_at,
-      }));
+      )[0].map(
+        (record: {
+          user: any;
+          type: any;
+          real_created_at: any;
+          real_updated_at: any;
+        }) => ({
+          user: record,
+          type: record.type,
+          created_at: record.real_created_at,
+          updated_at: record.real_updated_at,
+        })
+      );
     },
-    async incomingFriendRequests({ user_id }, _, { user, connection }) {
-      user.authenticate();
+    async incomingFriendRequests(
+      { user_id }: { user_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT *
@@ -210,15 +257,25 @@ module.exports = {
           AND user_id != :id`,
           { id: user_id }
         )
-      )[0].map((record) => ({
-        user: record,
-        type: "incoming_friend_request",
-        created_at: record.created_at,
-        updated_at: record.updated_at,
-      }));
+      )[0].map(
+        (record: {
+          user: any;
+          type: any;
+          created_at: any;
+          updated_at: any;
+        }) => ({
+          user: record,
+          type: 'incoming_friend_request',
+          created_at: record.created_at,
+          updated_at: record.updated_at,
+        })
+      );
     },
-    async outgoingFriendRequests({ user_id }, _, { user, connection }) {
-      user.authenticate();
+    async outgoingFriendRequests(
+      { user_id }: { user_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT *
@@ -234,15 +291,25 @@ module.exports = {
           AND user_id != :id`,
           { id: user_id }
         )
-      )[0].map((record) => ({
-        user: record,
-        type: "outgoing_friend_request",
-        created_at: record.created_at,
-        updated_at: record.updated_at,
-      }));
+      )[0].map(
+        (record: {
+          user: any;
+          type: any;
+          created_at: any;
+          updated_at: any;
+        }) => ({
+          user: record,
+          type: 'outgoing_friend_request',
+          created_at: record.created_at,
+          updated_at: record.updated_at,
+        })
+      );
     },
-    async blockedUsers({ user_id }, _, { user, connection }) {
-      user.authenticate();
+    async blockedUsers(
+      { user_id }: { user_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT *
@@ -252,29 +319,40 @@ module.exports = {
         WHERE type = 'outgoing_blocking' AND initiating_user_id = ?`,
           [user_id]
         )
-      )[0].map((record) => ({
-        user: record,
-        type: record.type,
-        created_at: record.created_at,
-        updated_at: record.updated_at,
-      }));
+      )[0].map(
+        (record: {
+          user: any;
+          type: any;
+          created_at: any;
+          updated_at: any;
+        }) => ({
+          user: record,
+          type: record.type,
+          created_at: record.created_at,
+          updated_at: record.updated_at,
+        })
+      );
     },
-    async relationshipWithUser({ user_id }, _, { user, connection }) {
-      user.authenticate();
-      const relationship1 = (
-        await connection.query(
-          `SELECT *
+    async myRelationshipWithUser(
+      { user_id }: { user_id: number },
+      _: any,
+      context: Context
+    ) {
+      const { user, connection } = context;
+
+      const query = `
+      SELECT *
       FROM user_user_relationships
-      WHERE initiating_user_id = ? AND target_user_id = ?`,
-          [user.id, user_id]
+      WHERE initiating_user_id = ? AND target_user_id = ?`;
+
+      const relationship1 = (
+        await connection.query(query,
+          [user.userId, user_id]
         )
       )[0][0];
       const relationship2 = (
-        await connection.query(
-          `SELECT *
-      FROM user_user_relationships
-      WHERE initiating_user_id = ? AND target_user_id = ?`,
-          [user_id, user.id]
+        await connection.query(query,
+          [user_id, user.userId]
         )
       )[0][0];
       const type1 = relationship1?.type;
@@ -283,26 +361,26 @@ module.exports = {
       const updated_at2 = relationship2?.updated_at;
 
       let type;
-      if (type1 === "friend" && type2 === "friend") {
-        type = "friend";
-      } else if (type1 === "blocked") {
-        type = "outgoing_blocking";
-      } else if (type2 === "blocked") {
-        type = "incoming_blocking";
+      if (type1 === 'friend' && type2 === 'friend') {
+        type = 'friend';
+      } else if (type1 === 'blocked') {
+        type = 'outgoing_blocking';
+      } else if (type2 === 'blocked') {
+        type = 'incoming_blocking';
       } else if (
-        type1 === "friend" &&
-        type2 !== "blocked" &&
+        type1 === 'friend' &&
+        type2 !== 'blocked' &&
         (updated_at1 > updated_at2 || updated_at2 === undefined)
       ) {
-        type = "outgoing_friend_request";
+        type = 'outgoing_friend_request';
       } else if (
-        type2 === "friend" &&
-        type1 !== "blocked" &&
+        type2 === 'friend' &&
+        type1 !== 'blocked' &&
         (updated_at2 > updated_at1 || updated_at1 === undefined)
       ) {
-        type = "incoming_friend_request";
+        type = 'incoming_friend_request';
       } else {
-        type = "none";
+        type = 'none';
       }
 
       return {
@@ -315,16 +393,14 @@ module.exports = {
           relationship1?.updated_at,
           relationship2?.updated_at
         ),
-        user: module.exports.Query.user(
-          {},
-          { userId: user_id },
-          { user, connection }
-        ),
+        user: resolvers.Query.user({}, { userId: user_id }, context),
       };
     },
-    async profileImage({ user_id }, __, { user, connection }) {
-      user.authenticate();
-
+    async profileImage(
+      { user_id }: { user_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT * FROM users AS u
@@ -336,3 +412,5 @@ module.exports = {
     },
   },
 };
+
+export default resolvers;

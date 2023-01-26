@@ -30,7 +30,7 @@ export const GroupInfos = ({
     description,
     visibility,
     createdAt,
-    userRelationShipWithGroup: { type: userRelationShipWithGroupType },
+    myRelationshipWithGroup: { type: myRelationShipWithGroupType },
   } = group;
   const [updateGroup] = useMutation(UPDATE_GROUP_MUTATION, {
     update(cache, { data: { updateGroup } }) {
@@ -48,7 +48,7 @@ export const GroupInfos = ({
     },
   });
   
-  const isAdmin = userRelationShipWithGroupType === "admin";
+  const isAdmin = myRelationShipWithGroupType === "admin";
 
   const renderVisibilityText = (visibility: string) => {
     return groupVisibilityOptions.find((option) => option.value === visibility)
@@ -140,7 +140,7 @@ GroupInfos.fragments = {
       visibility
       createdAt
 
-      userRelationShipWithGroup {
+      myRelationshipWithGroup {
         type
       }
     }
@@ -154,7 +154,7 @@ export type GroupInfosGQLData = {
   visibility: string;
   createdAt: string;
 
-  userRelationShipWithGroup: {
+  myRelationshipWithGroup: {
     type: string;
   };
 };

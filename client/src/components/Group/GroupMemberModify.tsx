@@ -323,13 +323,13 @@ export const GroupMemberModify = ({ group, userId }: GroupMemberModifyProps) => 
 
   const isLoggedInUserGroupCreator = creatorUserId === loggedInUserId;
 
-  const isEditedUserAdmin = admins.some((admin) => admin.userId === userId);
-  const isEditedUserBanned = bannedUsers.some(
+  const isEditedUserAdmin = admins?.some((admin) => admin.userId === userId);
+  const isEditedUserBanned = bannedUsers?.some(
     (bannedUser) => bannedUser.userId === userId
   );
   const isEditedUserMember = members.some((member) => member.userId === userId);
   const isEditedUserGroupCreator = creatorUserId === userId;
-  const isMemberRequestIncoming = memberRequests.some(
+  const isMemberRequestIncoming = memberRequests?.some(
     (memberRequest) => memberRequest.userId === userId
   );
 
@@ -447,13 +447,13 @@ export type GroupMemberModifyGQLData = {
   members: {
     userId: string;
   }[];
-  bannedUsers: {
+  bannedUsers?: {
     userId: string;
   }[];
-  admins: {
+  admins?: {
     userId: string;
   }[];
-  memberRequests: {
+  memberRequests?: {
     userId: string;
   }[];
   creatorUser: {

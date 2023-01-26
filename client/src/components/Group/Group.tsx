@@ -56,6 +56,7 @@ export const Group = ({
         onlyInterestedInMessageId,
         maxDepth,
       },
+      errorPolicy: 'all',
     }
   );
 
@@ -196,8 +197,29 @@ export const Group = ({
 
   if (loading) return <p>Loading...</p>;
   if (error) {
-    console.log(error);
-    return <p>Error!</p>;
+    // TODO: import this from GroupMembers.tsx
+    const acceptableErrorPaths = [
+      ['group', 'memberRequests'],
+      ['group', 'rejectedUsers'],
+      ['group', 'invitedUsers'],
+      ['group', 'bannedUsers'],
+    ];
+
+    // if error is not in acceptable error paths, throw it
+    // if user is admin no error is acceptable
+    if (
+      !acceptableErrorPaths.some((path) =>
+        error.graphQLErrors.some((e) =>
+          e.path?.some((p, i) => p === path[i])
+        )
+      ) &&
+      data?.group.myRelationshipWithGroup.type === 'admin'
+    ) {
+      console.log(error);
+      throw error;
+    }
+
+    //console.log(error);
   }
 
   const group = data!.group;
@@ -258,6 +280,9 @@ const GROUP_QUERY = gql`
 
       groupId
       name
+      myRelationshipWithGroup {
+        type
+      }
     }
   }
 
@@ -277,6 +302,9 @@ export type GroupQueryGQLData = {
     messages: MessageGQLData[];
     groupId: string;
     name: string;
+    myRelationshipWithGroup: {
+      type: "member" | "banned" | "admin" | "member_request" | "member_request_rejected" | "invited";
+    };
   } & AddRootMessageGQLData &
     GroupMembersGQLData &
     GroupInfosGQLData &

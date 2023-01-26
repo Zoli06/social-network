@@ -1,4 +1,9 @@
-import { Routes, Route, BrowserRouter as Router, Navigate } from 'react-router-dom';
+import {
+  Routes,
+  Route,
+  BrowserRouter as Router,
+  Navigate,
+} from 'react-router-dom';
 
 import './App.scss';
 // import { Post } from './components/Post';
@@ -9,11 +14,12 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { LogoutPage } from './pages/LogoutPage';
 import { EditProfilePage } from './pages/EditProfilePage';
+import { GroupInfoPage } from './pages/GroupInfoPage';
 import { useQuery, gql } from '@apollo/client';
 import React from 'react';
 import { Editor } from './components/Editor/Editor';
 
-const ME = gql`
+const ME_QUERY = gql`
   query {
     me {
       userId
@@ -29,7 +35,7 @@ export const UserContext = React.createContext<
 // This is the main application component. It is used to render the main page
 export function App() {
   // This function makes a request to the server to get the user ID of the current user
-  const { data, loading, error } = useQuery<MeQueryGQLData>(ME);
+  const { data, loading, error } = useQuery<MeQueryGQLData>(ME_QUERY);
 
   // If the user has set their preferred color scheme to dark mode, we set the dark theme
   if (
@@ -51,7 +57,7 @@ export function App() {
 
   if (loading) return <p>Loading...</p>;
   if (error) {
-    if (error.message === 'You are not authenticated!') {
+    if (error.message === 'Not Authorised!' || error.message === 'You are not authenticated!') {
       return (
         <Router>
           <Routes>
@@ -63,7 +69,7 @@ export function App() {
       );
     }
 
-    console.log(error);
+    console.error(error);
     return <p>Error!</p>;
   }
 
@@ -80,6 +86,8 @@ export function App() {
             path='/group/:groupId/:messageId/:maxDepth'
             element={<GroupPage />}
           />
+          {/* TODO: Add parameter to this route */}
+          <Route path='group-info' element={<GroupInfoPage />} />
           <Route path='/user/:userId' element={<UserPage />} />
           <Route path='/edit-profile' element={<EditProfilePage />} />
           <Route path='/login' element={<LoginPage />} />

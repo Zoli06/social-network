@@ -1,7 +1,10 @@
 import { gql } from '@apollo/client';
 import React from 'react';
 import { GroupMemberElement } from './GroupMemberElement';
-import { GroupMemberModify, GroupMemberModifyGQLData } from './GroupMemberModify';
+import {
+  GroupMemberModify,
+  GroupMemberModifyGQLData,
+} from './GroupMemberModify';
 import { UserContext } from '../../App';
 import './GroupMembers.scss';
 
@@ -17,22 +20,22 @@ export const GroupMembers = ({ className = '', group }: GroupMembersProps) => {
     rejectedUsers,
     bannedUsers,
     invitedUsers,
-    userRelationShipWithGroup: { type: userRelationShipWithGroupType },
+    myRelationshipWithGroup: { type: myRelationShipWithGroupType },
     creatorUser: { userId: creatorUserId },
   } = group;
   const userList = [
     ...members,
     ..._admins,
-    ...memberRequests,
-    ...rejectedUsers,
-    ...bannedUsers,
-    ...invitedUsers,
+    ...(memberRequests || []),
+    ...(rejectedUsers || []),
+    ...(bannedUsers || []),
+    ...(invitedUsers || []),
   ];
   const { userId: loggedInUserId } = React.useContext(UserContext)!;
 
   const admins = _admins.filter((admin) => admin.userId !== creatorUserId);
 
-  const isAdmin = userRelationShipWithGroupType === 'admin';
+  const isAdmin = myRelationShipWithGroupType === 'admin';
   const isGroupCreator = creatorUserId === loggedInUserId;
 
   return (
@@ -46,7 +49,9 @@ export const GroupMembers = ({ className = '', group }: GroupMembersProps) => {
         admins.map((user) => (
           <div className='element' key={'GroupMemberElement' + user.userId}>
             <GroupMemberElement userId={user.userId} userList={userList} />
-            {isGroupCreator && <GroupMemberModify group={group} userId={user.userId} />}
+            {isGroupCreator && (
+              <GroupMemberModify group={group} userId={user.userId} />
+            )}
           </div>
         ))
       ) : (
@@ -59,7 +64,9 @@ export const GroupMembers = ({ className = '', group }: GroupMembersProps) => {
         members.map((user) => (
           <div className='element' key={'GroupMemberElement' + user.userId}>
             <GroupMemberElement userId={user.userId} userList={userList} />
-            {isAdmin && <GroupMemberModify group={group} userId={user.userId} />}
+            {isAdmin && (
+              <GroupMemberModify group={group} userId={user.userId} />
+            )}
           </div>
         ))
       ) : (
@@ -67,22 +74,27 @@ export const GroupMembers = ({ className = '', group }: GroupMembersProps) => {
           <p>No members</p>
         </div>
       )}
-      <h2>Member Requests</h2>
-      {memberRequests.length > 0 ? (
-        memberRequests.map((user) => (
-          <div className='element' key={'GroupMemberElement' + user.userId}>
-            <GroupMemberElement userId={user.userId} userList={userList} />
-            {isAdmin && <GroupMemberModify group={group} userId={user.userId} />}
-          </div>
-        ))
-      ) : (
-        <div>
-          <p>No member requests</p>
-        </div>
-      )}
+      {isAdmin && (
+        <>
+          <h2>Member Requests</h2>
+          {memberRequests!.length > 0 ? (
+            memberRequests!.map((user) => (
+              <div className='element' key={'GroupMemberElement' + user.userId}>
+                <GroupMemberElement userId={user.userId} userList={userList} />
+                {isAdmin && (
+                  <GroupMemberModify group={group} userId={user.userId} />
+                )}
+              </div>
+            ))
+          ) : (
+            <div>
+              <p>No member requests</p>
+            </div>
+          )}
+
       <h2>Rejected Users</h2>
-      {rejectedUsers.length > 0 ? (
-        rejectedUsers.map((user) => (
+      {rejectedUsers!.length > 0 ? (
+        rejectedUsers!.map((user) => (
           <div className='element' key={'GroupMemberElement' + user.userId}>
             <GroupMemberElement userId={user.userId} userList={userList} />
           </div>
@@ -93,11 +105,13 @@ export const GroupMembers = ({ className = '', group }: GroupMembersProps) => {
         </div>
       )}
       <h2>Banned Users</h2>
-      {bannedUsers.length > 0 ? (
-        bannedUsers.map((user) => (
+      {bannedUsers!.length > 0 ? (
+        bannedUsers!.map((user) => (
           <div className='element' key={'GroupMemberElement' + user.userId}>
             <GroupMemberElement userId={user.userId} userList={userList} />
-            {isAdmin && <GroupMemberModify group={group} userId={user.userId} />}
+            {isAdmin && (
+              <GroupMemberModify group={group} userId={user.userId} />
+            )}
           </div>
         ))
       ) : (
@@ -106,8 +120,8 @@ export const GroupMembers = ({ className = '', group }: GroupMembersProps) => {
         </div>
       )}
       <h2>Invited Users</h2>
-      {invitedUsers.length > 0 ? (
-        invitedUsers.map((user) => (
+      {invitedUsers!.length > 0 ? (
+        invitedUsers!.map((user) => (
           <div className='element' key={'GroupMemberElement' + user.userId}>
             <GroupMemberElement userId={user.userId} userList={userList} />
           </div>
@@ -116,6 +130,8 @@ export const GroupMembers = ({ className = '', group }: GroupMembersProps) => {
         <div>
           <p>No invited users</p>
         </div>
+          )}
+          </>
       )}
     </div>
   );
@@ -155,7 +171,7 @@ GroupMembers.fragments = {
         ...GroupMemberElement
       }
 
-      userRelationShipWithGroup {
+      myRelationshipWithGroup {
         type
       }
 
@@ -168,20 +184,21 @@ GroupMembers.fragments = {
   `,
 };
 
-type UserWithRelationShip = {
+type UserRelationShipWithGroup = {
   userId: string;
-} & GroupMemberElementGQLData & GroupMemberModifyGQLData;
+} & GroupMemberElementGQLData &
+  GroupMemberModifyGQLData;
 
 export type GroupMembersGQLData = {
   groupId: string;
-  members: UserWithRelationShip[];
-  admins: UserWithRelationShip[];
-  memberRequests: UserWithRelationShip[];
-  rejectedUsers: UserWithRelationShip[];
-  bannedUsers: UserWithRelationShip[];
-  invitedUsers: UserWithRelationShip[];
-  userRelationShipWithGroup: {
-    type: string;
+  members: UserRelationShipWithGroup[];
+  admins: UserRelationShipWithGroup[];
+  memberRequests?: UserRelationShipWithGroup[];
+  rejectedUsers?: UserRelationShipWithGroup[];
+  bannedUsers?: UserRelationShipWithGroup[];
+  invitedUsers?: UserRelationShipWithGroup[];
+  myRelationshipWithGroup: {
+    type: "member" | "banned" | "admin" | "member_request" | "member_request_rejected" | "invited";
   };
   creatorUser: {
     userId: string;

@@ -14,7 +14,7 @@ const CREATE_USER_USER_RELATIONSHIP_MUTATION = gql`
 `;
 
 export const UserActions = ({ isMe, user }: UserActionsProps) => {
-  const { relationshipWithUser: { type: relationshipType } } = user;
+  const { myRelationshipWithUser: { type: relationshipType } } = user;
   const [createUserUserRelationship] = useMutation(
     CREATE_USER_USER_RELATIONSHIP_MUTATION,
     // update cache with new relationship
@@ -23,7 +23,7 @@ export const UserActions = ({ isMe, user }: UserActionsProps) => {
         cache.modify({
           id: cache.identify(user),
           fields: {
-            relationshipWithUser() {
+            myRelationshipWithUser() {
               return {
                 type: createUserUserRelationship.type,
               };
@@ -131,7 +131,7 @@ UserActions.fragments = {
   user: gql`
     fragment UserActions on User {
       userId
-      relationshipWithUser {
+      myRelationshipWithUser {
         type
       }
     }
@@ -140,7 +140,7 @@ UserActions.fragments = {
 
 export type UserActionsGQLData = {
   userId: string;
-  relationshipWithUser: {
+  myRelationshipWithUser: {
     type:
       | 'friend'
       | 'incoming_friend_request'

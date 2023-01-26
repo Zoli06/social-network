@@ -39,7 +39,7 @@ type Message {
   vote: VoteType
   mentionedUsers: [User!]!
   medias: [Media!]! # urls of the medias
-  userPermissionToMessage: MessagePermission!
+  myPermissionToMessage: MessagePermission!
 }
 
 input MessageInput {

@@ -1,25 +1,21 @@
-const {
-  Query: { user: getUser },
-} = require("./user.js");
-const {
-  Message: { responseTree: getMessageResponseTree },
-  Query: { message: getMessage },
-} = require("./message.js");
-const {
-  isGroupMember,
-  isGroupAdmin,
-  isGroupCreator,
-} = require("../helpers/group.js");
+import User from './user';
+import Message from './message';
+import { Context } from '../context';
+const { user: getUser } = User.Query;
+const { message: getMessage } = Message.Query;
+const { responseTree: getMessageResponseTree } = Message.Message;
 
-module.exports = {
+const resolvers = {
   Group: {
     async messages(
-      { group_id },
-      { onlyInterestedInMessageId, maxDepth },
-      { user, connection }
+      { group_id }: { group_id: number },
+      {
+        onlyInterestedInMessageId,
+        maxDepth,
+      }: { onlyInterestedInMessageId: number; maxDepth: number },
+      context: Context
     ) {
-      user.authenticate();
-
+      const { connection } = context;
       if (!onlyInterestedInMessageId && !maxDepth) {
         return (
           await connection.query(
@@ -30,7 +26,7 @@ module.exports = {
         )[0];
       }
 
-      // I have to do something with this spaghetti code
+      // TODO: Do something with this spaghetti code
 
       // convert undefined to null
       const _onlyInterestedInMessageId = onlyInterestedInMessageId || null;
@@ -41,28 +37,30 @@ module.exports = {
       const responseTree = await getMessageResponseTree(
         { message_id: _onlyInterestedInMessageId },
         { maxDepth: _maxDepth },
-        { user, connection }
+        context
       );
       if (_onlyInterestedInMessageId !== null) {
         const message = await getMessage(
           {},
           { messageId: _onlyInterestedInMessageId },
-          { user, connection }
+          context
         );
         return [...responseTree, message];
       }
       return responseTree;
     },
-    async creatorUser({ created_by_user_id }, _, { user, connection }) {
-      user.authenticate();
-      return await getUser(
-        {},
-        { userId: created_by_user_id },
-        { user, connection }
-      );
+    async creatorUser(
+      { created_by_user_id }: { created_by_user_id: number },
+      _: any,
+      context: Context
+    ) {
+      return await getUser({}, { userId: created_by_user_id }, context);
     },
-    async members({ group_id }, _, { user, connection }) {
-      user.authenticate();
+    async members(
+      { group_id }: { group_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT * FROM group_user_relationships
@@ -73,8 +71,11 @@ module.exports = {
         )
       )[0];
     },
-    async memberRequests({ group_id }, _, { user, connection }) {
-      user.authenticate();
+    async memberRequests(
+      { group_id }: { group_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT * FROM group_user_relationships
@@ -85,8 +86,11 @@ module.exports = {
         )
       )[0];
     },
-    async bannedUsers({ group_id }, _, { user, connection }) {
-      user.authenticate();
+    async bannedUsers(
+      { group_id }: { group_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT * FROM group_user_relationships
@@ -97,8 +101,11 @@ module.exports = {
         )
       )[0];
     },
-    async invitedUsers({ group_id }, _, { user, connection }) {
-      user.authenticate();
+    async invitedUsers(
+      { group_id }: { group_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT * FROM group_user_relationships
@@ -109,8 +116,11 @@ module.exports = {
         )
       )[0];
     },
-    async admins({ group_id }, _, { user, connection }) {
-      user.authenticate();
+    async admins(
+      { group_id }: { group_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT * FROM group_user_relationships
@@ -121,8 +131,11 @@ module.exports = {
         )
       )[0];
     },
-    async rejectedUsers({ group_id }, _, { user, connection }) {
-      user.authenticate();
+    async rejectedUsers(
+      { group_id }: { group_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT * FROM group_user_relationships
@@ -133,34 +146,69 @@ module.exports = {
         )
       )[0];
     },
-    async notificationFrequency({ group_id }, _, { user, connection }) {
-      user.authenticate();
+    async notificationFrequency(
+      { group_id }: { group_id: number },
+      _: any,
+      {
+        user,
+        connection,
+      }: Context
+    ) {
       return (
         await connection.query(
           `SELECT notification_frequency FROM group_user_relationships
           WHERE group_id = ? AND user_id = ?`,
-          [group_id, user.id]
+          [group_id, user.userId]
         )
       )[0][0];
     },
-    async userRelationShipWithGroup({ group_id }, { userId }, { user, connection }) {
-      user.authenticate();
+    async userRelationshipWithGroup(
+      { group_id }: { group_id: number },
+      { userId }: { userId: number },
+      {
+        user,
+        connection,
+      }: Context
+    ) {
+      console.log("Userrelationshipwithgroup resolver")
       return (
         await connection.query(
           `SELECT * FROM group_user_relationships
           WHERE group_id = ? AND user_id = ?`,
-          [group_id, userId || user.id]
+          [group_id, userId || user.userId]
         )
       )[0][0];
     },
+    async myRelationshipWithGroup(
+      { group_id }: { group_id: number },
+      _: any,
+      {
+        user,
+        connection,
+      }: Context
+    ) {
+      return (
+        await connection.query(
+          `SELECT * FROM group_user_relationships
+          WHERE group_id = ? AND user_id = ?`,
+          [group_id, user.userId]
+        )
+      )[0][0];
+    }
   },
   GroupUserRelationship: {
-    async user({ user_id }, _, { user, connection }) {
-      user.authenticate();
-      return await getUser({}, { userId: user_id }, { user, connection });
+    async user(
+      { user_id }: { user_id: number },
+      _: any,
+      context: Context
+    ) {
+      return await getUser({}, { userId: user_id }, context);
     },
-    async group({ group_id }, _, { user, connection }) {
-      user.authenticate();
+    async group(
+      { group_id }: { group_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT * FROM \`groups\`
@@ -171,69 +219,73 @@ module.exports = {
     },
   },
   Query: {
-    async group(_, { groupId }, { user, connection }) {
-      user.authenticate();
-
+    async group(
+      _: any,
+      { groupId }: { groupId: number },
+      { connection }: Context
+    ) {
       const group = (
         await connection.query(`SELECT * FROM \`groups\` WHERE group_id = ?`, [
           groupId,
         ])
       )[0][0];
 
-      await isGroupMember(user.id, group.group_id, connection, true);
-
       return group;
     },
   },
   Mutation: {
     async createGroup(
-      _,
-      { group: { name, visibility, description } },
-      { user, connection }
+      _: any,
+      {
+        group: { name, visibility, description },
+      }: { group: { name: string; visibility: string; description: string } },
+      context: Context
     ) {
-      user.authenticate();
+      const { connection, user } = context;
       const groupId = (
         await connection.query(
           `INSERT INTO \`groups\` (created_by_user_id, name, visibility, description) VALUES (?, ?, ?, ?)`,
-          [user.id, name, visibility, description]
+          [user.userId, name, visibility, description]
         )
       )[0].insertId;
-      return await module.exports.Query.group(
-        {},
-        { groupId },
-        { user, connection }
-      );
+      return await resolvers.Query.group({}, { groupId }, context);
     },
     async updateGroup(
-      _,
-      { group: { name, visibility, description }, groupId },
-      { user, connection }
+      _: any,
+      {
+        group: { name, visibility, description },
+        groupId,
+      }: {
+        group: { name: string; visibility: string; description: string };
+        groupId: number;
+      },
+      context: Context
     ) {
-      user.authenticate();
+      const { connection } = context;
       await connection.query(
         `UPDATE \`groups\`
           SET name = ?, visibility = ?, description = ?, updated_at = DEFAULT
           WHERE group_id = ?`,
         [name, visibility, description, groupId]
       );
-      return await module.exports.Query.group(
-        {},
-        { groupId },
-        { user, connection }
-      );
+      return await resolvers.Query.group({}, { groupId }, context);
     },
-    async deleteGroup(_, { groupId }, { user, connection }) {
-      user.authenticate();
-      await isGroupCreator(user.id, groupId, connection, true);
+    async deleteGroup(
+      _: any,
+      { groupId }: { groupId: number },
+      { connection }: Context
+    ) {
       await connection.query(`DELETE FROM \`groups\` WHERE group_id = ?`, [
         groupId,
       ]);
       return groupId;
     },
 
-    async sendGroupInvitation(_, { groupId, userId }, { user, connection }) {
-      user.authenticate();
-      await isGroupAdmin(user.id, groupId, connection, true);
+    async sendGroupInvitation(
+      _: any,
+      { groupId, userId }: { groupId: number; userId: number },
+      { connection }: Context
+    ) {
       await connection.query(
         `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, 'invited')
         ON DUPLICATE KEY UPDATE type = IF(type = null, 'invited', type)`,
@@ -241,25 +293,36 @@ module.exports = {
       );
       return true;
     },
-    async acceptGroupInvitation(_, { groupId }, { user, connection }) {
-      user.authenticate();
+    async acceptGroupInvitation(
+      _: any,
+      { groupId }: { groupId: number },
+      { user, connection }: Context
+    ) {
       await connection.query(
         `UPDATE group_user_relationships SET type = 'member' WHERE user_id = ? AND group_id = ? AND type = 'invited'`,
-        [user.id, groupId]
+        [user.userId, groupId]
       );
       return true;
     },
-    async rejectGroupInvitation(_, { groupId }, { user, connection }) {
-      user.authenticate();
+    async rejectGroupInvitation(
+      _: any,
+      { groupId }: { groupId: number },
+      {
+        user,
+        connection,
+      }: Context
+    ) {
       await connection.query(
         `UPDATE group_user_relationships SET type = null WHERE user_id = ? AND group_id = ? AND type = 'invited'`,
-        [user.id, groupId]
+        [user.userId, groupId]
       );
       return true;
     },
-    async banUser(_, { groupId, userId }, { user, connection }) {
-      user.authenticate();
-      await isGroupAdmin(user.id, groupId, connection, true);
+    async banUser(
+      _: any,
+      { groupId, userId }: { groupId: number; userId: number },
+      { connection }: Context
+    ) {
       await connection.query(
         `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, 'banned')
         ON DUPLICATE KEY UPDATE type = 'banned'`,
@@ -267,71 +330,95 @@ module.exports = {
       );
       return true;
     },
-    async unbanUser(_, { groupId, userId }, { user, connection }) {
-      user.authenticate();
-      await isGroupAdmin(user.id, groupId, connection, true);
+    async unbanUser(
+      _: any,
+      { groupId, userId }: { groupId: number; userId: number },
+      { connection }: Context
+    ) {
       await connection.query(
         `UPDATE group_user_relationships SET type = null WHERE user_id = ? AND group_id = ? AND type = 'banned'`,
         [userId, groupId]
       );
       return true;
     },
-    async addAdmin(_, { groupId, userId }, { user, connection }) {
-      user.authenticate();
-      await isGroupCreator(user.id, groupId, connection, true);
+    async addAdmin(
+      _: any,
+      { groupId, userId }: { groupId: number; userId: number },
+      { connection }: Context
+    ) {
       await connection.query(
         `UPDATE group_user_relationships SET type = 'admin' WHERE user_id = ? AND group_id = ? AND type = 'member'`,
         [userId, groupId]
       );
       return true;
     },
-    async removeAdmin(_, { groupId, userId }, { user, connection }) {
-      user.authenticate();
-      await isGroupCreator(user.id, groupId, connection, true);
+    async removeAdmin(
+      _: any,
+      { groupId, userId }: { groupId: number; userId: number },
+      { connection }: Context
+    ) {
       await connection.query(
         `UPDATE group_user_relationships SET type = 'member' WHERE user_id = ? AND group_id = ? AND type = 'admin'`,
         [userId, groupId]
       );
       return true;
     },
-    async sendMemberRequest(_, { groupId }, { user, connection }) {
-      user.authenticate();
+    async sendMemberRequest(
+      _: any,
+      { groupId }: { groupId: number },
+      {
+        user,
+        connection,
+      }: Context
+    ) {
       await connection.query(
         `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, 'member_request', ?)
         ON DUPLICATE KEY UPDATE type = IF(type = null, 'member_request', type)`,
-        [groupId, user.id]
+        [groupId, user.userId]
       );
       return true;
     },
-    async acceptMemberRequest(_, { groupId, userId }, { user, connection }) {
-      user.authenticate();
-      await isGroupAdmin(user.id, groupId, connection, true);
+    async acceptMemberRequest(
+      _: any,
+      { groupId, userId }: { groupId: number; userId: number },
+      { connection }: Context
+    ) {
       await connection.query(
         `UPDATE group_user_relationships SET type = 'member' WHERE user_id = ? AND group_id = ? AND type = 'member_request'`,
         [userId, groupId]
       );
       return true;
     },
-    async rejectMemberRequest(_, { groupId, userId }, { user, connection }) {
-      user.authenticate();
-      await isGroupAdmin(user.id, groupId, connection, true);
+    async rejectMemberRequest(
+      _: any,
+      { groupId, userId }: { groupId: number; userId: number },
+      { connection }: Context
+    ) {
       await connection.query(
         `UPDATE group_user_relationships SET type = 'member_request_rejected' WHERE user_id = ? AND group_id = ? AND type = 'member_request'`,
         [userId, groupId]
       );
       return true;
     },
-    async leaveGroup(_, { groupId }, { user, connection }) {
-      user.authenticate();
+    async leaveGroup(
+      _: any,
+      { groupId }: { groupId: number },
+      {
+        user,
+        connection,
+      }: Context
+    ) {
       await connection.query(
         `UPDATE group_user_relationships SET type = null WHERE user_id = ? AND group_id = ? AND (type = 'admin' OR type = 'member')`,
-        [user.id, groupId]
+        [user.userId, groupId]
       );
       return true;
     },
-    async kickUser(_, { groupId, userId }, { user, connection }) {
-      user.authenticate();
-      await isGroupAdmin(user.id, groupId, connection, true);
+    async kickUser(
+      _: any,
+      { groupId, userId }: { groupId: number; userId: number },
+      { connection }: Context
+    ) {
       await connection.query(
         `UPDATE group_user_relationships SET type = null WHERE user_id = ? AND group_id = ? AND (type = 'member' OR type = 'admin')`,
         [userId, groupId]
@@ -340,16 +427,20 @@ module.exports = {
     },
 
     async setNotificationFrequency(
-      _,
-      { groupId, frequency },
-      { user, connection }
+      _: any,
+      { groupId, frequency }: { groupId: number; frequency: string },
+      {
+        user,
+        connection,
+      }: Context
     ) {
-      user.authenticate();
       await connection.query(
         `UPDATE group_user_relationships SET notification_frequency = ? WHERE user_id = ? AND group_id = ?`,
-        [frequency, user.id, groupId]
+        [frequency, user.userId, groupId]
       );
       return true;
     },
   },
 };
+
+export default resolvers;

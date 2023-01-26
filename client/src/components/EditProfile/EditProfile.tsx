@@ -38,12 +38,12 @@ export const EditProfile = () => {
   const [editProfile] = useMutation(EDIT_PROFILE_MUTATION, {
     refetchQueries: [{ query: EDIT_PROFILE_QUERY }],
   });
-  const [me, editMe] = useState<EditProfileQueryGQLData['me'] | undefined>(
-    undefined
-  );
   const [password, setPassword] = useState<string>('');
   const [passwordConfirm, setPasswordConfirm] = useState<string>('');
 
+  const [me, editMe] = useState<EditProfileQueryGQLData['me'] | undefined>(
+    undefined
+  );
   useEffect(() => {
     if (data) {
       editMe(data.me);
@@ -74,6 +74,7 @@ export const EditProfile = () => {
       return;
     }
     const _password = password.length > 0 ? password : undefined;
+    // TODO: Bug here: if not required filled is empty, it won't be updated
     await editProfile({
       variables: {
         user: {

@@ -1,19 +1,24 @@
+import User from './user';
+import GraphemeSplitter from 'grapheme-splitter';
+import { Context } from '../context';
 const {
   Query: { user: getUser },
-} = require("./user.js");
-const { isGroupMember, isGroupAdmin } = require("../helpers/group.js");
-const { isMessageCreator } = require("../helpers/message.js");
-const Grapheme = require("grapheme-splitter");
-const splitter = new Grapheme();
-
-module.exports = {
+} = User;
+const splitter = new GraphemeSplitter();
+const resolvers = {
   Message: {
-    async author({ user_id }, _, { user, connection }) {
-      user.authenticate();
-      return await getUser({}, { userId: user_id }, { user, connection });
+    async author(
+      { user_id }: { user_id: number },
+      _: any,
+      context: Context
+    ) {
+      return await getUser({}, { userId: user_id }, context);
     },
-    async group({ group_id }, _, { user, connection }) {
-      user.authenticate();
+    async group(
+      { group_id }: { group_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT * FROM \`groups\`
@@ -22,8 +27,11 @@ module.exports = {
         )
       )[0][0];
     },
-    async reactions({ message_id }, _, { user, connection }) {
-      user.authenticate();
+    async reactions(
+      { message_id }: { message_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT * FROM reactions
@@ -32,50 +40,65 @@ module.exports = {
         )
       )[0];
     },
-    async reaction({ message_id }, _, { user, connection }) {
-      user.authenticate();
+    async reaction(
+      { message_id }: { message_id: number },
+      _: any,
+      { user, connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT * FROM reactions
           WHERE message_id = ? AND user_id = ? AND type IS NOT NULL`,
-          [message_id, user.id]
+          [message_id, user.userId]
         )
       )[0][0];
     },
-    async upVotes({ message_id }, _, { user, connection }) {
-      user.authenticate();
+    async upVotes(
+      { message_id }: { message_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT COUNT(*) FROM votes
           WHERE message_id = ? AND type = 'up'`,
           [message_id]
         )
-      )[0][0]["COUNT(*)"];
+      )[0][0]['COUNT(*)'];
     },
-    async downVotes({ message_id }, _, { user, connection }) {
-      user.authenticate();
+    async downVotes(
+      { message_id }: { message_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT COUNT(*) FROM votes
           WHERE message_id = ? AND type = 'down'`,
           [message_id]
         )
-      )[0][0]["COUNT(*)"];
+      )[0][0]['COUNT(*)'];
     },
-    async vote({ message_id }, _, { user, connection }) {
-      user.authenticate();
+    async vote(
+      { message_id }: { message_id: number },
+      _: any,
+      { user, connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT * FROM votes
           JOIN users
           USING(user_id)
           WHERE message_id = ? AND user_id = ?`,
-          [message_id, user.id]
+          [message_id, user.userId]
         )
-      )[0][0]?.["type"];
+      )[0][0]?.['type'];
     },
-    async mentionedUsers({ message_id }, _, { user, connection }) {
-      user.authenticate();
+    async mentionedUsers(
+      { message_id }: { message_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT * FROM mentioned_users
@@ -86,8 +109,11 @@ module.exports = {
         )
       )[0];
     },
-    async medias({ message_id }, _, { user, connection }) {
-      user.authenticate();
+    async medias(
+      { message_id }: { message_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT * FROM message_medias
@@ -98,8 +124,11 @@ module.exports = {
         )
       )[0];
     },
-    async responseTo({ response_to_message_id }, _, { user, connection }) {
-      user.authenticate();
+    async responseTo(
+      { response_to_message_id }: { response_to_message_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT * FROM messages
@@ -108,8 +137,11 @@ module.exports = {
         )
       )[0][0];
     },
-    async responses({ message_id }, _, { user, connection }) {
-      user.authenticate();
+    async responses(
+      { message_id }: { message_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT * FROM messages
@@ -118,13 +150,16 @@ module.exports = {
         )
       )[0];
     },
-    async responseTree({ message_id }, { maxDepth }, { user, connection }) {
-      user.authenticate();
+    async responseTree(
+      { message_id }: { message_id: number | null },
+      { maxDepth }: { maxDepth: number },
+      { connection }: Context
+    ) {
       const columns = (
         await connection.query(
-          `select column_name as columns from information_schema.columns where table_schema = 'social_network' and table_name = 'messages'`
+          `SELECT column_name AS columns FROM information_schema.columns WHERE table_schema = 'social_network' AND table_name = 'messages'`
         )
-      )[0].map((element) => element.columns);
+      )[0].map((element: { columns: string }) => element.columns);
 
       const noMaxDepth = maxDepth === undefined;
 
@@ -136,7 +171,9 @@ module.exports = {
               FROM messages
               WHERE response_to_message_id <=> ?
             UNION ALL
-            SELECT ${columns.map((element) => "m." + element)},mt.lvl + 1
+            SELECT ${columns.map(
+              (element: string) => 'm.' + element
+            )},mt.lvl + 1
               FROM message_tree AS mt JOIN messages AS m
                 ON mt.message_id = m.response_to_message_id
           )
@@ -145,53 +182,71 @@ module.exports = {
         )
       )[0];
     },
-    async responsesCount({ message_id }, _, { user, connection }) {
-      user.authenticate();
+    async responsesCount(
+      { message_id }: { message_id: number },
+      _: any,
+      { connection }: Context
+    ) {
       return (
         await connection.query(
           `SELECT COUNT(*) FROM messages
           WHERE response_to_message_id = ? `,
           [message_id]
         )
-      )[0][0]["COUNT(*)"];
+      )[0][0]['COUNT(*)'];
     },
-    async userPermissionToMessage({group_id, message_id}, _, { user, connection }) {
+    async myPermissionToMessage(
+      { group_id, message_id }: { group_id: number; message_id: number },
+      _: any,
+      { user, connection }: Context
+    ) {
       // author, admin or none of the above
-      user.authenticate();
-      const isAuthor = await isMessageCreator(user.id, message_id, connection, false, false);
-      const isAdmin = await isGroupAdmin(user.id, group_id, connection, false);
-      return isAuthor ? "author" : isAdmin ? "admin" : "none";
-    }
+      const isAuthor = (
+        await connection.query(
+          `SELECT * FROM messages
+          WHERE message_id = ? AND user_id = ?`,
+          [message_id, user.userId]
+        )
+      )[0][0];
+
+      const isAdmin = (
+        await connection.query(
+          `SELECT * FROM group_user_relationships
+          WHERE group_id = ? AND user_id = ? AND type = 'admin'`,
+          [group_id, user.userId]
+        )
+      )[0][0];
+
+      return isAuthor ? 'author' : isAdmin ? 'admin' : 'none';
+    },
   },
   Reaction: {
-    async user({ user_id }, _, { user, connection }) {
-      user.authenticate();
-      return await getUser({}, { userId: user_id }, { user, connection });
+    async user(
+      { user_id }: { user_id: number },
+      _: any,
+      context: Context
+    ) {
+      return await getUser({}, { userId: user_id }, context);
     },
   },
-  // Vote: {
-  //   async user({ user_id }, _, { user, connection }) {
-  //     user.authenticate();
-  //     return await getUser({}, { userId: user_id }, { user, connection });
-  //   },
-  // },
   Query: {
-    async message(_, { messageId }, { user, connection }) {
-      user.authenticate();
+    async message(
+      _: any,
+      { messageId }: { messageId: number },
+      { connection }: Context
+    ) {
       const message = (
         await connection.query(`SELECT * FROM messages WHERE message_id = ? `, [
           messageId,
         ])
       )[0][0];
 
-      await isGroupMember(user.id, message.group_id, connection, true);
-
       return message;
     },
   },
   Mutation: {
     async sendMessage(
-      _,
+      _: any,
       {
         message: {
           text,
@@ -200,11 +255,17 @@ module.exports = {
           mentionedUserIds,
           mediaIds,
         },
+      }: {
+        message: {
+          text: string;
+          groupId: number;
+          responseToMessageId: number;
+          mentionedUserIds: number[];
+          mediaIds: number[];
+        };
       },
-      { user, connection, pubsub }
+      { user, connection, pubsub }: Context
     ) {
-      user.authenticate();
-
       if (responseToMessageId != null) {
         // TODO: lot's of sql query like this, maybe we should make a helper function
         const _parentGroupId = (
@@ -215,14 +276,13 @@ module.exports = {
         )[0][0].group_id.toString();
 
         if (!!responseToMessageId && groupId !== _parentGroupId)
-          throw new Error("Parent message is in different group!");
+          throw new Error('Parent message is in different group!');
       }
 
-      await isGroupMember(user.id, groupId, connection, true);
       const messageId = (
         await connection.query(
           `INSERT INTO messages(user_id, text, response_to_message_id, group_id) VALUES(?, ?, ?, ?)`,
-          [user.id, text, responseToMessageId, groupId]
+          [user.userId, text, responseToMessageId, groupId]
         )
       )[0].insertId;
       if (mentionedUserIds) {
@@ -246,19 +306,25 @@ module.exports = {
       return createdMessage;
     },
     async editMessage(
-      _,
-      { message: { messageId, text, mentionedUserIds, mediaIds } },
-      { user, connection, pubsub }
+      _: any,
+      {
+        message: { messageId, text, mentionedUserIds, mediaIds },
+      }: {
+        message: {
+          messageId: number;
+          text: string;
+          mentionedUserIds: number[];
+          mediaIds: number[];
+        };
+      },
+      { connection, pubsub }: Context
     ) {
-      user.authenticate();
       const groupId = (
         await connection.query(
           `SELECT group_id FROM messages WHERE message_id = ? `,
           [messageId]
         )
       )[0][0].group_id;
-      await isGroupMember(user.id, groupId, connection, true);
-      await isMessageCreator(user.id, messageId, connection, false, true);
       await connection.query(
         `UPDATE messages
           SET text = ?, updated_at = DEFAULT
@@ -293,8 +359,11 @@ module.exports = {
       )[0][0];
       return editedMessage;
     },
-    async deleteMessage(_, { messageId }, { user, connection, pubsub }) {
-      user.authenticate();
+    async deleteMessage(
+      _: any,
+      { messageId }: { messageId: number },
+      { connection, pubsub }: Context
+    ) {
       const groupId = (
         await connection.query(
           `SELECT group_id FROM messages WHERE message_id = ? `,
@@ -302,9 +371,9 @@ module.exports = {
         )
       )[0][0].group_id;
 
-      let messagesToDelete = [];
+      let messagesToDelete: string[] = [];
 
-      const findMessagesToDeleteRecursively = async (messageId) => {
+      const findMessagesToDeleteRecursively = async (messageId: number) => {
         messagesToDelete.push(messageId.toString());
         const responses = (
           await connection.query(
@@ -353,134 +422,120 @@ module.exports = {
       });
       return messagesToDelete;
     },
-    async createReaction(_, { messageId, type }, { user, connection, pubsub }) {
-      user.authenticate();
-      emoji = type ? String.fromCodePoint(type) : null;
+    async createReaction(
+      _: any,
+      { messageId, type }: { messageId: number; type: number },
+      context: Context
+    ) {
+      const { connection, user, pubsub } = context;
+      const emoji = type ? String.fromCodePoint(type) : null;
       if (
         emoji != null &&
         (splitter.splitGraphemes(emoji).length !== 1 ||
           !/\p{Extended_Pictographic}/u.test(emoji))
       ) {
-        throw new Error("Invalid emoji");
+        throw new Error('Invalid emoji');
       }
-      const groupId = (
-        await connection.query(
-          `SELECT group_id FROM messages WHERE message_id = ? `,
-          [messageId]
-        )
-      )[0][0].group_id;
-      await isGroupMember(user.id, groupId, connection, true);
       await connection.query(
         `INSERT INTO reactions(user_id, message_id, type) VALUES(:userId, :messageId, :type)
         ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,
-        { userId: user.id, messageId, type }
+        { userId: user.userId, messageId, type }
       );
-      const reaction = await module.exports.Message.reaction(
+      const reaction = await resolvers.Message.reaction(
         { message_id: messageId },
         {},
-        { user, connection }
+        context
       );
       pubsub.publish(`MESSAGE_REACTED_${messageId}`, {
-        messageReacted: module.exports.Message.reactions(
+        messageReacted: resolvers.Message.reactions(
           { message_id: messageId },
           {},
-          { user, connection }
+          context
         ),
       });
       return reaction;
     },
-    async createVote(_, { messageId, type }, { user, connection, pubsub }) {
-      user.authenticate();
-      const groupId = (
-        await connection.query(
-          `SELECT group_id FROM messages WHERE message_id = ? `,
-          [messageId]
-        )
-      )[0][0].group_id;
-      await isGroupMember(user.id, groupId, connection, true);
+    async createVote(
+      _: any,
+      { messageId, type }: { messageId: number; type: number },
+      context: Context
+    ) {
+      const { connection, user, pubsub } = context;
       await connection.query(
         `INSERT INTO votes(user_id, message_id, type) VALUES(:userId, :messageId, :type)
         ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,
-        { userId: user.id, messageId, type }
+        { userId: user.userId, messageId, type }
+      );
+      const vote = await resolvers.Message.vote(
+        { message_id: messageId },
+        {},
+        context
       );
       pubsub.publish(`MESSAGE_VOTED_${messageId}`, {
         messageVoted: {
-          upVotes: await module.exports.Message.upVotes(
+          // don't use await here
+          upVotes: resolvers.Message.upVotes(
             { message_id: messageId },
             {},
-            { user, connection }
+            context
           ),
-          downVotes: await module.exports.Message.downVotes(
+          downVotes: resolvers.Message.downVotes(
             { message_id: messageId },
             {},
-            { user, connection }
+            context
           ),
         },
       });
-      return await module.exports.Message.vote(
-        { message_id: messageId },
-        {},
-        { user, connection }
-      );
+      return vote;
     },
   },
   Subscription: {
     messageAdded: {
-      subscribe: async (_, { groupId }, { user, connection, pubsub }) => {
-        user.authenticate();
-        await isGroupMember(user.id, groupId, connection, true);
+      subscribe: async (
+        _: any,
+        { groupId }: { groupId: number },
+        { pubsub }: Context
+      ) => {
         return pubsub.asyncIterator(`MESSAGE_ADDED_${groupId}`);
       },
     },
     messageEdited: {
-      subscribe: async (_, { groupId }, { user, connection, pubsub }) => {
-        user.authenticate();
-        await isGroupMember(user.id, groupId, connection, true);
+      subscribe: async (
+        _: any,
+        { groupId }: { groupId: number },
+        { pubsub }: Context
+      ) => {
         return pubsub.asyncIterator(`MESSAGE_EDITED_${groupId}`);
       },
     },
     messagesDeleted: {
-      subscribe: async (_, { groupId }, { user, connection, pubsub }) => {
-        user.authenticate();
-        await isGroupMember(user.id, groupId, connection, true);
+      subscribe: async (
+        _: any,
+        { groupId }: { groupId: number },
+        { pubsub }: Context
+      ) => {
         return pubsub.asyncIterator(`MESSAGES_DELETED_${groupId}`);
       },
     },
     messageReacted: {
-      subscribe: async (_, { messageId }, { user, connection, pubsub }) => {
-        user.authenticate();
-        await isGroupMember(
-          user.id,
-          (
-            await module.exports.Query.message(
-              {},
-              { messageId },
-              { user, connection }
-            )
-          ).group_id,
-          connection,
-          true
-        );
+      subscribe: async (
+        _: any,
+        { messageId }: { messageId: number },
+        { pubsub }: Context
+      ) => {
         return pubsub.asyncIterator(`MESSAGE_REACTED_${messageId}`);
       },
     },
     messageVoted: {
-      subscribe: async (_, { messageId }, { user, connection, pubsub }) => {
-        user.authenticate();
-        await isGroupMember(
-          user.id,
-          (
-            await module.exports.Query.message(
-              {},
-              { messageId },
-              { user, connection }
-            )
-          ).group_id,
-          connection,
-          true
-        );
+      subscribe: async (
+        _: any,
+        { messageId }: { messageId: number },
+        { pubsub }: Context
+      ) => {
         return pubsub.asyncIterator(`MESSAGE_VOTED_${messageId}`);
       },
     },
   },
 };
+
+export default resolvers;

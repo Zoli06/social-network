@@ -13,6 +13,7 @@ enum UserUserRelationshipInputType {
   none
 }
 
+# TODO: add the other user too
 type UserUserRelationship {
   user: User!
   type: UserUserRelationshipType!
@@ -42,7 +43,7 @@ type User {
   outgoingFriendRequests: [UserUserRelationship!]!
   blockedUsers: [UserUserRelationship!]!
   userRelationships: [UserUserRelationship!]! # all relationships
-  relationshipWithUser: UserUserRelationship!
+  myRelationshipWithUser: UserUserRelationship!
   profileImage: Media
 }
 

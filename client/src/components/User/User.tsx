@@ -1,15 +1,20 @@
+import React, { useContext } from 'react';
 import { gql, useQuery } from '@apollo/client';
 import './User.scss';
 import { ProfileImage } from './ProfileImage';
 import { UserInfos, UserInfosGQLData } from './UserInfos';
 import { UserActions, UserActionsGQLData } from './UserActions';
+import { UserContext } from '../../App';
 
 // import { Theme, Button } from 'react-daisyui'
 
-export const User = ({ userId, isMe = false }: UserProps) => {
+export const User = ({ userId }: UserProps) => {
   const { data, loading, error } = useQuery<UserQueryGQLData>(USER_QUERY, {
     variables: { userId },
   });
+  const { userId: loggedInUserId } = useContext(UserContext)!;
+
+  const isMe = loggedInUserId === userId;
 
   if (loading) return <div>Loading...</div>;
   if (error) {
@@ -65,5 +70,4 @@ type UserQueryGQLData = {
 
 type UserProps = {
   userId: string;
-  isMe?: boolean;
 };

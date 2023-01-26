@@ -16,13 +16,13 @@ const EDIT_MESSAGE_MUTATION = gql`
   }
 `;
 
-enum UserPermissionToMessage {
+enum PermissionToMessageEnum {
   AUTHOR = "AUTHOR",
   ADMIN = "ADMIN",
   NONE = "NONE",
 }
 
-export const MessageModify = ({ message: { messageId, text, userPermissionToMessage } }: MessageModifyProps) => {
+export const MessageModify = ({ message: { messageId, text, myPermissionToMessage } }: MessageModifyProps) => {
   const [deleteMessage] = useMutation(DELETE_MESSAGE_MUTATION);
   const [editMessage] = useMutation(EDIT_MESSAGE_MUTATION);
 
@@ -37,12 +37,12 @@ export const MessageModify = ({ message: { messageId, text, userPermissionToMess
     });
   };
 
-  const userPermissionToMessageEnum =
-    userPermissionToMessage.toUpperCase() as UserPermissionToMessage;
+  const myPermissionToMessageAsEnum =
+    myPermissionToMessage.toUpperCase() as PermissionToMessageEnum;
   
   return (
     <div className="message-modify">
-      {userPermissionToMessageEnum === UserPermissionToMessage.AUTHOR && (
+      {myPermissionToMessageAsEnum === PermissionToMessageEnum.AUTHOR && (
         <svg
           className="message-edit icon"
           onClick={() => openEditor(handleEditMessage, text)}
@@ -50,11 +50,11 @@ export const MessageModify = ({ message: { messageId, text, userPermissionToMess
           <use href="/assets/images/svg-bundle.svg#edit" />
         </svg>
       )}
-      {(userPermissionToMessageEnum === UserPermissionToMessage.AUTHOR ||
-        userPermissionToMessageEnum === UserPermissionToMessage.ADMIN) && (
+      {(myPermissionToMessageAsEnum === PermissionToMessageEnum.AUTHOR ||
+        myPermissionToMessageAsEnum === PermissionToMessageEnum.ADMIN) && (
         <svg
           className={`message-delete icon ${
-            userPermissionToMessageEnum === UserPermissionToMessage.ADMIN &&
+            myPermissionToMessageAsEnum === PermissionToMessageEnum.ADMIN &&
             "danger"
           }`}
           onClick={() => deleteMessage({ variables: { messageId } })}
@@ -70,7 +70,7 @@ MessageModify.fragments = {
   message: gql`
     fragment MessageModify on Message {
       messageId
-      userPermissionToMessage
+      myPermissionToMessage
       text
       author {
         userId
@@ -81,7 +81,7 @@ MessageModify.fragments = {
 
 export type MessageModifyGQLData = {
   messageId: string;
-  userPermissionToMessage: UserPermissionToMessage;
+  myPermissionToMessage: PermissionToMessageEnum;
   text: string;
   author: {
     userId: string;
