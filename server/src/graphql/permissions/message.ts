@@ -11,7 +11,7 @@ export default {
   Query: {
     message: and(
       isAuthenticated,
-      race(race(isGroupMember, isGroupAdmin, isGroupCreator), isMessageCreator)
+      race(isGroupMember, isGroupAdmin, isGroupCreator, isMessageCreator)
     ),
   },
   Mutation: {
