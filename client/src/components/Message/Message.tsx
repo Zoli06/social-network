@@ -7,12 +7,12 @@ import { MessageText, MessageTextGQLData } from './MessageText';
 import { MessageActions, MessageActionsGQLData } from './MessageActions';
 
 // If messages is provided, message responses will be rendered
-export function Message({
+export const Message = ({
   message,
   messages,
   subscribeToMore,
   className = '',
-}: MessageProps) {
+}: MessageProps) => {
   return (
     <div className={`message-container ${className}`}>
       <div className='message-content'>
