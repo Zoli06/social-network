@@ -1,8 +1,15 @@
 import React from 'react';
+import { useParams } from 'react-router-dom';
 import { GroupInfo } from '../components/GroupInfo/GroupInfo';
 
 export const GroupInfoPage = () => {
+  const {groupId} = useParams<{groupId: string}>();
+
   return (
-    <GroupInfo groupId='1' />
+    <>
+      {groupId && (
+        <GroupInfo groupId={groupId} />
+      )}
+    </>
   )
 }

@@ -86,8 +86,7 @@ export function App() {
             path='/group/:groupId/:messageId/:maxDepth'
             element={<GroupPage />}
           />
-          {/* TODO: Add parameter to this route */}
-          <Route path='group-info' element={<GroupInfoPage />} />
+          <Route path='group-info/:groupId' element={<GroupInfoPage />} />
           <Route path='/user/:userId' element={<UserPage />} />
           <Route path='/edit-profile' element={<EditProfilePage />} />
           <Route path='/login' element={<LoginPage />} />
