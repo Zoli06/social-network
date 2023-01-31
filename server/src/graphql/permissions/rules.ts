@@ -267,6 +267,7 @@ export const isUserViewingOwnThing = rule()(async (parent, args, ctx, info) => {
   const { userId } = ctx.user;
 
   if (userId !== viewedUserId) {
+    console.log(parent, args)
     console.log('isUserViewingOwnThing', false)
   }
   return userId === viewedUserId;

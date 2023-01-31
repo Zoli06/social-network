@@ -11,10 +11,8 @@ import {
 
 export default {
   Query: {
-    group: and(
-      isAuthenticated,
-      race(isGroupMember, isGroupAdmin, isGroupCreator)
-    ),
+    // TODO: implement private groups
+    group: isAuthenticated
   },
   Mutation: {
     createGroup: isAuthenticated,
@@ -81,7 +79,7 @@ export default {
       isAuthenticated,
       race(isGroupAdmin, isGroupCreator)
     ),
-    myRelationshipWithGroup: and(isAuthenticated),
+    myRelationshipWithGroup: isAuthenticated,
   },
   GroupUserRelationship: {
     // user: isAuthenticated,

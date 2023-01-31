@@ -187,13 +187,24 @@ const resolvers = {
         connection,
       }: Context
     ) {
-      return (
+      const relationship = (
         await connection.query(
           `SELECT * FROM group_user_relationships
           WHERE group_id = ? AND user_id = ?`,
           [group_id, user.userId]
         )
       )[0][0];
+
+      if (relationship) {
+        return relationship;
+      } else {
+        return {
+          type: "none",
+          notification_frequency: "none",
+          group: {},
+          user: {},
+        };
+      }
     }
   },
   GroupUserRelationship: {
