@@ -14,6 +14,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { LogoutPage } from './pages/LogoutPage';
 import { EditProfilePage } from './pages/EditProfilePage';
+import { GroupMembersAdministrationPage } from './pages/GroupMembersAdministrationPage';
 import { GroupInfoPage } from './pages/GroupInfoPage';
 import { useQuery, gql } from '@apollo/client';
 import React from 'react';
@@ -87,6 +88,10 @@ export function App() {
             element={<GroupPage />}
           />
           <Route path='group-info/:groupId' element={<GroupInfoPage />} />
+          <Route
+            path='group-members/:groupId'
+            element={<GroupMembersAdministrationPage />}
+          />
           <Route path='/user/:userId' element={<UserPage />} />
           <Route path='/edit-profile' element={<EditProfilePage />} />
           <Route path='/login' element={<LoginPage />} />
