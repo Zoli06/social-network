@@ -1,20 +1,19 @@
 import { useEffect } from 'react';
 import './Group.scss';
 import { useQuery, useLazyQuery, gql } from '@apollo/client';
+import { Navigate } from 'react-router-dom';
+
 import { Message } from '../Message/Message';
 import { MessagesWrapper } from '../Message/MessagesWrapper';
 import { AddRootMessage } from './AddRootMessage';
 import { GroupMembers } from './GroupMembers';
 import { GroupInfos } from './GroupInfos';
-import { GroupMemberModify } from './GroupMemberModify';
 import { cache } from '../../index';
 
 import { MessageGQLData } from '../Message/Message';
 import { AddRootMessageGQLData } from './AddRootMessage';
 import { GroupMembersGQLData } from './GroupMembers';
 import { GroupInfosGQLData } from './GroupInfos';
-import { GroupMemberModifyGQLData } from './GroupMemberModify';
-import { Navigate } from 'react-router-dom';
 
 const MESSAGE_QUERY = gql`
   query GetMessage($messageId: ID!) {
@@ -57,7 +56,6 @@ export const Group = ({
         onlyInterestedInMessageId,
         maxDepth,
       },
-      errorPolicy: 'all',
     }
   );
 
@@ -198,44 +196,8 @@ export const Group = ({
 
   if (loading) return <p>Loading...</p>;
   if (error) {
-    const isEqual = (a: readonly (string | number)[], b: readonly (string | number)[]) => {
-      if (a.length !== b.length) {
-        return false;
-      }
-
-      for (let i = 0; i < a.length; i++) {
-        if (a[i] !== b[i]) {
-          return false;
-        }
-      }
-
-      return true;
-    };
-
-    // if error is not in acceptable error paths, throw it
-    // if user is admin no error is acceptable
-    const myRelationshipWithGroupType =
-      data?.group?.myRelationshipWithGroup.type;
-
-    if (!myRelationshipWithGroupType || !['member', 'admin'].includes(myRelationshipWithGroupType)) {
-      return <Navigate to={`/group-info/${groupId}`} />;
-    }
-    
-    if (myRelationshipWithGroupType === 'member') {
-      // TODO: import this from GroupMembers.tsx
-      const acceptableErrorPaths = [
-        ['group', 'memberRequests'],
-        ['group', 'rejectedUsers'],
-        ['group', 'invitedUsers'],
-        ['group', 'bannedUsers'],
-      ];
-
-      const errorPath = error.graphQLErrors[0].path;
-
-      if (!errorPath || !acceptableErrorPaths.some((path) => isEqual(path, errorPath))) {
-        throw error;
-      }
-    }
+    console.error(error);
+    return <Navigate to={`/group-info/${groupId}`} />;
   }
 
   const group = data!.group;
@@ -292,7 +254,6 @@ const GROUP_QUERY = gql`
       ...AddRootMessage
       ...GroupMembers
       ...GroupInfos
-      ...GroupMemberModify
 
       groupId
       name
@@ -304,9 +265,8 @@ const GROUP_QUERY = gql`
 
   ${Message.fragments.message}
   ${AddRootMessage.fragments.group}
-  ${GroupMembers.fragments.group}
+  ${GroupMembers.fragments.groupAsMember}
   ${GroupInfos.fragments.group}
-  ${GroupMemberModify.fragments.group}
 `;
 
 Group.fragments = {
@@ -318,19 +278,9 @@ export type GroupQueryGQLData = {
     messages: MessageGQLData[];
     groupId: string;
     name: string;
-    myRelationshipWithGroup: {
-      type:
-        | 'member'
-        | 'banned'
-        | 'admin'
-        | 'member_request'
-        | 'member_request_rejected'
-        | 'invited';
-    };
   } & AddRootMessageGQLData &
     GroupMembersGQLData &
-    GroupInfosGQLData &
-    GroupMemberModifyGQLData;
+    GroupInfosGQLData
 };
 
 export type GroupProps = {

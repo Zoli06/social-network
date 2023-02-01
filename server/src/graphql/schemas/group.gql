@@ -36,11 +36,11 @@ type Group {
   members: [User!]!
 
   # TODO: add a filter input to members field and remove these fields as they are no longer needed
-  memberRequests: [User!]
-  bannedUsers: [User!]
-  invitedUsers: [User!]
-  admins: [User!]
-  rejectedUsers: [User!]
+  memberRequests: [User!]!
+  bannedUsers: [User!]!
+  invitedUsers: [User!]!
+  admins: [User!]!
+  rejectedUsers: [User!]!
   #
 
   notificationFrequency: NotificationFrequency
@@ -65,6 +65,7 @@ type Mutation {
   updateGroup(groupId: ID!, group: GroupInput!): Group
   deleteGroup(groupId: ID!): ID
 
+  # TODO: add admin request
   sendGroupInvitation(groupId: ID!, userId: ID!): Boolean
   acceptGroupInvitation(groupId: ID!): Boolean
   rejectGroupInvitation(groupId: ID!): Boolean

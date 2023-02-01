@@ -447,13 +447,13 @@ export type GroupMemberModifyGQLData = {
   members: {
     userId: string;
   }[];
-  bannedUsers?: {
+  bannedUsers: {
     userId: string;
   }[];
-  admins?: {
+  admins: {
     userId: string;
   }[];
-  memberRequests?: {
+  memberRequests: {
     userId: string;
   }[];
   creatorUser: {
