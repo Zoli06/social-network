@@ -282,10 +282,8 @@ export const didUserSentMemberRequest = rule()(
 
     const relationship = (
       await connection.query(
-        `
-      SELECT * FROM group_user_relationships
-      WHERE user_id = ? AND group_id = ?
-    `,
+        `SELECT * FROM group_user_relationships
+      WHERE user_id = ? AND group_id = ?`,
         [userId, groupId]
       )
     )[0][0];
@@ -297,6 +295,38 @@ export const didUserSentMemberRequest = rule()(
     return false;
   }
 );
+
+export const isGroupVisibleToUser = rule()(async (parent, args, ctx, info) => {
+  const { connection } = ctx;
+  const { userId } = ctx.user;
+  const groupId = await findGroupId(args, parent, connection);
+
+  const group = (
+    await connection.query(
+    `SELECT visibility, created_by_user_id FROM \`groups\`
+      WHERE group_id = ?`,
+    [groupId]
+  ))[0][0];
+
+  if (group.visibility === 'hidden') {
+    const relationshipType = (
+      await connection.query(
+      `SELECT type FROM group_user_relationships
+        WHERE group_id = ? AND user_id = ?`,
+      [groupId, userId]
+    ))[0][0]['type'];
+
+    if (
+      ['invited', 'member', 'admin'].includes(relationshipType) ||
+      group.created_by_user_id === userId
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  return true;
+});
 
 export const isMediaOwner = rule()(async (parent, args, ctx, info) => {
   const { mediaId } = args;

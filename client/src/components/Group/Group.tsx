@@ -196,8 +196,11 @@ export const Group = ({
 
   if (loading) return <p>Loading...</p>;
   if (error) {
+    if (error.message === 'Not Authorised!') {
+      console.log('Not Authorised! Redirecting to info page...');
+      return <Navigate to={`/group-info/${groupId}`} />;
+    }
     console.error(error);
-    return <Navigate to={`/group-info/${groupId}`} />;
   }
 
   const group = data!.group;

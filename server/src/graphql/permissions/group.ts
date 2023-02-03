@@ -6,13 +6,14 @@ import {
   isGroupCreator,
   isInvitedToGroup,
   isBannedFromGroup,
-  didUserSentMemberRequest
+  didUserSentMemberRequest,
+  isGroupVisibleToUser
 } from './rules';
 
 export default {
   Query: {
     // TODO: implement private groups
-    group: isAuthenticated
+    group: and(isAuthenticated, isGroupVisibleToUser)
   },
   Mutation: {
     createGroup: isAuthenticated,
@@ -31,6 +32,7 @@ export default {
     removeAdmin: and(isAuthenticated, isGroupCreator),
     sendMemberRequest: and(
       isAuthenticated,
+      isGroupVisibleToUser,
       not(race(isGroupAdmin, isGroupCreator, isGroupMember)),
       not(isBannedFromGroup)
     ),
@@ -50,10 +52,10 @@ export default {
   },
   Group: {
     groupId: isAuthenticated,
-    creatorUser: isAuthenticated,
-    createdAt: isAuthenticated,
-    updatedAt: isAuthenticated,
-    name: isAuthenticated,
+    creatorUser: and(isAuthenticated, isGroupVisibleToUser),
+    createdAt: and(isAuthenticated, isGroupVisibleToUser),
+    updatedAt: and(isAuthenticated, isGroupVisibleToUser),
+    name: and(isAuthenticated, isGroupVisibleToUser),
     messages: and(
       isAuthenticated,
       race(isGroupMember, isGroupAdmin, isGroupCreator)
@@ -74,8 +76,8 @@ export default {
       isAuthenticated,
       race(isGroupMember, isGroupAdmin, isGroupCreator)
     ),
-    description: isAuthenticated,
-    visibility: isAuthenticated,
+    description: and(isAuthenticated, isGroupVisibleToUser),
+    visibility: and(isAuthenticated, isGroupVisibleToUser),
     userRelationshipWithGroup: and(
       isAuthenticated,
       race(isGroupAdmin, isGroupCreator)

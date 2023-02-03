@@ -35,15 +35,11 @@ type Group {
   name: String!
   messages(onlyInterestedInMessageId: ID, maxDepth: Int): [Message!]! # onlyInterestedInMessageId replaces post
   members: [User!]!
-
-  # TODO: add a filter input to members field and remove these fields as they are no longer needed
   memberRequests: [User!]!
   bannedUsers: [User!]!
   invitedUsers: [User!]!
   admins: [User!]!
   rejectedUsers: [User!]!
-  #
-
   notificationFrequency: NotificationFrequency
   description: String
   visibility: Visibility!
