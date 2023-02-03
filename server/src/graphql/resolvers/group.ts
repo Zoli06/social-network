@@ -170,7 +170,6 @@ const resolvers = {
         connection,
       }: Context
     ) {
-      console.log("Userrelationshipwithgroup resolver")
       return (
         await connection.query(
           `SELECT * FROM group_user_relationships
@@ -299,7 +298,7 @@ const resolvers = {
     ) {
       await connection.query(
         `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, 'invited')
-        ON DUPLICATE KEY UPDATE type = IF(type = null, 'invited', type)`,
+        ON DUPLICATE KEY UPDATE type = IF(type IS null, 'invited', type)`,
         [groupId, userId]
       );
       return true;
@@ -383,8 +382,8 @@ const resolvers = {
       }: Context
     ) {
       await connection.query(
-        `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, 'member_request', ?)
-        ON DUPLICATE KEY UPDATE type = IF(type = null, 'member_request', type)`,
+        `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, 'member_request')
+        ON DUPLICATE KEY UPDATE type = IF(type IS null, 'member_request', type)`,
         [groupId, user.userId]
       );
       return true;
@@ -421,6 +420,20 @@ const resolvers = {
     ) {
       await connection.query(
         `UPDATE group_user_relationships SET type = null WHERE user_id = ? AND group_id = ? AND (type = 'admin' OR type = 'member')`,
+        [user.userId, groupId]
+      );
+      return true;
+    },
+    async cancelMemberRequest(
+      _: any,
+      { groupId }: { groupId: number },
+      {
+        user,
+        connection,
+      }: Context
+    ) {
+      await connection.query(
+        `UPDATE group_user_relationships SET type = null WHERE user_id = ? AND group_id = ? AND (type = 'member_request')`,
         [user.userId, groupId]
       );
       return true;

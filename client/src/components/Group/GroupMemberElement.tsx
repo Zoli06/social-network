@@ -2,9 +2,7 @@ import { gql } from "@apollo/client";
 import { ProfileImage } from "../User/ProfileImage";
 import "./GroupMemberElement.scss";
 
-export const GroupMemberElement = ({ userId, userList }: GroupMemberElementProps) => {
-  const user = userList.find((user) => user.userId === userId)!;
-
+export const GroupMemberElement = ({ user }: GroupMemberElementProps) => {
   return (
     <div className="group-member-element">
       <div className="profile-image-wrapper">
@@ -44,6 +42,5 @@ export type GroupMemberElementGQLData = {
 };
 
 type GroupMemberElementProps = {
-  userId: string;
-  userList: GroupMemberElementGQLData[];
+  user: GroupMemberElementGQLData;
 };

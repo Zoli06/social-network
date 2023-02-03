@@ -22,7 +22,7 @@ const resolvers = {
       __: any,
       context: Context
     ) {
-      console.log('me', context.user)
+      // console.log('me', context.user)
       return await resolvers.Query.user(_, { userId: context.user.userId }, context);
     },
   },

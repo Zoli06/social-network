@@ -6,7 +6,7 @@ import {
   isGroupCreator,
   isInvitedToGroup,
   isBannedFromGroup,
-  isUserViewingOwnThing,
+  didUserSentMemberRequest
 } from './rules';
 
 export default {
@@ -42,6 +42,7 @@ export default {
       isAuthenticated,
       race(isGroupAdmin, isGroupCreator)
     ),
+    cancelMemberRequest: and(isAuthenticated, didUserSentMemberRequest),
     leaveGroup: and(isAuthenticated, race(isGroupMember, isGroupAdmin)),
     kickUser: and(isAuthenticated, race(isGroupAdmin, isGroupCreator)),
 
@@ -87,6 +88,7 @@ export default {
     // type: isAuthenticated,
     // createdAt: isAuthenticated,
     // updatedAt: isAuthenticated
-    '*': and(isAuthenticated, isUserViewingOwnThing),
+    // TODO: fix this per
+    '*': isAuthenticated
   },
 };

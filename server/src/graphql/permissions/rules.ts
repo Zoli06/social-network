@@ -1,4 +1,5 @@
 import { rule } from 'graphql-shield';
+import context from '../context';
 
 // TODO: refactor these functions
 const findGroupId = async (
@@ -42,7 +43,7 @@ const findGroupId = async (
     args.message?.group_id ||
     parent?.groupId ||
     parent?.group?.groupId;
-    parent?.message?.groupId;
+  parent?.message?.groupId;
 
   // maybe only messageId is provided
   if (!groupId && args?.messageId) {
@@ -144,7 +145,7 @@ export const isGroupCreator = rule()(async (parent, args, ctx, info) => {
   if (group?.created_by_user_id === userId) {
     return true;
   }
-  console.log('isGroupCreator', false)
+  // console.log('isGroupCreator', false);
   return false;
 });
 
@@ -166,7 +167,7 @@ export const isGroupAdmin = rule()(async (parent, args, ctx, info) => {
   if (relationship?.type === 'admin') {
     return true;
   }
-  console.log('isGroupAdmin', false)
+  // console.log('isGroupAdmin', false);
   return false;
 });
 
@@ -188,8 +189,8 @@ export const isGroupMember = rule()(async (parent, args, ctx, info) => {
   if (relationship?.type === 'member') {
     return true;
   }
-  console.log(userId, groupId, relationship, args, parent)
-  console.log('isGroupMember', false)
+  // console.log(userId, groupId, relationship, args, parent);
+  // console.log('isGroupMember', false);
   return false;
 });
 
@@ -211,7 +212,7 @@ export const isInvitedToGroup = rule()(async (parent, args, ctx, info) => {
   if (relationship?.type === 'invited') {
     return true;
   }
-  console.log('isInvitedToGroup', false)
+  // console.log('isInvitedToGroup', false);
   return false;
 });
 
@@ -233,7 +234,7 @@ export const isBannedFromGroup = rule()(async (parent, args, ctx, info) => {
   if (relationship?.type === 'banned') {
     return true;
   }
-  console.log('isBannedFromGroup', false)
+  // console.log('isBannedFromGroup', false);
   return false;
 });
 
@@ -254,7 +255,7 @@ export const isMessageCreator = rule()(async (parent, args, ctx, info) => {
   if (message?.user_id === userId) {
     return true;
   }
-  console.log('isMessageCreator', false)
+  // console.log('isMessageCreator', false);
   return false;
 });
 
@@ -266,12 +267,36 @@ export const isUserViewingOwnThing = rule()(async (parent, args, ctx, info) => {
   const viewedUserId = await findUserId(args, parent, ctx.connection);
   const { userId } = ctx.user;
 
-  if (userId !== viewedUserId) {
-    console.log(parent, args)
-    console.log('isUserViewingOwnThing', false)
-  }
+  // if (userId !== viewedUserId) {
+  //   console.log(parent, args);
+  //   console.log('isUserViewingOwnThing', false);
+  // }
   return userId === viewedUserId;
 });
+
+export const didUserSentMemberRequest = rule()(
+  async (parent, args, ctx, info) => {
+    const { connection } = ctx;
+    const { userId } = ctx.user;
+    const groupId = await findGroupId(args, parent, connection);
+
+    const relationship = (
+      await connection.query(
+        `
+      SELECT * FROM group_user_relationships
+      WHERE user_id = ? AND group_id = ?
+    `,
+        [userId, groupId]
+      )
+    )[0][0];
+
+    if (relationship.type === 'member_request') {
+      return true;
+    }
+
+    return false;
+  }
+);
 
 export const isMediaOwner = rule()(async (parent, args, ctx, info) => {
   const { mediaId } = args;

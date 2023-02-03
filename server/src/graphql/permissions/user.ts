@@ -34,10 +34,7 @@ export default {
   },
   // TODO: do todo in user.gql then write permissions for this field
   UserUserRelationship: {
-    user: isAuthenticated,
-    type: isAuthenticated,
-    createdAt: isAuthenticated,
-    updatedAt: isAuthenticated,
+    '*': isAuthenticated
   },
   AuthPayload: {
     token: allow,

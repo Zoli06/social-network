@@ -16,14 +16,15 @@ enum GroupUserRelationshipType {
   member_request
   member_request_rejected
   invited
+  none
 }
 
 type GroupUserRelationship {
   user: User!
   group: Group!
-  type: GroupUserRelationshipType!
-  createdAt: Date!
-  updatedAt: Date!
+  type: GroupUserRelationshipType
+  createdAt: Date
+  updatedAt: Date
 }
 
 type Group {
@@ -74,6 +75,7 @@ type Mutation {
   addAdmin(groupId: ID!, userId: ID!): Boolean
   removeAdmin(groupId: ID!, userId: ID!): Boolean
   sendMemberRequest(groupId: ID!): Boolean
+  cancelMemberRequest(groupId: ID!): Boolean
   acceptMemberRequest(groupId: ID!, userId: ID!): Boolean
   rejectMemberRequest(groupId: ID!, userId: ID!): Boolean
   leaveGroup(groupId: ID!): Boolean

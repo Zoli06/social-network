@@ -23,17 +23,18 @@ export const GroupMembers = ({ className = '', group }: GroupMembersProps) => {
     myRelationshipWithGroup: { type: myRelationShipWithGroupType },
     creatorUser: { userId: creatorUserId },
   } = group;
-  const userList = [
-    ...members,
-    ..._admins,
-    ...(memberRequests || []),
-    ...(rejectedUsers || []),
-    ...(bannedUsers || []),
-    ...(invitedUsers || []),
-  ];
+  // const userList = [
+  //   ...members,
+  //   ..._admins,
+  //   ...(memberRequests || []),
+  //   ...(rejectedUsers || []),
+  //   ...(bannedUsers || []),
+  //   ...(invitedUsers || []),
+  // ];
   const { userId: loggedInUserId } = React.useContext(UserContext)!;
 
   const admins = _admins.filter((admin) => admin.userId !== creatorUserId);
+  const creatorUser = _admins.find((admin) => admin.userId === creatorUserId)!;
 
   const isAdmin = myRelationShipWithGroupType === 'admin';
   const isGroupCreator = creatorUserId === loggedInUserId;
@@ -42,16 +43,20 @@ export const GroupMembers = ({ className = '', group }: GroupMembersProps) => {
     <div className={`group-members ${className}`}>
       <h2>Creator</h2>
       <div className='group-member-element-container'>
-        <GroupMemberElement userId={creatorUserId} userList={userList} />
+        <GroupMemberElement user={creatorUser} />
       </div>
       <h2>Admins</h2>
       {admins.length > 0 ? (
         admins.map((user) => (
           <div className='element' key={'GroupMemberElement' + user.userId}>
-            <GroupMemberElement userId={user.userId} userList={userList} />
-            {(isGroupCreator && memberRequests && rejectedUsers && bannedUsers && invitedUsers) && (
-              <GroupMemberModify group={group as any} userId={user.userId} />
-            )}
+            <GroupMemberElement user={user} />
+            {isGroupCreator &&
+              memberRequests &&
+              rejectedUsers &&
+              bannedUsers &&
+              invitedUsers && (
+                <GroupMemberModify group={group as any} userId={user.userId} />
+              )}
           </div>
         ))
       ) : (
@@ -63,10 +68,14 @@ export const GroupMembers = ({ className = '', group }: GroupMembersProps) => {
       {members.length > 0 ? (
         members.map((user) => (
           <div className='element' key={'GroupMemberElement' + user.userId}>
-            <GroupMemberElement userId={user.userId} userList={userList} />
-            {(isAdmin && memberRequests && rejectedUsers && bannedUsers && invitedUsers) && (
-              <GroupMemberModify group={group as any} userId={user.userId} />
-            )}
+            <GroupMemberElement user={user} />
+            {isAdmin &&
+              memberRequests &&
+              rejectedUsers &&
+              bannedUsers &&
+              invitedUsers && (
+                <GroupMemberModify group={group as any} userId={user.userId} />
+              )}
           </div>
         ))
       ) : (
@@ -74,67 +83,89 @@ export const GroupMembers = ({ className = '', group }: GroupMembersProps) => {
           <p>No members</p>
         </div>
       )}
-      {(isAdmin && memberRequests && rejectedUsers && bannedUsers && invitedUsers) && (
-        <>
-          <h2>Member Requests</h2>
-          {memberRequests.length > 0 ? (
-            memberRequests.map((user) => (
-              <div className='element' key={'GroupMemberElement' + user.userId}>
-                <GroupMemberElement userId={user.userId} userList={userList} />
-                {isAdmin && (
-                  <GroupMemberModify group={group as any} userId={user.userId} />
-                )}
+      {isAdmin &&
+        memberRequests &&
+        rejectedUsers &&
+        bannedUsers &&
+        invitedUsers && (
+          <>
+            <h2>Member Requests</h2>
+            {memberRequests.length > 0 ? (
+              memberRequests.map((user) => (
+                <div
+                  className='element'
+                  key={'GroupMemberElement' + user.userId}
+                >
+                  <GroupMemberElement user={user} />
+                  {isAdmin && (
+                    <GroupMemberModify
+                      group={group as any}
+                      userId={user.userId}
+                    />
+                  )}
+                </div>
+              ))
+            ) : (
+              <div>
+                <p>No member requests</p>
               </div>
-            ))
-          ) : (
-            <div>
-              <p>No member requests</p>
-            </div>
-          )}
+            )}
 
-          <h2>Rejected Users</h2>
-          {rejectedUsers.length > 0 ? (
-            rejectedUsers.map((user) => (
-              <div className='element' key={'GroupMemberElement' + user.userId}>
-                <GroupMemberElement userId={user.userId} userList={userList} />
+            <h2>Rejected Users</h2>
+            {rejectedUsers.length > 0 ? (
+              rejectedUsers.map((user) => (
+                <div
+                  className='element'
+                  key={'GroupMemberElement' + user.userId}
+                >
+                  <GroupMemberElement user={user} />
+                </div>
+              ))
+            ) : (
+              <div>
+                <p>No rejected users</p>
               </div>
-            ))
-          ) : (
-            <div>
-              <p>No rejected users</p>
-            </div>
-          )}
-          
-          <h2>Banned Users</h2>
-          {bannedUsers.length > 0 ? (
-            bannedUsers.map((user) => (
-              <div className='element' key={'GroupMemberElement' + user.userId}>
-                <GroupMemberElement userId={user.userId} userList={userList} />
-                {isAdmin && (
-                  <GroupMemberModify group={group as any} userId={user.userId} />
-                )}
-              </div>
-            ))
-          ) : (
-            <div>
-              <p>No banned users</p>
-            </div>
-          )}
+            )}
 
-          <h2>Invited Users</h2>
-          {invitedUsers.length > 0 ? (
-            invitedUsers.map((user) => (
-              <div className='element' key={'GroupMemberElement' + user.userId}>
-                <GroupMemberElement userId={user.userId} userList={userList} />
+            <h2>Banned Users</h2>
+            {bannedUsers.length > 0 ? (
+              bannedUsers.map((user) => (
+                <div
+                  className='element'
+                  key={'GroupMemberElement' + user.userId}
+                >
+                  <GroupMemberElement user={user} />
+                  {isAdmin && (
+                    <GroupMemberModify
+                      group={group as any}
+                      userId={user.userId}
+                    />
+                  )}
+                </div>
+              ))
+            ) : (
+              <div>
+                <p>No banned users</p>
               </div>
-            ))
-          ) : (
-            <div>
-              <p>No invited users</p>
-            </div>
-          )}
-        </>
-      )}
+            )}
+
+            <h2>Invited Users</h2>
+            {invitedUsers.length > 0 ? (
+              invitedUsers.map((user) => (
+                <div
+                  className='element'
+                  key={'GroupMemberElement' + user.userId}
+                >
+                  <GroupMemberElement user={user} />
+                </div>
+              ))
+            ) : (
+              <div>
+                <p>No invited users</p>
+              </div>
+            )}
+          </>
+        )}
     </div>
   );
 };
@@ -235,7 +266,8 @@ export type GroupMembersGQLData = {
       | 'admin'
       | 'member_request'
       | 'member_request_rejected'
-      | 'invited';
+      | 'invited'
+      | null;
   };
   creatorUser: {
     userId: string;
