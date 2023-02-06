@@ -1,3 +1,5 @@
+import './GroupMembersAdministration.scss';
+
 import React from 'react'
 import { gql, useQuery } from '@apollo/client';
 import { GroupMembers, GroupMembersGQLData } from '../Group/GroupMembers';

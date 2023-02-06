@@ -1,3 +1,5 @@
+import './GroupInfo.scss'
+
 import { gql, useMutation } from '@apollo/client';
 import { UserContext } from '../../App';
 import React, { useContext } from 'react';
