@@ -1,5 +1,5 @@
 import { deny, allow, and } from 'graphql-shield';
-import { isAuthenticated, isUserViewingOwnThing } from './rules';
+import { isAuthenticated, isUserViewingOwnThing, isUserCheckingOwnNotification } from './rules';
 
 export default {
   Query: {
@@ -11,6 +11,7 @@ export default {
     login: allow,
     updateUser: isAuthenticated,
     createUserUserRelationship: isAuthenticated,
+    checkNotification: and(isAuthenticated, isUserCheckingOwnNotification),
   },
   User: {
     userId: isAuthenticated,
@@ -31,6 +32,7 @@ export default {
     userRelationships: and(isAuthenticated, isUserViewingOwnThing),
     myRelationshipWithUser: and(isAuthenticated),
     profileImage: isAuthenticated,
+    notifications: and(isAuthenticated, isUserViewingOwnThing),
   },
   // TODO: do todo in user.gql then write permissions for this field
   UserUserRelationship: {
@@ -39,5 +41,8 @@ export default {
   AuthPayload: {
     token: allow,
     user: allow,
+  },
+  Notification: {
+    '*': isAuthenticated,
   },
 };

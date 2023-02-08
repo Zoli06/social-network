@@ -122,6 +122,37 @@ const findMessageId = async (
   return messageId;
 };
 
+const findNotificationId = async (
+  args: {
+    notification_id?: number;
+    notificationId?: number;
+    notification?: {
+      notification_id?: number;
+      notificationId?: number;
+    };
+  },
+  parent: {
+    notification_id?: number;
+    notificationId?: number;
+    notification?: {
+      notification_id?: number;
+      notificationId?: number;
+    };
+  },
+  connection: any
+) => {
+  const notificationId =
+    args?.notificationId ||
+    args?.notification?.notificationId ||
+    parent?.notification_id ||
+    parent?.notification?.notification_id ||
+    args.notification_id ||
+    args.notification?.notification_id ||
+    parent?.notificationId ||
+    parent?.notification?.notificationId;
+  return notificationId;
+};
+
 export const isGroupCreator = rule()(async (parent, args, ctx, info) => {
   // If rule applied on Group type, groupId is in args.groupId
   // If rule applied on Message type, groupId is in args.group.groupId
@@ -303,18 +334,20 @@ export const isGroupVisibleToUser = rule()(async (parent, args, ctx, info) => {
 
   const group = (
     await connection.query(
-    `SELECT visibility, created_by_user_id FROM \`groups\`
+      `SELECT visibility, created_by_user_id FROM \`groups\`
       WHERE group_id = ?`,
-    [groupId]
-  ))[0][0];
+      [groupId]
+    )
+  )[0][0];
 
   if (group.visibility === 'hidden') {
     const relationshipType = (
       await connection.query(
-      `SELECT type FROM group_user_relationships
+        `SELECT type FROM group_user_relationships
         WHERE group_id = ? AND user_id = ?`,
-      [groupId, userId]
-    ))[0][0]['type'];
+        [groupId, userId]
+      )
+    )[0][0]['type'];
 
     if (
       ['invited', 'member', 'admin'].includes(relationshipType) ||
@@ -327,6 +360,32 @@ export const isGroupVisibleToUser = rule()(async (parent, args, ctx, info) => {
 
   return true;
 });
+
+export const isUserCheckingOwnNotification = rule()(
+  async (parent, args, ctx, info) => {
+    const { connection } = ctx;
+    const { userId } = ctx.user;
+
+    const notificationId = await findNotificationId(args, parent, connection);
+
+    const notification = (
+      await connection.query(
+        `SELECT * FROM notifications as n
+        JOIN notification_user_connections as nuc
+        ON n.notification_id = nuc.notification_id
+        WHERE n.notification_id = ?
+        `,
+        [notificationId]
+      )
+    )[0][0];
+
+    if (notification.user_id === userId) {
+      return true;
+    }
+
+    return false;
+  }
+);
 
 export const isMediaOwner = rule()(async (parent, args, ctx, info) => {
   const { mediaId } = args;

@@ -1,17 +1,15 @@
 import User from './user';
 import GraphemeSplitter from 'grapheme-splitter';
 import { Context } from '../context';
+import { sendNotifications } from '../helpers/notifications';
+
 const {
   Query: { user: getUser },
 } = User;
 const splitter = new GraphemeSplitter();
 const resolvers = {
   Message: {
-    async author(
-      { user_id }: { user_id: number },
-      _: any,
-      context: Context
-    ) {
+    async author({ user_id }: { user_id: number }, _: any, context: Context) {
       return await getUser({}, { userId: user_id }, context);
     },
     async group(
@@ -221,11 +219,7 @@ const resolvers = {
     },
   },
   Reaction: {
-    async user(
-      { user_id }: { user_id: number },
-      _: any,
-      context: Context
-    ) {
+    async user({ user_id }: { user_id: number }, _: any, context: Context) {
       return await getUser({}, { userId: user_id }, context);
     },
   },
@@ -264,8 +258,10 @@ const resolvers = {
           mediaIds: number[];
         };
       },
-      { user, connection, pubsub }: Context
+      context: Context
     ) {
+      const { user, connection, pubsub } = context;
+
       if (responseToMessageId != null) {
         // TODO: lot's of sql query like this, maybe we should make a helper function
         const _parentGroupId = (
@@ -303,6 +299,41 @@ const resolvers = {
           messageId,
         ])
       )[0][0];
+
+      const userIdsToNotify = (
+        await connection.query(
+          `SELECT group_user_relationships.user_id, notification_frequency FROM group_user_relationships
+          JOIN users ON group_user_relationships.user_id = users.user_id
+          WHERE group_id = ?`,
+          [createdMessage.group_id]
+        )
+      )[0].filter(
+        ({
+          user_id: userId,
+          notification_frequency: notificationFrequency,
+        }: {
+          user_id: number;
+          notification_frequency: 'frequent' | 'low' | 'none';
+          }) => {
+          const willNotify =
+            notificationFrequency === 'frequent' ||
+            (notificationFrequency === 'low' && Math.random() < 0.2)
+          return willNotify && userId !== user.userId;
+        }
+      ).map(({ user_id: userId }: { user_id: number }) => userId);
+
+      if (userIdsToNotify.length > 0) {
+        await sendNotifications(
+          {
+            userIds: userIdsToNotify,
+            title: `New message in ${createdMessage.group_id}`,
+            description: text,
+            urlPath: `/group/${createdMessage.group_id}/${createdMessage.message_id}`
+          },
+          context
+        );
+      }
+
       return createdMessage;
     },
     async editMessage(
@@ -453,6 +484,31 @@ const resolvers = {
           context
         ),
       });
+
+      const userName = (
+        await connection.query(
+          `SELECT user_name FROM users WHERE user_id = ?`,
+          [user.userId]
+        )
+      )[0][0].user_name;
+
+      const userId = (
+        await connection.query(
+          `SELECT user_id FROM messages WHERE message_id = ?`,
+          [messageId]
+        )
+      )[0][0].user_id;
+
+      await sendNotifications(
+        {
+          userIds: [userId],
+          title: 'New reaction',
+          description: `${userName} reacted to your message`,
+          urlPath: `/groups/${reaction.group_id}/${messageId}`,
+        },
+        context
+      );
+
       return reaction;
     },
     async createVote(
@@ -486,6 +542,24 @@ const resolvers = {
           ),
         },
       });
+
+      const userName = (
+        await connection.query(
+          `SELECT user_name FROM users WHERE user_id = ?`,
+          [user.userId]
+        )
+      )[0][0].user_name;
+
+      await sendNotifications(
+        {
+          userIds: [vote.user_id],
+          title: 'New vote',
+          description: `${userName} voted to your message`,
+          urlPath: `/groups/${vote.group_id}/${messageId}`,
+        },
+        context
+      );
+
       return vote;
     },
   },

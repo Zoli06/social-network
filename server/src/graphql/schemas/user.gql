@@ -26,6 +26,17 @@ type AuthPayload {
   user: User!
 }
 
+type Notification {
+  notificationId: ID!
+  user: User!
+  title: String!
+  description: String
+  urlPath: String!
+  isSeen: Boolean!
+  createdAt: Date!
+  updatedAt: Date!
+}
+
 type User {
   userId: ID!
   firstName: String!
@@ -45,6 +56,7 @@ type User {
   userRelationships: [UserUserRelationship!]! # all relationships
   myRelationshipWithUser: UserUserRelationship!
   profileImage: Media
+  notifications: [Notification!]!
 }
 
 input UserInput {
@@ -84,4 +96,5 @@ type Mutation {
     userId: ID!
     type: UserUserRelationshipInputType
   ): UserUserRelationship # also can be used to delete and update
+  checkNotification(notificationId: ID!): Boolean
 }
