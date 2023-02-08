@@ -7,9 +7,7 @@ const resolvers = {
     async user(
       _: any,
       { userId }: { userId: number },
-      {
-        connection,
-      }: Context
+      { connection }: Context
     ) {
       return (
         await connection.query(`SELECT * FROM users WHERE user_id = ?`, [
@@ -17,13 +15,13 @@ const resolvers = {
         ])
       )[0][0];
     },
-    async me(
-      _: any,
-      __: any,
-      context: Context
-    ) {
+    async me(_: any, __: any, context: Context) {
       // console.log('me', context.user)
-      return await resolvers.Query.user(_, { userId: context.user.userId }, context);
+      return await resolvers.Query.user(
+        _,
+        { userId: context.user.userId },
+        context
+      );
     },
   },
   Mutation: {
@@ -164,11 +162,7 @@ const resolvers = {
           user.userId,
         ]
       );
-      return await resolvers.Query.user(
-        {},
-        { userId: user.userId },
-        context
-      );
+      return await resolvers.Query.user({}, { userId: user.userId }, context);
     },
     async createUserUserRelationship(
       _: any,
@@ -188,13 +182,26 @@ const resolvers = {
         context
       );
     },
+    checkNotification: async (
+      _: any,
+      { notificationId }: { notificationId: number },
+      context: Context
+    ) => {
+      const { user, connection } = context;
+      // TODO: auto update updated_at in database
+      await connection.query(
+        `UPDATE notifications as n
+        JOIN notification_user_connections as nuc
+        ON nuc.notification_id = n.notification_id
+        SET is_seen = 1, updated_at = DEFAULT
+        WHERE n.notification_id = ?`,
+        [notificationId, user.userId]
+      );
+      return true;
+    },
   },
   User: {
-    async userRelationships(
-      parent: any,
-      _: any,
-      context: Context
-    ) {
+    async userRelationships(parent: any, _: any, context: Context) {
       return [
         ...(await this.friends(parent, _, context)),
         ...(await this.incomingFriendRequests(parent, _, context)),
@@ -346,14 +353,10 @@ const resolvers = {
       WHERE initiating_user_id = ? AND target_user_id = ?`;
 
       const relationship1 = (
-        await connection.query(query,
-          [user.userId, user_id]
-        )
+        await connection.query(query, [user.userId, user_id])
       )[0][0];
       const relationship2 = (
-        await connection.query(query,
-          [user_id, user.userId]
-        )
+        await connection.query(query, [user_id, user.userId])
       )[0][0];
       const type1 = relationship1?.type;
       const type2 = relationship2?.type;
@@ -410,6 +413,25 @@ const resolvers = {
         )
       )[0][0];
     },
+    async notifications(
+      { user_id }: { user_id: number },
+      _: any,
+      { connection }: Context
+    ) {
+      return (
+        await connection.query(
+          `SELECT * FROM notifications as n
+          JOIN notification_user_connections as nuc
+          ON n.notification_id = nuc.notification_id
+          WHERE user_id = ?`,
+          [user_id]
+        )
+      )[0];
+    },
+  },
+  Notification: {
+    user: ({ user_id }: { user_id: number }, _: any, context: Context) =>
+      resolvers.Query.user({}, { userId: user_id }, context),
   },
 };
 

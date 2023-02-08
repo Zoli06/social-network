@@ -1,6 +1,7 @@
 import User from './user';
 import Message from './message';
 import { Context } from '../context';
+import { sendNotifications } from '../helpers/notifications';
 const { user: getUser } = User.Query;
 const { message: getMessage } = Message.Query;
 const { responseTree: getMessageResponseTree } = Message.Message;
@@ -149,10 +150,7 @@ const resolvers = {
     async notificationFrequency(
       { group_id }: { group_id: number },
       _: any,
-      {
-        user,
-        connection,
-      }: Context
+      { user, connection }: Context
     ) {
       return (
         await connection.query(
@@ -165,10 +163,7 @@ const resolvers = {
     async userRelationshipWithGroup(
       { group_id }: { group_id: number },
       { userId }: { userId: number },
-      {
-        user,
-        connection,
-      }: Context
+      { user, connection }: Context
     ) {
       return (
         await connection.query(
@@ -181,10 +176,7 @@ const resolvers = {
     async myRelationshipWithGroup(
       { group_id }: { group_id: number },
       _: any,
-      {
-        user,
-        connection,
-      }: Context
+      { user, connection }: Context
     ) {
       const relationship = (
         await connection.query(
@@ -198,20 +190,16 @@ const resolvers = {
         return relationship;
       } else {
         return {
-          type: "none",
-          notification_frequency: "none",
+          type: 'none',
+          notification_frequency: 'none',
           group: {},
           user: {},
         };
       }
-    }
+    },
   },
   GroupUserRelationship: {
-    async user(
-      { user_id }: { user_id: number },
-      _: any,
-      context: Context
-    ) {
+    async user({ user_id }: { user_id: number }, _: any, context: Context) {
       return await getUser({}, { userId: user_id }, context);
     },
     async group(
@@ -283,24 +271,74 @@ const resolvers = {
     async deleteGroup(
       _: any,
       { groupId }: { groupId: number },
-      { connection }: Context
+      context: Context
     ) {
+      const { connection } = context;
+
+      const groupName = connection.query(
+        `SELECT name FROM groups
+          WHERE group_id = ?`
+      )[0][0].name;
+
+      const userIds = (
+        await connection.query(
+          `SELECT user_id FROM group_user_relationships
+          WHERE (type = 'member' OR type = 'admin') AND group_id = ?`,
+          [groupId]
+        )
+      )[0].map((relationship: any) => relationship.user_id);
+
+      // BUG: this won't work because of foreign key constraints
+      // TODO: introduce a soft delete
       await connection.query(`DELETE FROM \`groups\` WHERE group_id = ?`, [
         groupId,
       ]);
+
+      await sendNotifications(
+        {
+          userIds,
+          title: `${groupName} has been deleted`,
+          urlPath: `/`,
+        },
+        context
+      );
+
       return groupId;
     },
 
     async sendGroupInvitation(
       _: any,
       { groupId, userId }: { groupId: number; userId: number },
-      { connection }: Context
+      context: Context
     ) {
+      const { connection, user } = context;
+
       await connection.query(
         `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, 'invited')
         ON DUPLICATE KEY UPDATE type = IF(type IS null, 'invited', type)`,
         [groupId, userId]
       );
+
+      const userName = connection.query(
+        `SELECT user_name FROM users
+          WHERE user_id = ?`,
+        [user.userId]
+      )[0][0].user_name;
+
+      const groupName = connection.query(
+        `SELECT name FROM groups
+          WHERE group_id = ?`
+      )[0][0].name;
+
+      await sendNotifications(
+        {
+          userIds: [userId],
+          title: `${userName} sent you an invitation to ${groupName}`,
+          urlPath: `/group-info/${groupId}`,
+        },
+        context
+      );
+
       return true;
     },
     async acceptGroupInvitation(
@@ -312,15 +350,13 @@ const resolvers = {
         `UPDATE group_user_relationships SET type = 'member' WHERE user_id = ? AND group_id = ? AND type = 'invited'`,
         [user.userId, groupId]
       );
+
       return true;
     },
     async rejectGroupInvitation(
       _: any,
       { groupId }: { groupId: number },
-      {
-        user,
-        connection,
-      }: Context
+      { user, connection }: Context
     ) {
       await connection.query(
         `UPDATE group_user_relationships SET type = null WHERE user_id = ? AND group_id = ? AND type = 'invited'`,
@@ -331,92 +367,254 @@ const resolvers = {
     async banUser(
       _: any,
       { groupId, userId }: { groupId: number; userId: number },
-      { connection }: Context
+      context: Context
     ) {
+      const { connection } = context;
+
       await connection.query(
         `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, 'banned')
         ON DUPLICATE KEY UPDATE type = 'banned'`,
         [groupId, userId]
       );
+
+      const groupName = (
+        await connection.query(
+          `SELECT name FROM groups
+          WHERE group_id = ?`
+        )
+      )[0][0].name;
+
+      await sendNotifications(
+        {
+          userIds: [userId],
+          title: `You has been banned from ${groupName}`,
+          urlPath: `/group-info/${groupId}`,
+        },
+        context
+      );
+
       return true;
     },
     async unbanUser(
       _: any,
       { groupId, userId }: { groupId: number; userId: number },
-      { connection }: Context
+      context: Context
     ) {
+      const { connection } = context;
+
       await connection.query(
         `UPDATE group_user_relationships SET type = null WHERE user_id = ? AND group_id = ? AND type = 'banned'`,
         [userId, groupId]
       );
+
+      const groupName = (
+        await connection.query(
+          `SELECT name FROM groups
+          WHERE group_id = ?`
+        )
+      )[0][0].name;
+
+      await sendNotifications(
+        {
+          userIds: [userId],
+          title: `You has been unbanned from ${groupName}`,
+          description:
+            'You can now send a member request and see if the admins let you go back',
+          urlPath: `/group-info/${groupId}`,
+        },
+        context
+      );
+
       return true;
     },
     async addAdmin(
       _: any,
       { groupId, userId }: { groupId: number; userId: number },
-      { connection }: Context
+      context: Context
     ) {
+      const { connection } = context;
+
       await connection.query(
         `UPDATE group_user_relationships SET type = 'admin' WHERE user_id = ? AND group_id = ? AND type = 'member'`,
         [userId, groupId]
       );
+
+      const groupName = (
+        await connection.query(
+          `SELECT name FROM groups
+          WHERE group_id = ?`
+        )
+      )[0][0].name;
+
+      await sendNotifications(
+        {
+          userIds: [userId],
+          title: `You are now an admin in ${groupName}`,
+          urlPath: `/group-info/${groupId}`,
+        },
+        context
+      );
+
       return true;
     },
     async removeAdmin(
       _: any,
       { groupId, userId }: { groupId: number; userId: number },
-      { connection }: Context
+      context: Context
     ) {
+      const { connection } = context;
+
       await connection.query(
         `UPDATE group_user_relationships SET type = 'member' WHERE user_id = ? AND group_id = ? AND type = 'admin'`,
         [userId, groupId]
       );
+
+      const groupName = (
+        await connection.query(
+          `SELECT name FROM groups
+          WHERE group_id = ?`
+        )
+      )[0][0].name;
+
+      await sendNotifications(
+        {
+          userIds: [userId],
+          title: `You are no longer an admin in ${groupName}`,
+          urlPath: `/group-info/${groupId}`,
+        },
+        context
+      );
+
       return true;
     },
     async sendMemberRequest(
       _: any,
       { groupId }: { groupId: number },
-      {
-        user,
-        connection,
-      }: Context
+      context: Context
     ) {
+      const { user, connection } = context;
+
       await connection.query(
         `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, 'member_request')
         ON DUPLICATE KEY UPDATE type = IF(type IS null, 'member_request', type)`,
         [groupId, user.userId]
       );
+
+      const userIds = [
+        ...(
+          await connection.query(
+            `
+            SELECT user_id FROM group_user_relationships
+            WHERE type = 'admin' AND group_id = ?
+          `,
+            [groupId]
+          )
+        )[0].map(({ creator_user_id }: { creator_user_id: number }) => {
+          return creator_user_id;
+        }),
+        ...(
+          await connection.query(
+            `
+            SELECT creator_user_id FROM groups
+            group_id = ?
+          `,
+            [groupId]
+          )
+        )[0][0]['creator_user_id'],
+      ];
+
+      const userName = (
+        await connection.query(
+          `
+            SELECT user_name FROM users
+            WHERE user_id = ?
+          `,
+          [user.userId]
+        )
+      );
+
+      const groupName = (
+        await connection.query(
+          `SELECT name FROM groups
+          WHERE group_id = ?`
+        )
+      )[0][0].name;
+
+      await sendNotifications(
+        {
+          userIds,
+          title: `${userName} sent a member request to ${groupName}`,
+          urlPath: `/group-members/${groupId}`,
+        },
+        context
+      );
+
       return true;
     },
     async acceptMemberRequest(
       _: any,
       { groupId, userId }: { groupId: number; userId: number },
-      { connection }: Context
+      context: Context,
     ) {
+      const { connection } = context;
+
       await connection.query(
         `UPDATE group_user_relationships SET type = 'member' WHERE user_id = ? AND group_id = ? AND type = 'member_request'`,
         [userId, groupId]
       );
+
+      const groupName = (
+        await connection.query(
+          `SELECT name FROM groups
+          WHERE group_id = ?`
+        )
+      )[0][0].name;
+
+      await sendNotifications(
+        {
+          userIds: [userId],
+          title: `Your member request has been accepted in ${groupName}`,
+          urlPath: `/group/${groupId}`,
+        },
+        context
+      );
+
       return true;
     },
     async rejectMemberRequest(
       _: any,
       { groupId, userId }: { groupId: number; userId: number },
-      { connection }: Context
+      context: Context
     ) {
+      const { connection } = context;
+
       await connection.query(
         `UPDATE group_user_relationships SET type = 'member_request_rejected' WHERE user_id = ? AND group_id = ? AND type = 'member_request'`,
         [userId, groupId]
       );
+
+      const groupName = (
+        await connection.query(
+          `SELECT name FROM groups
+          WHERE group_id = ?`
+        )
+      )[0][0].name;
+
+      await sendNotifications(
+        {
+          userIds: [userId],
+          title: `Your member request has been rejected in ${groupName}`,
+          urlPath: `/group-info/${groupId}`,
+        },
+        context
+      );
+
       return true;
     },
     async leaveGroup(
       _: any,
       { groupId }: { groupId: number },
-      {
-        user,
-        connection,
-      }: Context
+      { user, connection }: Context
     ) {
       await connection.query(
         `UPDATE group_user_relationships SET type = null WHERE user_id = ? AND group_id = ? AND (type = 'admin' OR type = 'member')`,
@@ -427,10 +625,7 @@ const resolvers = {
     async cancelMemberRequest(
       _: any,
       { groupId }: { groupId: number },
-      {
-        user,
-        connection,
-      }: Context
+      { user, connection }: Context
     ) {
       await connection.query(
         `UPDATE group_user_relationships SET type = null WHERE user_id = ? AND group_id = ? AND (type = 'member_request')`,
@@ -441,22 +636,39 @@ const resolvers = {
     async kickUser(
       _: any,
       { groupId, userId }: { groupId: number; userId: number },
-      { connection }: Context
+      context: Context
     ) {
+      const { connection } = context;
+
       await connection.query(
         `UPDATE group_user_relationships SET type = null WHERE user_id = ? AND group_id = ? AND (type = 'member' OR type = 'admin')`,
         [userId, groupId]
       );
+
+      const groupName = (
+        await connection.query(
+          `SELECT name FROM groups
+          WHERE group_id = ?`
+        )
+      )[0][0].name;
+
+      await sendNotifications(
+        {
+          userIds: [userId],
+          title: `You has been kicked from ${groupName}`,
+          description: `Kick doesn't mean ban: try to send a member request`,
+          urlPath: `/group-info/${groupId}`,
+        },
+        context
+      );
+
       return true;
     },
 
     async setNotificationFrequency(
       _: any,
       { groupId, frequency }: { groupId: number; frequency: string },
-      {
-        user,
-        connection,
-      }: Context
+      { user, connection }: Context
     ) {
       await connection.query(
         `UPDATE group_user_relationships SET notification_frequency = ? WHERE user_id = ? AND group_id = ?`,
