@@ -20,14 +20,6 @@ import { useQuery, gql } from '@apollo/client';
 import React from 'react';
 import { Editor } from './components/Editor/Editor';
 
-const ME_QUERY = gql`
-  query {
-    me {
-      userId
-    }
-  }
-`;
-
 // This context stores the user ID of the current user
 export const UserContext = React.createContext<
   MeQueryGQLData['me'] | undefined
@@ -76,20 +68,20 @@ export function App() {
 
   const { me } = data!;
 
+  me.notifications.forEach((notification) => {
+    console.log(notification);
+  });
+
   return (
     <Router>
       <UserContext.Provider value={me}>
         <Editor />
         <Routes>
           <Route path='/group/:groupId' element={<GroupPage />} />
-          <Route path='/group/:groupId/:messageId' element={<GroupPage />} />
+          <Route path='/group/:groupId/message/:messageId' element={<GroupPage />} />
+          <Route path='group/:groupId/info' element={<GroupInfoPage />} />
           <Route
-            path='/group/:groupId/:messageId/:maxDepth'
-            element={<GroupPage />}
-          />
-          <Route path='group-info/:groupId' element={<GroupInfoPage />} />
-          <Route
-            path='group-members/:groupId'
+            path='group/:groupId/members-admin'
             element={<GroupMembersAdministrationPage />}
           />
           <Route path='/user/:userId' element={<UserPage />} />
@@ -105,8 +97,28 @@ export function App() {
   );
 }
 
+const ME_QUERY = gql`
+  query {
+    me {
+      userId
+      notifications(showAll: false) {
+        notificationId
+        title
+        description
+        urlPath
+      }
+    }
+  }
+`;
+
 type MeQueryGQLData = {
   me: {
     userId: string;
+    notifications: {
+      notificationId: string;
+      title: string;
+      description: string;
+      urlPath: string;
+    }[];
   };
 };

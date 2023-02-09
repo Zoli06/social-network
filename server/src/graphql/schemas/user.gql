@@ -56,7 +56,7 @@ type User {
   userRelationships: [UserUserRelationship!]! # all relationships
   myRelationshipWithUser: UserUserRelationship!
   profileImage: Media
-  notifications: [Notification!]!
+  notifications(showAll: Boolean!): [Notification!]!
 }
 
 input UserInput {

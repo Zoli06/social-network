@@ -2,6 +2,7 @@ import User from './user';
 import GraphemeSplitter from 'grapheme-splitter';
 import { Context } from '../context';
 import { sendNotifications } from '../helpers/notifications';
+import { deleteMessageAndReplies } from '../helpers/message';
 
 const {
   Query: { user: getUser },
@@ -300,7 +301,7 @@ const resolvers = {
         ])
       )[0][0];
 
-      const userIdsToNotify = (
+      const memberUserIdsToNotify = (
         await connection.query(
           `SELECT group_user_relationships.user_id, notification_frequency FROM group_user_relationships
           JOIN users ON group_user_relationships.user_id = users.user_id
@@ -322,13 +323,32 @@ const resolvers = {
         }
       ).map(({ user_id: userId }: { user_id: number }) => userId);
 
-      if (userIdsToNotify.length > 0) {
+      const groupName = (
+        await connection.query(
+          `SELECT name FROM \`groups\` WHERE group_id = ?`,
+          [createdMessage.group_id]
+        )
+      )[0][0].name;
+
+      if (memberUserIdsToNotify.length > 0) {
         await sendNotifications(
           {
-            userIds: userIdsToNotify,
-            title: `New message in ${createdMessage.group_id}`,
+            userIds: memberUserIdsToNotify,
+            title: `New message in ${groupName}`,
             description: text,
-            urlPath: `/group/${createdMessage.group_id}/${createdMessage.message_id}`
+            urlPath: `/group/${createdMessage.group_id}/message/${createdMessage.message_id}`
+          },
+          context
+        );
+      }
+
+      if (mentionedUserIds?.length > 0) {
+        await sendNotifications(
+          {
+            userIds: mentionedUserIds,
+            title: `You were mentioned in ${groupName}`,
+            description: text,
+            urlPath: `/group/${createdMessage.group_id}/message/${createdMessage.message_id}`
           },
           context
         );
@@ -402,51 +422,7 @@ const resolvers = {
         )
       )[0][0].group_id;
 
-      let messagesToDelete: string[] = [];
-
-      const findMessagesToDeleteRecursively = async (messageId: number) => {
-        messagesToDelete.push(messageId.toString());
-        const responses = (
-          await connection.query(
-            `SELECT message_id FROM messages WHERE response_to_message_id = ? `,
-            [messageId]
-          )
-        )[0];
-        if (responses.length > 0) {
-          for (const response of responses) {
-            await findMessagesToDeleteRecursively(response.message_id);
-          }
-        }
-      };
-
-      await findMessagesToDeleteRecursively(messageId);
-
-      //TODO: maybe we can execute the first three query simultaneously
-      await connection.query(`DELETE FROM reactions WHERE message_id IN (?) `, [
-        messagesToDelete,
-      ]);
-
-      await connection.query(
-        `DELETE FROM mentioned_users WHERE message_id IN (?) `,
-        [messagesToDelete]
-      );
-
-      await connection.query(
-        `DELETE FROM message_medias WHERE message_id IN (?) `,
-        [messagesToDelete]
-      );
-
-      await connection.query(`DELETE FROM votes WHERE message_id IN (?) `, [
-        messagesToDelete,
-      ]);
-
-      messagesToDelete = messagesToDelete.reverse();
-
-      for (const message of messagesToDelete) {
-        await connection.query(`DELETE FROM messages WHERE message_id = ? `, [
-          message,
-        ]);
-      }
+      const messagesToDelete = await deleteMessageAndReplies(messageId, connection);
 
       pubsub.publish(`MESSAGES_DELETED_${groupId}`, {
         messagesDeleted: messagesToDelete,
@@ -504,7 +480,7 @@ const resolvers = {
           userIds: [userId],
           title: 'New reaction',
           description: `${userName} reacted to your message`,
-          urlPath: `/groups/${reaction.group_id}/${messageId}`,
+          urlPath: `/groups/${reaction.group_id}/message/${messageId}`,
         },
         context
       );
@@ -517,16 +493,20 @@ const resolvers = {
       context: Context
     ) {
       const { connection, user, pubsub } = context;
+
+      const existingVotes = (await connection.query(`
+        SELECT * FROM votes WHERE message_id = ?`,
+        [messageId]
+      ))[0];
+
+      const willNotify = existingVotes.length === 0;
+
       await connection.query(
         `INSERT INTO votes(user_id, message_id, type) VALUES(:userId, :messageId, :type)
         ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,
         { userId: user.userId, messageId, type }
       );
-      const vote = await resolvers.Message.vote(
-        { message_id: messageId },
-        {},
-        context
-      );
+
       pubsub.publish(`MESSAGE_VOTED_${messageId}`, {
         messageVoted: {
           // don't use await here
@@ -543,20 +523,35 @@ const resolvers = {
         },
       });
 
-      const userName = (
-        await connection.query(
-          `SELECT user_name FROM users WHERE user_id = ?`,
-          [user.userId]
-        )
-      )[0][0].user_name;
+      if (willNotify) {
+        const message = (
+          await connection.query(
+            `SELECT user_id, group_id FROM messages WHERE message_id = ?`,
+            [messageId]
+          )
+        )[0][0];
 
-      await sendNotifications(
-        {
-          userIds: [vote.user_id],
-          title: 'New vote',
-          description: `${userName} voted to your message`,
-          urlPath: `/groups/${vote.group_id}/${messageId}`,
-        },
+        const userName = (
+          await connection.query(
+            `SELECT user_name FROM users WHERE user_id = ?`,
+            [user.userId]
+          )
+        )[0][0].user_name;
+
+        await sendNotifications(
+          {
+            userIds: [message.user_id],
+            title: 'New vote on your message',
+            description: `${userName} voted to your message`,
+            urlPath: `/groups/${message.group_id}/message/${messageId}`,
+          },
+          context
+        );
+      }
+
+      const vote = resolvers.Message.vote(
+        { message_id: messageId },
+        {},
         context
       );
 

@@ -18,7 +18,7 @@ export const sendNotifications = async (
 
   await connection.query(
     `
-      INSERT INTO notification_user_connections (notification_id, user_id)
+      INSERT INTO user_notifications (notification_id, user_id)
       VALUES ?
     `,
     [userIds.map((userId) => [notificationId, userId])]

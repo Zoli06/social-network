@@ -21,23 +21,17 @@ export const GroupMembers = ({ className = '', group }: GroupMembersProps) => {
     bannedUsers,
     invitedUsers,
     myRelationshipWithGroup: { type: myRelationShipWithGroupType },
-    creatorUser: { userId: creatorUserId },
+    creatorUser,
   } = group;
-  // const userList = [
-  //   ...members,
-  //   ..._admins,
-  //   ...(memberRequests || []),
-  //   ...(rejectedUsers || []),
-  //   ...(bannedUsers || []),
-  //   ...(invitedUsers || []),
-  // ];
+  const creatorUserId = creatorUser.userId;
   const { userId: loggedInUserId } = React.useContext(UserContext)!;
 
   const admins = _admins.filter((admin) => admin.userId !== creatorUserId);
-  const creatorUser = _admins.find((admin) => admin.userId === creatorUserId)!;
 
   const isAdmin = myRelationShipWithGroupType === 'admin';
   const isGroupCreator = creatorUserId === loggedInUserId;
+
+  const isAdminOrGroupCreator = isAdmin || isGroupCreator;
 
   return (
     <div className={`group-members ${className}`}>
@@ -69,7 +63,7 @@ export const GroupMembers = ({ className = '', group }: GroupMembersProps) => {
         members.map((user) => (
           <div className='element' key={'GroupMemberElement' + user.userId}>
             <GroupMemberElement user={user} />
-            {isAdmin &&
+            {isAdminOrGroupCreator &&
               memberRequests &&
               rejectedUsers &&
               bannedUsers &&
@@ -83,7 +77,7 @@ export const GroupMembers = ({ className = '', group }: GroupMembersProps) => {
           <p>No members</p>
         </div>
       )}
-      {isAdmin &&
+      {isAdminOrGroupCreator &&
         memberRequests &&
         rejectedUsers &&
         bannedUsers &&
@@ -97,7 +91,7 @@ export const GroupMembers = ({ className = '', group }: GroupMembersProps) => {
                   key={'GroupMemberElement' + user.userId}
                 >
                   <GroupMemberElement user={user} />
-                  {isAdmin && (
+                  {isAdminOrGroupCreator && (
                     <GroupMemberModify
                       group={group as any}
                       userId={user.userId}
@@ -135,7 +129,7 @@ export const GroupMembers = ({ className = '', group }: GroupMembersProps) => {
                   key={'GroupMemberElement' + user.userId}
                 >
                   <GroupMemberElement user={user} />
-                  {isAdmin && (
+                  {isAdminOrGroupCreator && (
                     <GroupMemberModify
                       group={group as any}
                       userId={user.userId}
@@ -170,7 +164,6 @@ export const GroupMembers = ({ className = '', group }: GroupMembersProps) => {
   );
 };
 
-// TODO: move this back to dictionary
 const groupAsMember = gql`
   fragment GroupMembers on Group {
     groupId
@@ -190,6 +183,7 @@ const groupAsMember = gql`
 
     creatorUser {
       userId
+      ...GroupMemberElement
     }
   }
 
@@ -215,6 +209,7 @@ const groupAsAdmin = gql`
 
     creatorUser {
       userId
+      ...GroupMemberElement
     }
 
     memberRequests {
@@ -269,9 +264,7 @@ export type GroupMembersGQLData = {
       | 'invited'
       | null;
   };
-  creatorUser: {
-    userId: string;
-  };
+  creatorUser: UserRelationShipWithGroup;
 };
 
 type GroupMembersProps = {

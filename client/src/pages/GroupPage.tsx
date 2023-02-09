@@ -1,12 +1,15 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { Group } from '../components/Group/Group';
 
 export const GroupPage = () => {
-  const { groupId, messageId, maxDepth } = useParams < {
+  const { groupId, messageId } = useParams < {
     groupId: string;
     messageId?: string;
-    maxDepth?: string;
   }>();
+
+  const [searchParams] = useSearchParams();
+  const maxDepth = searchParams.get('max-depth');
+
   return (
     <>
       {groupId && (

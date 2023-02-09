@@ -19,7 +19,6 @@ export default {
     lastName: isAuthenticated,
     middleName: isAuthenticated,
     userName: isAuthenticated,
-    // TODO: Maybe email and mobileNumber should be hidden from other users. Consider that
     mobileNumber: and(isAuthenticated),
     email: and(isAuthenticated),
     registratedAt: isAuthenticated,

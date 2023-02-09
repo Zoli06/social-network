@@ -191,7 +191,7 @@ const resolvers = {
       // TODO: auto update updated_at in database
       await connection.query(
         `UPDATE notifications as n
-        JOIN notification_user_connections as nuc
+        JOIN user_notifications as nuc
         ON nuc.notification_id = n.notification_id
         SET is_seen = 1, updated_at = DEFAULT
         WHERE n.notification_id = ?`,
@@ -415,15 +415,16 @@ const resolvers = {
     },
     async notifications(
       { user_id }: { user_id: number },
-      _: any,
+      { showAll }: { showAll: boolean },
       { connection }: Context
     ) {
       return (
         await connection.query(
           `SELECT * FROM notifications as n
-          JOIN notification_user_connections as nuc
+          JOIN user_notifications as nuc
           ON n.notification_id = nuc.notification_id
-          WHERE user_id = ?`,
+          WHERE user_id = ? ${showAll ? '' : 'AND nuc.is_seen = 0'}
+          ORDER BY created_at DESC`,
           [user_id]
         )
       )[0];

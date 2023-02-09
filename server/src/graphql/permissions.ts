@@ -30,15 +30,4 @@ export default shield(permissions as unknown as ShieldRule, {
         );
         return true;
       }),
-  // // copilot shut up
-  // // also typescript shut up too
-  // // @ts-ignore
-  // async fallbackError(thrownThing, parent, args, context, info) {
-  //   console.log(thrownThing);
-  //   // TODO: find a more elegant way to return other fields if a field rule fails
-  //   // Apollo client set data to undefined if an error is thrown
-  //   return `Error in field '${camelCase(
-  //     info.fieldName
-  //   )}': ${thrownThing}. This behaviour is temporary and invalid`;
-  // },
 });

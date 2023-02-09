@@ -62,7 +62,6 @@ type Mutation {
   updateGroup(groupId: ID!, group: GroupInput!): Group
   deleteGroup(groupId: ID!): ID
 
-  # TODO: add admin request
   sendGroupInvitation(groupId: ID!, userId: ID!): Boolean
   acceptGroupInvitation(groupId: ID!): Boolean
   rejectGroupInvitation(groupId: ID!): Boolean

@@ -156,8 +156,6 @@ const findNotificationId = async (
 export const isGroupCreator = rule()(async (parent, args, ctx, info) => {
   // If rule applied on Group type, groupId is in args.groupId
   // If rule applied on Message type, groupId is in args.group.groupId
-  // TODO: Find a better way to do this
-  // TODO: If there is no better way, add more supported types
   // Done in the same way in isGroupAdmin, isGroupMember
   const groupId = await findGroupId(args, parent, ctx.connection);
   const {
@@ -347,7 +345,7 @@ export const isGroupVisibleToUser = rule()(async (parent, args, ctx, info) => {
         WHERE group_id = ? AND user_id = ?`,
         [groupId, userId]
       )
-    )[0][0]['type'];
+    )[0][0]?.type;
 
     if (
       ['invited', 'member', 'admin'].includes(relationshipType) ||
@@ -371,7 +369,7 @@ export const isUserCheckingOwnNotification = rule()(
     const notification = (
       await connection.query(
         `SELECT * FROM notifications as n
-        JOIN notification_user_connections as nuc
+        JOIN user_notifications as nuc
         ON n.notification_id = nuc.notification_id
         WHERE n.notification_id = ?
         `,

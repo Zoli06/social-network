@@ -4,7 +4,6 @@ import { gql } from "@apollo/client";
 import MDEditor from "@uiw/react-md-editor";
 import rehypeSanitize from "rehype-sanitize";
 
-// TODO: make this code DRY
 export let openEditor = (
   _onSubmit: OnSubmit,
   _textValue?: string

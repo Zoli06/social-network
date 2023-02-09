@@ -12,7 +12,6 @@ import {
 
 export default {
   Query: {
-    // TODO: implement private groups
     group: and(isAuthenticated, isGroupVisibleToUser)
   },
   Mutation: {
@@ -90,7 +89,7 @@ export default {
     // type: isAuthenticated,
     // createdAt: isAuthenticated,
     // updatedAt: isAuthenticated
-    // TODO: fix this per
+    // TODO: fix this
     '*': isAuthenticated
   },
 };

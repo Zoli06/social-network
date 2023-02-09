@@ -2,6 +2,8 @@ import User from './user';
 import Message from './message';
 import { Context } from '../context';
 import { sendNotifications } from '../helpers/notifications';
+import { deleteGroup } from '../helpers/group';
+import { title } from 'process';
 const { user: getUser } = User.Query;
 const { message: getMessage } = Message.Query;
 const { responseTree: getMessageResponseTree } = Message.Message;
@@ -220,8 +222,9 @@ const resolvers = {
     async group(
       _: any,
       { groupId }: { groupId: number },
-      { connection }: Context
+      context: Context
     ) {
+      const { connection } = context;
       const group = (
         await connection.query(`SELECT * FROM \`groups\` WHERE group_id = ?`, [
           groupId,
@@ -275,9 +278,12 @@ const resolvers = {
     ) {
       const { connection } = context;
 
-      const groupName = connection.query(
-        `SELECT name FROM groups
-          WHERE group_id = ?`
+      const groupName = (
+        await connection.query(
+          `SELECT name FROM \`groups\`
+          WHERE group_id = ?`,
+          [groupId]
+        )
       )[0][0].name;
 
       const userIds = (
@@ -286,13 +292,9 @@ const resolvers = {
           WHERE (type = 'member' OR type = 'admin') AND group_id = ?`,
           [groupId]
         )
-      )[0].map((relationship: any) => relationship.user_id);
+      )[0].map(({ user_id }: {user_id: number}) => user_id);
 
-      // BUG: this won't work because of foreign key constraints
-      // TODO: introduce a soft delete
-      await connection.query(`DELETE FROM \`groups\` WHERE group_id = ?`, [
-        groupId,
-      ]);
+      await deleteGroup(groupId, connection);
 
       await sendNotifications(
         {
@@ -325,16 +327,19 @@ const resolvers = {
         [user.userId]
       )[0][0].user_name;
 
-      const groupName = connection.query(
-        `SELECT name FROM groups
-          WHERE group_id = ?`
+      const groupName = (
+        await connection.query(
+          `SELECT name FROM \`groups\`
+          WHERE group_id = ?`,
+          [groupId]
+        )
       )[0][0].name;
 
       await sendNotifications(
         {
           userIds: [userId],
           title: `${userName} sent you an invitation to ${groupName}`,
-          urlPath: `/group-info/${groupId}`,
+          urlPath: `/group/${groupId}/info`,
         },
         context
       );
@@ -379,8 +384,9 @@ const resolvers = {
 
       const groupName = (
         await connection.query(
-          `SELECT name FROM groups
-          WHERE group_id = ?`
+          `SELECT name FROM \`groups\`
+          WHERE group_id = ?`,
+          [groupId]
         )
       )[0][0].name;
 
@@ -388,7 +394,7 @@ const resolvers = {
         {
           userIds: [userId],
           title: `You has been banned from ${groupName}`,
-          urlPath: `/group-info/${groupId}`,
+          urlPath: `/group/${groupId}/info`,
         },
         context
       );
@@ -409,8 +415,9 @@ const resolvers = {
 
       const groupName = (
         await connection.query(
-          `SELECT name FROM groups
-          WHERE group_id = ?`
+          `SELECT name FROM \`groups\`
+          WHERE group_id = ?`,
+          [groupId]
         )
       )[0][0].name;
 
@@ -420,8 +427,8 @@ const resolvers = {
           title: `You has been unbanned from ${groupName}`,
           description:
             'You can now send a member request and see if the admins let you go back',
-          urlPath: `/group-info/${groupId}`,
-        },
+            urlPath: `/group/${groupId}/info`,
+          },
         context
       );
 
@@ -441,8 +448,9 @@ const resolvers = {
 
       const groupName = (
         await connection.query(
-          `SELECT name FROM groups
-          WHERE group_id = ?`
+          `SELECT name FROM \`groups\`
+          WHERE group_id = ?`,
+          [groupId]
         )
       )[0][0].name;
 
@@ -450,7 +458,7 @@ const resolvers = {
         {
           userIds: [userId],
           title: `You are now an admin in ${groupName}`,
-          urlPath: `/group-info/${groupId}`,
+          urlPath: `/group/${groupId}/info`,
         },
         context
       );
@@ -471,8 +479,9 @@ const resolvers = {
 
       const groupName = (
         await connection.query(
-          `SELECT name FROM groups
-          WHERE group_id = ?`
+          `SELECT name FROM \`groups\`
+          WHERE group_id = ?`,
+          [groupId]
         )
       )[0][0].name;
 
@@ -480,7 +489,7 @@ const resolvers = {
         {
           userIds: [userId],
           title: `You are no longer an admin in ${groupName}`,
-          urlPath: `/group-info/${groupId}`,
+          urlPath: `/group/${groupId}/info`,
         },
         context
       );
@@ -515,7 +524,7 @@ const resolvers = {
         ...(
           await connection.query(
             `
-            SELECT creator_user_id FROM groups
+            SELECT creator_user_id FROM \`groups\`
             group_id = ?
           `,
             [groupId]
@@ -523,20 +532,19 @@ const resolvers = {
         )[0][0]['creator_user_id'],
       ];
 
-      const userName = (
-        await connection.query(
-          `
+      const userName = await connection.query(
+        `
             SELECT user_name FROM users
             WHERE user_id = ?
           `,
-          [user.userId]
-        )
+        [user.userId]
       );
 
       const groupName = (
         await connection.query(
-          `SELECT name FROM groups
-          WHERE group_id = ?`
+          `SELECT name FROM \`groups\`
+          WHERE group_id = ?`,
+          [groupId]
         )
       )[0][0].name;
 
@@ -544,7 +552,7 @@ const resolvers = {
         {
           userIds,
           title: `${userName} sent a member request to ${groupName}`,
-          urlPath: `/group-members/${groupId}`,
+          urlPath: `/group/${groupId}/members-admin`,
         },
         context
       );
@@ -554,7 +562,7 @@ const resolvers = {
     async acceptMemberRequest(
       _: any,
       { groupId, userId }: { groupId: number; userId: number },
-      context: Context,
+      context: Context
     ) {
       const { connection } = context;
 
@@ -565,8 +573,9 @@ const resolvers = {
 
       const groupName = (
         await connection.query(
-          `SELECT name FROM groups
-          WHERE group_id = ?`
+          `SELECT name FROM \`groups\`
+          WHERE group_id = ?`,
+          [groupId]
         )
       )[0][0].name;
 
@@ -595,8 +604,9 @@ const resolvers = {
 
       const groupName = (
         await connection.query(
-          `SELECT name FROM groups
-          WHERE group_id = ?`
+          `SELECT name FROM \`groups\`
+          WHERE group_id = ?`,
+          [groupId]
         )
       )[0][0].name;
 
@@ -604,7 +614,7 @@ const resolvers = {
         {
           userIds: [userId],
           title: `Your member request has been rejected in ${groupName}`,
-          urlPath: `/group-info/${groupId}`,
+          urlPath: `/group/${groupId}/info`,
         },
         context
       );
@@ -647,8 +657,9 @@ const resolvers = {
 
       const groupName = (
         await connection.query(
-          `SELECT name FROM groups
-          WHERE group_id = ?`
+          `SELECT name FROM \`groups\`
+          WHERE group_id = ?`,
+          [groupId]
         )
       )[0][0].name;
 
@@ -657,7 +668,7 @@ const resolvers = {
           userIds: [userId],
           title: `You has been kicked from ${groupName}`,
           description: `Kick doesn't mean ban: try to send a member request`,
-          urlPath: `/group-info/${groupId}`,
+          urlPath: `/group/${groupId}/info`,
         },
         context
       );

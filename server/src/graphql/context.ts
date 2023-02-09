@@ -19,8 +19,6 @@ const getUser = (token: string) => {
         return jwt.verify(token, process.env.JWT_SECRET!) as object;
       } catch (err) {
         if (process.env.NODE_ENV === 'development' && isNumeric(token))
-          // XXX: BREAKING CHANGE! id renamed to userId!
-          // TODO: Find dependent functions and update them
           return { userId: parseInt(token) };
       }
     }

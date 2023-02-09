@@ -1,4 +1,5 @@
 import { Context } from "../context";
+import { deleteMedia } from "../helpers/media";
 
 const resolvers = {
   Media: {
@@ -51,9 +52,8 @@ const resolvers = {
       { mediaId }: { mediaId: number },
       { connection }: Context
     ) {
-      await connection.query(`DELETE FROM medias WHERE media_id = ?`, [
-        mediaId,
-      ]);
+      await deleteMedia(mediaId, connection);
+
       return mediaId;
     },
   },
