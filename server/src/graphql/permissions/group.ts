@@ -7,7 +7,7 @@ import {
   isInvitedToGroup,
   isBannedFromGroup,
   didUserSentMemberRequest,
-  isGroupVisibleToUser
+  isGroupVisibleToUser,
 } from './rules';
 
 export default {
@@ -47,7 +47,7 @@ export default {
     leaveGroup: and(isAuthenticated, race(isGroupMember, isGroupAdmin)),
     kickUser: and(isAuthenticated, race(isGroupAdmin, isGroupCreator)),
 
-    setNotificationFrequency: and(isAuthenticated, isGroupMember),
+    setNotificationFrequency: and(isAuthenticated, race(isGroupMember, isGroupAdmin, isGroupCreator))
   },
   Group: {
     groupId: isAuthenticated,

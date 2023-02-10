@@ -160,7 +160,7 @@ const resolvers = {
           WHERE group_id = ? AND user_id = ?`,
           [group_id, user.userId]
         )
-      )[0][0];
+      )[0][0].notification_frequency;
     },
     async userRelationshipWithGroup(
       { group_id }: { group_id: number },
@@ -193,7 +193,7 @@ const resolvers = {
       } else {
         return {
           type: 'none',
-          notification_frequency: 'none',
+          notification_frequency: 'off',
           group: {},
           user: {},
         };
@@ -249,6 +249,10 @@ const resolvers = {
           [user.userId, name, visibility, description]
         )
       )[0].insertId;
+      await connection.query(
+        `INSERT INTO group_user_relationships (group_id, user_id, type) VALUES (?, ?, 'admin')`,
+        [groupId, user.userId]
+      );
       return await resolvers.Query.group({}, { groupId }, context);
     },
     async updateGroup(
@@ -682,10 +686,12 @@ const resolvers = {
       { user, connection }: Context
     ) {
       await connection.query(
-        `UPDATE group_user_relationships SET notification_frequency = ? WHERE user_id = ? AND group_id = ?`,
+        `UPDATE group_user_relationships
+        SET notification_frequency = ?, updated_at = DEFAULT
+        WHERE user_id = ? AND group_id = ?`,
         [frequency, user.userId, groupId]
       );
-      return true;
+      return frequency;
     },
   },
 };

@@ -314,7 +314,7 @@ const resolvers = {
           notification_frequency: notificationFrequency,
         }: {
           user_id: number;
-          notification_frequency: 'frequent' | 'low' | 'none';
+          notification_frequency: 'frequent' | 'low' | 'off';
           }) => {
           const willNotify =
             notificationFrequency === 'frequent' ||

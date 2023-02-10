@@ -19,6 +19,7 @@ import { GroupInfoPage } from './pages/GroupInfoPage';
 import { useQuery, gql } from '@apollo/client';
 import React from 'react';
 import { Editor } from './components/Editor/Editor';
+import { Header, HeaderGQLData } from './components/Header/Header';
 
 // This context stores the user ID of the current user
 export const UserContext = React.createContext<
@@ -68,14 +69,11 @@ export function App() {
 
   const { me } = data!;
 
-  me.notifications.forEach((notification) => {
-    console.log(notification);
-  });
-
   return (
     <Router>
       <UserContext.Provider value={me}>
         <Editor />
+        <Header user={me} />
         <Routes>
           <Route path='/group/:groupId' element={<GroupPage />} />
           <Route path='/group/:groupId/message/:messageId' element={<GroupPage />} />
@@ -98,27 +96,18 @@ export function App() {
 }
 
 const ME_QUERY = gql`
-  query {
+  query MeQuery {
     me {
       userId
-      notifications(showAll: false) {
-        notificationId
-        title
-        description
-        urlPath
-      }
+      ...Header
     }
   }
+
+  ${Header.fragments.user}
 `;
 
 type MeQueryGQLData = {
   me: {
     userId: string;
-    notifications: {
-      notificationId: string;
-      title: string;
-      description: string;
-      urlPath: string;
-    }[];
-  };
+  } & HeaderGQLData;
 };

@@ -296,10 +296,6 @@ export const isUserViewingOwnThing = rule()(async (parent, args, ctx, info) => {
   const viewedUserId = await findUserId(args, parent, ctx.connection);
   const { userId } = ctx.user;
 
-  // if (userId !== viewedUserId) {
-  //   console.log(parent, args);
-  //   console.log('isUserViewingOwnThing', false);
-  // }
   return userId === viewedUserId;
 });
 
@@ -366,18 +362,18 @@ export const isUserCheckingOwnNotification = rule()(
 
     const notificationId = await findNotificationId(args, parent, connection);
 
-    const notification = (
+    const notificationUserIds = (
       await connection.query(
-        `SELECT * FROM notifications as n
+        `SELECT nuc.user_id FROM notifications as n
         JOIN user_notifications as nuc
         ON n.notification_id = nuc.notification_id
         WHERE n.notification_id = ?
         `,
         [notificationId]
       )
-    )[0][0];
+    )[0].map((n: { user_id: number }) => n.user_id);
 
-    if (notification.user_id === userId) {
+    if (notificationUserIds.includes(userId)) {
       return true;
     }
 

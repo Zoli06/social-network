@@ -193,7 +193,7 @@ const resolvers = {
         `UPDATE notifications as n
         JOIN user_notifications as nuc
         ON nuc.notification_id = n.notification_id
-        SET is_seen = 1, updated_at = DEFAULT
+        SET seen_at = NOW(), updated_at = DEFAULT
         WHERE n.notification_id = ?`,
         [notificationId, user.userId]
       );
@@ -423,7 +423,7 @@ const resolvers = {
           `SELECT * FROM notifications as n
           JOIN user_notifications as nuc
           ON n.notification_id = nuc.notification_id
-          WHERE user_id = ? ${showAll ? '' : 'AND nuc.is_seen = 0'}
+          WHERE user_id = ? ${showAll ? '' : 'AND nuc.seen_at IS NULL'}
           ORDER BY created_at DESC`,
           [user_id]
         )

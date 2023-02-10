@@ -40,7 +40,7 @@ type Group {
   invitedUsers: [User!]!
   admins: [User!]!
   rejectedUsers: [User!]!
-  notificationFrequency: NotificationFrequency
+  notificationFrequency: NotificationFrequency!
   description: String
   visibility: Visibility!
   userRelationshipWithGroup(userId: ID): GroupUserRelationship!
@@ -79,5 +79,5 @@ type Mutation {
   setNotificationFrequency(
     groupId: ID!
     frequency: NotificationFrequency!
-  ): Boolean
+  ): NotificationFrequency!
 }

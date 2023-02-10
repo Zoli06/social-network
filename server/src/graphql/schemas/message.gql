@@ -16,11 +16,6 @@ type Reaction {
   type: Int!
 }
 
-input MediaInput {
-  url: String!
-  caption: String
-}
-
 type Message {
   messageId: ID!
   group: Group!
