@@ -1,24 +1,24 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { App } from "./App";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { App } from './App';
 import {
   ApolloClient,
   InMemoryCache,
   ApolloProvider,
   createHttpLink,
   split,
-} from "@apollo/client";
-import { getMainDefinition } from "@apollo/client/utilities";
-import { setContext } from "@apollo/client/link/context";
-import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
-import { createClient } from "graphql-ws";
+} from '@apollo/client';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { setContext } from '@apollo/client/link/context';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import { createClient } from 'graphql-ws';
 
 const getAuthToken = () => {
   // production code
   // const token = localStorage.getItem('token');
 
   // temp code
-  let token = localStorage.getItem("token");
+  let token = localStorage.getItem('token');
   // if (!token) token = "45";
   return token;
 };
@@ -42,7 +42,7 @@ const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
-      authorization: token ? `Bearer ${token}` : "",
+      authorization: token ? `Bearer ${token}` : '',
     },
   };
 });
@@ -51,8 +51,8 @@ const splitLink = split(
   ({ query }) => {
     const definition = getMainDefinition(query);
     return (
-      definition.kind === "OperationDefinition" &&
-      definition.operation === "subscription"
+      definition.kind === 'OperationDefinition' &&
+      definition.operation === 'subscription'
     );
   },
   wsLink,
@@ -72,23 +72,26 @@ export const cache = new InMemoryCache({
     mediaId: string;
     messageId: string;
     userId: string;
+    privateMessageId: string;
   }) => {
     switch (__typename) {
-      case "Group":
+      case 'Group':
         return rest.groupId;
-      case "Media":
+      case 'Media':
         return rest.mediaId;
-      case "Message":
+      case 'Message':
         return rest.messageId;
-      case "User":
+      case 'User':
         return rest.userId;
+      case 'PrivateMessage':
+        return rest.privateMessageId;
       default:
         return id;
     }
   },
   typePolicies: {
     Message: {
-      keyFields: ["messageId"],
+      keyFields: ['messageId'],
       fields: {
         reactions: {
           merge(_existing, incoming) {
@@ -98,7 +101,7 @@ export const cache = new InMemoryCache({
       },
     },
     Group: {
-      keyFields: ["groupId"],
+      keyFields: ['groupId'],
       fields: {
         messages: {
           merge(_existing, incoming) {
@@ -108,40 +111,40 @@ export const cache = new InMemoryCache({
         members: {
           merge(_existing, incoming) {
             return incoming;
-          }
+          },
         },
         memberRequests: {
           merge(_existing, incoming) {
             return incoming;
-          }
+          },
         },
         bannedUsers: {
           merge(_existing, incoming) {
             return incoming;
-          }
+          },
         },
         invitedUsers: {
           merge(_existing, incoming) {
             return incoming;
-          }
+          },
         },
         admins: {
           merge(_existing, incoming) {
             return incoming;
-          }
+          },
         },
         rejectedUsers: {
           merge(_existing, incoming) {
             return incoming;
-          }
+          },
         },
       },
     },
     Media: {
-      keyFields: ["mediaId"],
+      keyFields: ['mediaId'],
     },
     User: {
-      keyFields: ["userId"],
+      keyFields: ['userId'],
     },
     Subscription: {
       fields: {
@@ -161,7 +164,7 @@ export const client = new ApolloClient({
 });
 
 const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
+  document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>

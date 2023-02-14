@@ -74,4 +74,8 @@ export default {
     updatedAt: isAuthenticated,
     type: isAuthenticated,
   },
+  VoteChange: {
+    upVotes: isAuthenticated,
+    downVotes: isAuthenticated,
+  },
 };

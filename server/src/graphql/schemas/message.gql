@@ -53,13 +53,13 @@ input MessageEditInput {
 }
 
 type Query {
-  message(messageId: ID!): Message
+  message(messageId: ID!): Message!
 }
 
 type Mutation {
-  sendMessage(message: MessageInput!): Message
-  editMessage(message: MessageEditInput!): Message
-  deleteMessage(messageId: ID!): [ID!]
+  sendMessage(message: MessageInput!): Message!
+  editMessage(message: MessageEditInput!): Message!
+  deleteMessage(messageId: ID!): [ID!]!
   createReaction(messageId: ID!, type: Int): Reaction # also can be used to delete and update
   createVote(messageId: ID!, type: VoteType): VoteType # also can be used to delete and update
 }

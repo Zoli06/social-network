@@ -1,6 +1,6 @@
 import jsonwebtoken from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { Context } from '../context';
+import context, { Context } from '../context';
 
 const resolvers = {
   Query: {
@@ -209,11 +209,10 @@ const resolvers = {
         ...(await this.blockedUsers(parent, _, context)),
       ];
     },
-    async friends(
-      { user_id }: { user_id: number },
-      _: any,
-      { connection }: Context
-    ) {
+    async friends({ user_id }: { user_id: number }, _: any, context: Context) {
+      const { connection } = context;
+      const me = await resolvers.Query.me({}, {}, context);
+
       return (
         await connection.query(
           `SELECT users.*, uur1.*, LEAST(uur1.created_at, uur2.created_at) AS real_created_at, GREATEST(uur1.updated_at, uur2.updated_at) AS real_updated_at
@@ -236,19 +235,27 @@ const resolvers = {
           type: any;
           real_created_at: any;
           real_updated_at: any;
-        }) => ({
-          user: record,
-          type: record.type,
-          created_at: record.real_created_at,
-          updated_at: record.real_updated_at,
-        })
+        }) => {
+          console.log(record);
+
+          return {
+            target_user: record,
+            point_of_view_user: me,
+            type: record.type,
+            created_at: record.real_created_at,
+            updated_at: record.real_updated_at,
+          };
+        }
       );
     },
     async incomingFriendRequests(
       { user_id }: { user_id: number },
       _: any,
-      { connection }: Context
+      context: Context
     ) {
+      const { connection } = context;
+      const me = await resolvers.Query.me({}, {}, context);
+
       return (
         await connection.query(
           `SELECT *
@@ -271,7 +278,8 @@ const resolvers = {
           created_at: any;
           updated_at: any;
         }) => ({
-          user: record,
+          target_user: record,
+          point_of_view_user: me,
           type: 'incoming_friend_request',
           created_at: record.created_at,
           updated_at: record.updated_at,
@@ -281,8 +289,11 @@ const resolvers = {
     async outgoingFriendRequests(
       { user_id }: { user_id: number },
       _: any,
-      { connection }: Context
+      context: Context
     ) {
+      const { connection } = context;
+      const me = await resolvers.Query.me({}, {}, context);
+
       return (
         await connection.query(
           `SELECT *
@@ -305,7 +316,8 @@ const resolvers = {
           created_at: any;
           updated_at: any;
         }) => ({
-          user: record,
+          target_user: record,
+          point_of_view_user: me,
           type: 'outgoing_friend_request',
           created_at: record.created_at,
           updated_at: record.updated_at,
@@ -315,8 +327,11 @@ const resolvers = {
     async blockedUsers(
       { user_id }: { user_id: number },
       _: any,
-      { connection }: Context
+      context: Context
     ) {
+      const { connection } = context;
+      const me = await resolvers.Query.me({}, {}, context);
+
       return (
         await connection.query(
           `SELECT *
@@ -333,7 +348,8 @@ const resolvers = {
           created_at: any;
           updated_at: any;
         }) => ({
-          user: record,
+          target_user: record,
+          point_of_view_user: me,
           type: record.type,
           created_at: record.created_at,
           updated_at: record.updated_at,
@@ -358,10 +374,13 @@ const resolvers = {
       const relationship2 = (
         await connection.query(query, [user_id, user.userId])
       )[0][0];
+      const createdAt1 = relationship1?.created_at;
+      const createdAt2 = relationship2?.created_at;
+
       const type1 = relationship1?.type;
       const type2 = relationship2?.type;
-      const updated_at1 = relationship1?.updated_at;
-      const updated_at2 = relationship2?.updated_at;
+      const updatedAt1 = relationship1?.updated_at;
+      const updatedAt2 = relationship2?.updated_at;
 
       let type;
       if (type1 === 'friend' && type2 === 'friend') {
@@ -373,13 +392,13 @@ const resolvers = {
       } else if (
         type1 === 'friend' &&
         type2 !== 'blocked' &&
-        (updated_at1 > updated_at2 || updated_at2 === undefined)
+        (updatedAt1 > updatedAt2 || updatedAt2 === undefined)
       ) {
         type = 'outgoing_friend_request';
       } else if (
         type2 === 'friend' &&
         type1 !== 'blocked' &&
-        (updated_at2 > updated_at1 || updated_at1 === undefined)
+        (updatedAt2 > updatedAt1 || updatedAt1 === undefined)
       ) {
         type = 'incoming_friend_request';
       } else {
@@ -388,15 +407,14 @@ const resolvers = {
 
       return {
         type,
-        created_at: Math.min(
-          relationship1?.created_at,
-          relationship2?.created_at
+        created_at: Math.min(createdAt1, createdAt2),
+        updated_at: Math.max(updatedAt1, updatedAt2),
+        target_user: await resolvers.Query.user(
+          {},
+          { userId: user_id },
+          context
         ),
-        updated_at: Math.max(
-          relationship1?.updated_at,
-          relationship2?.updated_at
-        ),
-        user: resolvers.Query.user({}, { userId: user_id }, context),
+        point_of_view_user: await resolvers.Query.me({}, {}, context),
       };
     },
     async profileImage(
@@ -426,6 +444,22 @@ const resolvers = {
           WHERE user_id = ? ${showAll ? '' : 'AND nuc.seen_at IS NULL'}
           ORDER BY created_at DESC`,
           [user_id]
+        )
+      )[0];
+    },
+    async myPrivateMessagesWithUser(
+      { user_id }: { user_id: number },
+      _: any,
+      context: Context
+    ) {
+      const { user, connection } = context;
+
+      return (
+        await connection.query(
+          `SELECT * FROM private_messages
+        WHERE (sender_user_id = ? AND receiver_user_id = ?) OR (sender_user_id = ? AND receiver_user_id = ?)
+        ORDER BY created_at ASC`,
+          [user.userId, user_id, user_id, user.userId]
         )
       )[0];
     },

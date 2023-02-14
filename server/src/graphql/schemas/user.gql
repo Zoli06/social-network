@@ -13,9 +13,9 @@ enum UserUserRelationshipInputType {
   none
 }
 
-# TODO: add the other user too
 type UserUserRelationship {
-  user: User!
+  targetUser: User!
+  pointOfViewUser: User!
   type: UserUserRelationshipType!
   createdAt: Date!
   updatedAt: Date!
@@ -57,6 +57,7 @@ type User {
   myRelationshipWithUser: UserUserRelationship!
   profileImage: Media
   notifications(showAll: Boolean!): [Notification!]!
+  myPrivateMessagesWithUser: [PrivateMessage!]!
 }
 
 input UserInput {
@@ -84,17 +85,17 @@ input UserUpdateInput {
 }
 
 type Query {
-  user(userId: ID!): User
-  me: User
+  user(userId: ID!): User!
+  me: User!
 }
 
 type Mutation {
-  register(user: UserInput!): AuthPayload
-  login(email: String!, password: String!): AuthPayload
-  updateUser(user: UserUpdateInput!): User # user only can update his/her own profile
+  register(user: UserInput!): AuthPayload!
+  login(email: String!, password: String!): AuthPayload!
+  updateUser(user: UserUpdateInput!): User! # user only can update his/her own profile
   createUserUserRelationship(
     userId: ID!
     type: UserUserRelationshipInputType
-  ): UserUserRelationship # also can be used to delete and update
-  checkNotification(notificationId: ID!): Boolean
+  ): UserUserRelationship! # also can be used to delete and update
+  checkNotification(notificationId: ID!): Boolean!
 }

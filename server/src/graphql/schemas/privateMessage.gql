@@ -1,0 +1,34 @@
+type PrivateMessage {
+  privateMessageId: ID!
+  senderUser: User!
+  receiverUser: User!
+  text: String!
+  createdAt: Date!
+  updatedAt: Date!
+}
+
+input PrivateMessageInput {
+  receiverUserId: ID!
+  text: String!
+}
+
+input PrivateMessageEditInput {
+  privateMessageId: ID!
+  text: String!
+}
+
+type Query {
+  privateMessage(privateMessageId: ID!): PrivateMessage!
+}
+
+type Mutation {
+  sendPrivateMessage(privateMessage: PrivateMessageInput!): PrivateMessage!
+  editPrivateMessage(privateMessage: PrivateMessageEditInput!): PrivateMessage!
+  deletePrivateMessage(privateMessageId: ID!): Boolean!
+}
+
+type Subscription {
+  privateMessageAdded(senderUserId: ID!): ID!
+  privateMessageEdited(senderUserId: ID!): ID!
+  privateMessageDeleted(senderUserId: ID!): ID!
+}

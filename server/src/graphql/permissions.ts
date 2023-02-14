@@ -5,6 +5,7 @@ import groupPermissions from './permissions/group';
 import messagePermissions from './permissions/message';
 import mediaPermissions from './permissions/media';
 import userPermissions from './permissions/user';
+import privateMessagePermissions from './permissions/privateMessage';
 import { ShieldRule } from 'graphql-shield/typings/types';
 
 const { NODE_ENV } = process.env;
@@ -13,7 +14,8 @@ const permissions = merge(
   groupPermissions,
   messagePermissions,
   mediaPermissions,
-  userPermissions
+  userPermissions,
+  privateMessagePermissions
 );
 const isProduction = NODE_ENV === 'production';
 

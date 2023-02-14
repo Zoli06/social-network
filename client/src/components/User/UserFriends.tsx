@@ -7,9 +7,9 @@ export const UserFriends = ({ user: { friends } }: UserFriendsProps) => {
     <div className='friends-list-container'>
       {friends.length > 0 ? <h3>Friends</h3> : <h3>No friends</h3>}
       <div className='friends-list'>
-        {friends?.map(({ user }) => (
-          <div className='friend' key={user.userId}>
-            <UserCard user={user} />
+        {friends?.map(({ targetUser }) => (
+          <div className='friend' key={targetUser.userId}>
+            <UserCard user={targetUser} />
             </div>
         ))}
       </div>
@@ -22,7 +22,7 @@ UserFriends.fragments = {
     fragment UserFriends on User {
       userId
       friends {
-        user {
+        targetUser {
           ...UserCard
         }
       }
@@ -35,7 +35,7 @@ UserFriends.fragments = {
 export type UserFriendsGQLData = {
   userId: string;
   friends: {
-    user: UserCardGQLData;
+    targetUser: UserCardGQLData;
   }[];
 };
 

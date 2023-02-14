@@ -1,5 +1,5 @@
-import { Context } from "../context";
-import { deleteMedia } from "../helpers/media";
+import { Context } from '../context';
+import { deleteMedia } from '../helpers/media';
 
 const resolvers = {
   Media: {

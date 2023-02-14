@@ -28,6 +28,42 @@ const getUser = (token: string) => {
   }
 };
 
+type Notification = {
+  userIds: number[];
+  title: string;
+  description?: string;
+  urlPath: string;
+};
+
+const sendNotifications = async (
+  { userIds, title, description, urlPath }: Notification
+) => {
+  // convert connection to any to avoid type errors
+  const _connection = connection as any;
+
+  const result = (
+    await _connection.query(
+      `
+      INSERT INTO notifications (title, description, url_path)
+      VALUES (?, ?, ?)
+    `,
+      [title, description, urlPath]
+    )
+  )[0];
+
+  const notificationId = result.insertId;
+
+  await _connection.query(
+    `
+      INSERT INTO user_notifications (notification_id, user_id)
+      VALUES ?
+    `,
+    [userIds.map((userId) => [notificationId, userId])]
+  );
+
+  return true;
+};
+
 const context = ({
   req,
   connectionParams,
@@ -38,6 +74,7 @@ const context = ({
   user: { isAuthenticated: boolean; authenticate: () => void; userId: number };
   connection: any;
   pubsub: PubSub;
+  sendNotifications: (notification: Notification) => Promise<boolean>;
 } => {
   const token = (
     req?.get('Authorization') ||
@@ -46,12 +83,12 @@ const context = ({
   )
     .replace('Bearer', '')
     .trim();
-  
+
   const user = getUser(token) as { userId: number } | null;
   const isAuthenticated = !!user;
   return {
     user: {
-      ...user? user : { userId: -1 },
+      ...(user ? user : { userId: -1 }),
       isAuthenticated,
       // TODO: remove this
       authenticate: () => {
@@ -60,6 +97,7 @@ const context = ({
     },
     connection,
     pubsub,
+    sendNotifications,
   };
 };
 

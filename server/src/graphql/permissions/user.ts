@@ -32,6 +32,7 @@ export default {
     myRelationshipWithUser: and(isAuthenticated),
     profileImage: isAuthenticated,
     notifications: and(isAuthenticated, isUserViewingOwnThing),
+    myPrivateMessagesWithUser: isAuthenticated,
   },
   // TODO: do todo in user.gql then write permissions for this field
   UserUserRelationship: {

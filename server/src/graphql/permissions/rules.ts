@@ -153,6 +153,36 @@ const findNotificationId = async (
   return notificationId;
 };
 
+const findPrivateMessageId = async(
+  args: {
+    private_message_id?: number;
+    privateMessageId?: number;
+    privateMessage?: {
+      private_message_id?: number;
+      privateMessageId?: number;
+    };
+  },
+  parent: {
+    private_message_id?: number;
+    privateMessageId?: number;
+    privateMessage?: {
+      private_message_id?: number;
+      privateMessageId?: number;
+    };
+  },
+) => {
+  const privateMessageId =
+    args?.privateMessageId ||
+    args?.privateMessage?.privateMessageId ||
+    parent?.private_message_id ||
+    parent?.privateMessage?.private_message_id ||
+    args.private_message_id ||
+    args.privateMessage?.private_message_id ||
+    parent?.privateMessageId ||
+    parent?.privateMessage?.privateMessageId;
+  return privateMessageId;
+}
+
 export const isGroupCreator = rule()(async (parent, args, ctx, info) => {
   // If rule applied on Group type, groupId is in args.groupId
   // If rule applied on Message type, groupId is in args.group.groupId
@@ -374,6 +404,61 @@ export const isUserCheckingOwnNotification = rule()(
     )[0].map((n: { user_id: number }) => n.user_id);
 
     if (notificationUserIds.includes(userId)) {
+      return true;
+    }
+
+    return false;
+  }
+);
+
+export const isUserViewingOwnPrivateMessage = rule()(
+  async (parent, args, ctx, info) => {
+    const { connection } = ctx;
+    const { userId } = ctx.user;
+
+    const privateMessageId = await findPrivateMessageId(
+      args,
+      parent
+    );
+
+    const privateMessage = (
+      await connection.query(
+        `SELECT sender_user_id, receiver_user_id FROM private_messages
+        WHERE private_message_id = ?`,
+        [privateMessageId]
+      )
+    )[0][0];
+
+    if (
+      privateMessage.sender_user_id === userId ||
+      privateMessage.receiver_user_id === userId
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+);
+
+export const isPrivateMessageReceiverFriend = rule()(
+  async (parent, args, ctx, info) => {
+    const { connection } = ctx;
+    const { userId } = ctx.user;
+
+    const { receiverUserId } = args.privateMessage;
+    
+    const relationships = (
+      await connection.query(
+        `SELECT type FROM user_user_relationships
+        WHERE initiating_user_id = ? AND target_user_id = ?
+        OR initiating_user_id = ? AND target_user_id = ?`,
+        [userId, receiverUserId, receiverUserId, userId]
+      )
+    )[0];
+
+    if (relationships.length !== 2) return false;
+
+    if (relationships[0].type && relationships[1].type) {
       return true;
     }
 

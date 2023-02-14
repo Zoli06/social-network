@@ -1,7 +1,6 @@
 import User from './user';
 import GraphemeSplitter from 'grapheme-splitter';
 import { Context } from '../context';
-import { sendNotifications } from '../helpers/notifications';
 import { deleteMessageAndReplies } from '../helpers/message';
 
 const {
@@ -261,7 +260,7 @@ const resolvers = {
       },
       context: Context
     ) {
-      const { user, connection, pubsub } = context;
+      const { user, connection, pubsub, sendNotifications } = context;
 
       if (responseToMessageId != null) {
         // TODO: lot's of sql query like this, maybe we should make a helper function
@@ -308,20 +307,22 @@ const resolvers = {
           WHERE group_id = ?`,
           [createdMessage.group_id]
         )
-      )[0].filter(
-        ({
-          user_id: userId,
-          notification_frequency: notificationFrequency,
-        }: {
-          user_id: number;
-          notification_frequency: 'frequent' | 'low' | 'off';
+      )[0]
+        .filter(
+          ({
+            user_id: userId,
+            notification_frequency: notificationFrequency,
+          }: {
+            user_id: number;
+            notification_frequency: 'frequent' | 'low' | 'off';
           }) => {
-          const willNotify =
-            notificationFrequency === 'frequent' ||
-            (notificationFrequency === 'low' && Math.random() < 0.2)
-          return willNotify && userId !== user.userId;
-        }
-      ).map(({ user_id: userId }: { user_id: number }) => userId);
+            const willNotify =
+              notificationFrequency === 'frequent' ||
+              (notificationFrequency === 'low' && Math.random() < 0.2);
+            return willNotify && userId !== user.userId;
+          }
+        )
+        .map(({ user_id: userId }: { user_id: number }) => userId);
 
       const groupName = (
         await connection.query(
@@ -331,27 +332,21 @@ const resolvers = {
       )[0][0].name;
 
       if (memberUserIdsToNotify.length > 0) {
-        await sendNotifications(
-          {
-            userIds: memberUserIdsToNotify,
-            title: `New message in ${groupName}`,
-            description: text,
-            urlPath: `/group/${createdMessage.group_id}/message/${createdMessage.message_id}`
-          },
-          context
-        );
+        await sendNotifications({
+          userIds: memberUserIdsToNotify,
+          title: `New message in ${groupName}`,
+          description: text,
+          urlPath: `/group/${createdMessage.group_id}/message/${createdMessage.message_id}`,
+        });
       }
 
       if (mentionedUserIds?.length > 0) {
-        await sendNotifications(
-          {
-            userIds: mentionedUserIds,
-            title: `You were mentioned in ${groupName}`,
-            description: text,
-            urlPath: `/group/${createdMessage.group_id}/message/${createdMessage.message_id}`
-          },
-          context
-        );
+        await sendNotifications({
+          userIds: mentionedUserIds,
+          title: `You were mentioned in ${groupName}`,
+          description: text,
+          urlPath: `/group/${createdMessage.group_id}/message/${createdMessage.message_id}`,
+        });
       }
 
       return createdMessage;
@@ -422,7 +417,10 @@ const resolvers = {
         )
       )[0][0].group_id;
 
-      const messagesToDelete = await deleteMessageAndReplies(messageId, connection);
+      const messagesToDelete = await deleteMessageAndReplies(
+        messageId,
+        connection
+      );
 
       pubsub.publish(`MESSAGES_DELETED_${groupId}`, {
         messagesDeleted: messagesToDelete,
@@ -434,7 +432,7 @@ const resolvers = {
       { messageId, type }: { messageId: number; type: number },
       context: Context
     ) {
-      const { connection, user, pubsub } = context;
+      const { connection, user, pubsub, sendNotifications } = context;
       const emoji = type ? String.fromCodePoint(type) : null;
       if (
         emoji != null &&
@@ -448,11 +446,7 @@ const resolvers = {
         ON DUPLICATE KEY UPDATE type = :type, updated_at = DEFAULT`,
         { userId: user.userId, messageId, type }
       );
-      const reaction = await resolvers.Message.reaction(
-        { message_id: messageId },
-        {},
-        context
-      );
+
       pubsub.publish(`MESSAGE_REACTED_${messageId}`, {
         messageReacted: resolvers.Message.reactions(
           { message_id: messageId },
@@ -461,29 +455,34 @@ const resolvers = {
         ),
       });
 
-      const userName = (
-        await connection.query(
-          `SELECT user_name FROM users WHERE user_id = ?`,
-          [user.userId]
-        )
-      )[0][0].user_name;
+      const reaction = await resolvers.Message.reaction(
+        { message_id: messageId },
+        {},
+        context
+      );
 
-      const userId = (
-        await connection.query(
-          `SELECT user_id FROM messages WHERE message_id = ?`,
-          [messageId]
-        )
-      )[0][0].user_id;
+      if (type !== null) {
+        const userName = (
+          await connection.query(
+            `SELECT user_name FROM users WHERE user_id = ?`,
+            [user.userId]
+          )
+        )[0][0].user_name;
 
-      await sendNotifications(
-        {
+        const userId = (
+          await connection.query(
+            `SELECT user_id FROM messages WHERE message_id = ?`,
+            [messageId]
+          )
+        )[0][0].user_id;
+
+        await sendNotifications({
           userIds: [userId],
           title: 'New reaction',
           description: `${userName} reacted to your message`,
           urlPath: `/groups/${reaction.group_id}/message/${messageId}`,
-        },
-        context
-      );
+        });
+      }
 
       return reaction;
     },
@@ -492,12 +491,15 @@ const resolvers = {
       { messageId, type }: { messageId: number; type: number },
       context: Context
     ) {
-      const { connection, user, pubsub } = context;
+      const { connection, user, pubsub, sendNotifications } = context;
 
-      const existingVotes = (await connection.query(`
+      const existingVotes = (
+        await connection.query(
+          `
         SELECT * FROM votes WHERE message_id = ?`,
-        [messageId]
-      ))[0];
+          [messageId]
+        )
+      )[0];
 
       const willNotify = existingVotes.length === 0;
 
@@ -538,15 +540,12 @@ const resolvers = {
           )
         )[0][0].user_name;
 
-        await sendNotifications(
-          {
-            userIds: [message.user_id],
-            title: 'New vote on your message',
-            description: `${userName} voted to your message`,
-            urlPath: `/groups/${message.group_id}/message/${messageId}`,
-          },
-          context
-        );
+        await sendNotifications({
+          userIds: [message.user_id],
+          title: 'New vote on your message',
+          description: `${userName} voted to your message`,
+          urlPath: `/groups/${message.group_id}/message/${messageId}`,
+        });
       }
 
       const vote = resolvers.Message.vote(
