@@ -1,7 +1,5 @@
-import './Login.scss';
 import { gql, useMutation } from '@apollo/client';
 import React from 'react';
-// daisyui
 import { Input, Button } from 'react-daisyui';
 
 const LOGIN_MUTATION = gql`
