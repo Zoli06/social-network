@@ -14,13 +14,11 @@ export const Login = () => {
   const [login] = useMutation<LoginMutationGQLData, LoginMutationGQLVariables>(
     LOGIN_MUTATION
   );
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    // TODO: trace value with state
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('email');
-    const password = formData.get('password');
 
     if (typeof email === 'string' && typeof password === 'string') {
       // get the token from the server
@@ -49,31 +47,43 @@ export const Login = () => {
     //   <a href='/register'>Register</a>
     // </form>
 
-    <form
-      className='flex component-preview p-4 items-center justify-center gap-2 font-sans'
-      onSubmit={handleSubmit}
-    >
-      <div className='form-control w-full max-w-xs flex flex-col gap-2'>
-        <div>
-          <h1 className='text-3xl font-bold'>Login</h1>
+    <div>
+      <h1 className='text-3xl font-bold'>Login</h1>
+      <form
+        className='flex items-center justify-center gap-2'
+        onSubmit={handleSubmit}
+      >
+        <div className='form-control max-w-xs'>
           <label className='label'>
             <span className='label-text'>Email address</span>
           </label>
-          <Input type='email' name='email' id='email' />
+          <Input
+            type='email'
+            name='email'
+            id='email'
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
           <label className='label'>
             <span className='label-text'>Password</span>
           </label>
-          <Input type='password' name='password' id='password' />
-        </div>
+          <Input
+            type='password'
+            name='password'
+            id='password'
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-        <div>
-          <Button type='submit' className='w-full btn-primary'>
-            Login
-          </Button>
-          <a href='/register'>Register</a>
+          <div className='py-2'>
+            <Button type='submit' className='w-full btn-primary'>
+              Login
+            </Button>
+            <a href='/register' className='hover:underline'>Register</a>
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 };
 
