@@ -2,7 +2,6 @@ import User from './user';
 import Message from './message';
 import { Context } from '../context';
 import { deleteGroup } from '../helpers/group';
-import { title } from 'process';
 const { user: getUser } = User.Query;
 const { message: getMessage } = Message.Query;
 const { responseTree: getMessageResponseTree } = Message.Message;
@@ -191,12 +190,36 @@ const resolvers = {
         return relationship;
       } else {
         return {
-          type: 'none',
+          type: null,
           notification_frequency: 'off',
           group: {},
           user: {},
         };
       }
+    },
+    async indexImage(
+      { group_id }: { group_id: number },
+      _: any,
+      { connection }: Context
+    ) {
+      return (await connection.query(
+        `SELECT * FROM \`groups\`
+        JOIN medias
+        ON index_image_media_id = media_id
+        WHERE group_id = ?`
+      , [group_id]))[0][0]
+    },
+    async bannerImage(
+      { group_id }: { group_id: number },
+      _: any,
+      { connection }: Context
+    ) {
+      return (await connection.query(
+        `SELECT * FROM \`groups\`
+        JOIN medias
+        ON index_image_media_id = media_id
+        WHERE group_id = ?`
+      , [group_id]))[0][0]
     },
   },
   GroupUserRelationship: {
@@ -227,6 +250,19 @@ const resolvers = {
       )[0][0];
 
       return group;
+    },
+    async searchGroups(
+      _: any,
+      { query }: { query: string },
+      { connection }: Context
+    ) {
+      return (
+        await connection.query(
+          `SELECT * FROM \`groups\`
+          WHERE MATCH (name, description) AGAINST (? IN NATURAL LANGUAGE MODE)`,
+          [query]
+        )
+      )[0];
     },
   },
   Mutation: {
@@ -490,7 +526,7 @@ const resolvers = {
         [groupId, user.userId]
       );
 
-      const userIds = [
+      const userIds = [...new Set([
         ...(
           await connection.query(
             `
@@ -499,27 +535,27 @@ const resolvers = {
           `,
             [groupId]
           )
-        )[0].map(({ creator_user_id }: { creator_user_id: number }) => {
-          return creator_user_id;
+        )[0].map(({ user_id }: { user_id: number }) => {
+          return user_id;
         }),
-        ...(
+        (
           await connection.query(
             `
-            SELECT creator_user_id FROM \`groups\`
-            group_id = ?
+            SELECT created_by_user_id FROM \`groups\`
+            WHERE group_id = ?
           `,
             [groupId]
           )
-        )[0][0]['creator_user_id'],
-      ];
+        )[0][0]['created_by_user_id'],
+      ])];
 
-      const userName = await connection.query(
+      const userName = (await connection.query(
         `
             SELECT user_name FROM users
             WHERE user_id = ?
           `,
         [user.userId]
-      );
+      ))[0][0]['user_name'];
 
       const groupName = (
         await connection.query(
@@ -532,7 +568,7 @@ const resolvers = {
       await sendNotifications({
         userIds,
         title: `${userName} sent a member request to ${groupName}`,
-        urlPath: `/group/${groupId}/members-admin`,
+        urlPath: `/group/${groupId}/admin`,
       });
 
       return true;
@@ -655,7 +691,7 @@ const resolvers = {
         [frequency, user.userId, groupId]
       );
       return frequency;
-    },
+    }
   },
 };
 

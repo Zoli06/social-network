@@ -1,17 +1,17 @@
-import './UserCard.scss';
-import { ProfileImage } from './ProfileImage';
+import { ProfileImage, ProfileImageGQLData } from './ProfileImage';
 import { gql } from '@apollo/client';
 import { Link } from 'react-router-dom';
+import { Artboard } from 'react-daisyui';
 
 export const UserCard = ({ user }: UserCardProps) => {
   return (
-    <Link to={`/user/${user.userId}`} key={user.userId} className='user-card' style={{textDecoration: 'none'}}>
-      <div className='profile-image-wrapper'>
+    <Link to={`/user/${user.userId}`}>
+      <Artboard className='rounded-md cursor-pointer p-4 flex gap-2'>
         <ProfileImage user={user} />
-      </div>
-      <p className='name'>
-        {user.firstName} {user.middleName} {user.lastName}
-      </p>
+        <h1 className='text-xl font-bold'>
+          {user.firstName} {user.middleName} {user.lastName}
+        </h1>
+      </Artboard>
     </Link>
   );
 };
@@ -23,11 +23,10 @@ UserCard.fragments = {
       firstName
       lastName
       middleName
-      profileImage {
-        mediaId
-        url
-      }
+      ...ProfileImage
     }
+
+    ${ProfileImage.fragments.user}
   `,
 };
 
@@ -36,11 +35,7 @@ export type UserCardGQLData = {
   firstName: string;
   lastName: string;
   middleName: string;
-  profileImage: {
-    mediaId: string;
-    url: string;
-  };
-};
+} & ProfileImageGQLData;
 
 type UserCardProps = {
   user: UserCardGQLData;

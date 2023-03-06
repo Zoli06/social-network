@@ -2,8 +2,9 @@ import {
   isAuthenticated,
   isUserViewingOwnPrivateMessage,
   isPrivateMessageReceiverFriend,
+  isPrivateMessageDeleted
 } from './rules';
-import { and, allow } from 'graphql-shield';
+import { and, allow, not } from 'graphql-shield';
 
 export default {
   Query: {
@@ -11,8 +12,8 @@ export default {
   },
   Mutation: {
     sendPrivateMessage: and(isAuthenticated, isPrivateMessageReceiverFriend),
-    editPrivateMessage: and(isAuthenticated, isUserViewingOwnPrivateMessage),
-    deletePrivateMessage: and(isAuthenticated, isUserViewingOwnPrivateMessage),
+    editPrivateMessage: and(isAuthenticated, isUserViewingOwnPrivateMessage, not(isPrivateMessageDeleted)),
+    deletePrivateMessage: and(isAuthenticated, isUserViewingOwnPrivateMessage, not(isPrivateMessageDeleted)),
   },
   PrivateMessage: {
     '*': isAuthenticated,

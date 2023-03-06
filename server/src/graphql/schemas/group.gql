@@ -16,7 +16,6 @@ enum GroupUserRelationshipType {
   member_request
   member_request_rejected
   invited
-  none
 }
 
 type GroupUserRelationship {
@@ -45,6 +44,8 @@ type Group {
   visibility: Visibility!
   userRelationshipWithGroup(userId: ID): GroupUserRelationship!
   myRelationshipWithGroup: GroupUserRelationship!
+  indexImage: Media
+  bannerImage: Media
 }
 
 input GroupInput {
@@ -54,7 +55,8 @@ input GroupInput {
 }
 
 type Query {
-  group(groupId: ID): Group!
+  group(groupId: ID!): Group!
+  searchGroups(query: String!): [Group!]!
 }
 
 type Mutation {

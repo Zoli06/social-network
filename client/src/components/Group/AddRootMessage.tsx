@@ -1,6 +1,6 @@
-import { gql, useMutation } from "@apollo/client";
-import "./AddRootMessage.scss";
-import { openEditor } from "../Editor/Editor";
+import { gql, useMutation } from '@apollo/client';
+import { openEditor } from '../Editor/Editor';
+import { SvgButton } from '../../utilities/SvgButton';
 
 // TODO: Refactor this
 // Same code is used in MessageActions.tsx
@@ -28,10 +28,8 @@ export const AddRootMessage = ({ group }: AddRootMessageProps) => {
   };
 
   return (
-    <div className="add-root-message">
-      <svg onClick={() => openEditor(handleAddRootMessage)}>
-        <use href="/assets/images/svg-bundle.svg#plus" />
-      </svg>
+    <div className='fixed bottom-8 right-8 rounded-full border-2 border-transparent hover:border-green-500'>
+      <SvgButton icon='plus' onClick={() => openEditor(handleAddRootMessage)} customClass='!w-20 !h-20 bg-white !fill-green-500 rounded-full' />
     </div>
   );
 };
@@ -50,4 +48,4 @@ export type AddRootMessageGQLData = {
 
 type AddRootMessageProps = {
   group: AddRootMessageGQLData;
-}
+};

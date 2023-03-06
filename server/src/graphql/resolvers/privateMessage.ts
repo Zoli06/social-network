@@ -120,7 +120,7 @@ export const resolvers = {
       )[0][0];
 
       await connection.query(
-        'DELETE FROM private_messages WHERE private_message_id = ?',
+        'UPDATE private_messages SET text = "", is_deleted = 1 WHERE private_message_id = ?',
         [privateMessageId]
       );
 

@@ -46,7 +46,6 @@ type User {
   mobileNumber: String
   email: String!
   registratedAt: Date!
-  lastLoginAt: Date!
   updatedAt: Date!
   intro: String
   friends: [UserUserRelationship!]!
@@ -58,6 +57,14 @@ type User {
   profileImage: Media
   notifications(showAll: Boolean!): [Notification!]!
   myPrivateMessagesWithUser: [PrivateMessage!]!
+  groupRelationships: [GroupUserRelationship!]! # all relationships
+  createdGroups: [GroupUserRelationship!]!
+  adminOfGroups: [GroupUserRelationship!]!
+  memberOfGroups: [GroupUserRelationship!]!
+  bannedFromGroups: [GroupUserRelationship!]!
+  sentMemberRequestsToGroups: [GroupUserRelationship!]!
+  groupsRejectedMemberRequest: [GroupUserRelationship!]!
+  invitedToGroups: [GroupUserRelationship!]!
 }
 
 input UserInput {
@@ -87,12 +94,14 @@ input UserUpdateInput {
 type Query {
   user(userId: ID!): User!
   me: User!
+  searchUsers(query: String!): [User!]!
 }
 
 type Mutation {
   register(user: UserInput!): AuthPayload!
   login(email: String!, password: String!): AuthPayload!
-  updateUser(user: UserUpdateInput!): User! # user only can update his/her own profile
+  updateMe(user: UserUpdateInput!): User! # user only can update his/her own profile
+  deleteMe: Boolean!
   createUserUserRelationship(
     userId: ID!
     type: UserUserRelationshipInputType

@@ -1,5 +1,5 @@
-import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { StrictMode } from 'react';
 import { App } from './App';
 import {
   ApolloClient,
@@ -12,14 +12,10 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { setContext } from '@apollo/client/link/context';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
+import './index.scss';
 
 const getAuthToken = () => {
-  // production code
-  // const token = localStorage.getItem('token');
-
-  // temp code
-  let token = localStorage.getItem('token');
-  // if (!token) token = "45";
+  const token = localStorage.getItem('token');
   return token;
 };
 
@@ -90,6 +86,9 @@ export const cache = new InMemoryCache({
     }
   },
   typePolicies: {
+    PrivateMessage: {
+      keyFields: ['privateMessageId'],
+    },
     Message: {
       keyFields: ['messageId'],
       fields: {
@@ -145,6 +144,13 @@ export const cache = new InMemoryCache({
     },
     User: {
       keyFields: ['userId'],
+      fields: {
+        myPrivateMessagesWithUser: {
+          merge(_existing, incoming) {
+            return incoming;
+          }
+        },
+      },
     },
     Subscription: {
       fields: {
@@ -167,9 +173,9 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
-  <React.StrictMode>
+  <StrictMode>
     <ApolloProvider client={client}>
-      <App />
+        <App />
     </ApolloProvider>
-  </React.StrictMode>
+  </StrictMode>
 );

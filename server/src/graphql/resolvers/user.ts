@@ -1,6 +1,7 @@
 import jsonwebtoken from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import context, { Context } from '../context';
+import { deleteUser } from '../helpers/user';
 
 const resolvers = {
   Query: {
@@ -23,6 +24,21 @@ const resolvers = {
         context
       );
     },
+    async searchUsers(
+      _: any,
+      { query }: { query: String },
+      { connection }: Context
+    ) {
+      return (
+        await connection.query(
+          `
+            SELECT * FROM users
+            WHERE MATCH(first_name, last_name, middle_name, user_name, intro) AGAINST (? IN NATURAL LANGUAGE MODE)
+          `,
+          [query]
+        )
+      )[0];
+    }
   },
   Mutation: {
     async register(
@@ -96,10 +112,6 @@ const resolvers = {
       if (!isValid) {
         throw new Error('Incorrect password');
       }
-      await connection.query(
-        `UPDATE users SET last_login_at = DEFAULT WHERE user_id = ?`,
-        [user.user_id]
-      );
       const token = jsonwebtoken.sign(
         { userId: user.user_id },
         process.env.JWT_SECRET!,
@@ -110,7 +122,7 @@ const resolvers = {
         user,
       };
     },
-    async updateUser(
+    async updateMe(
       _: any,
       {
         user: {
@@ -164,24 +176,52 @@ const resolvers = {
       );
       return await resolvers.Query.user({}, { userId: user.userId }, context);
     },
+    async deleteMe(_: any, __: any, context: Context) {
+      const { user, connection } = context;
+      await deleteUser(user.userId, connection);
+      return true;
+    },
     async createUserUserRelationship(
       _: any,
       { userId, type }: { userId: number; type: string | null },
       context: Context
     ) {
-      const { user, connection } = context;
+      const { user, connection, sendNotifications } = context;
       if (type === 'none') type = null;
       await connection.query(
         `INSERT INTO user_user_relationships (initiating_user_id, target_user_id, type) VALUES (?, ?, ?)
         ON DUPLICATE KEY UPDATE type = ?, updated_at = DEFAULT`,
         [user.userId, userId, type, type]
       );
-      return await resolvers.User.myRelationshipWithUser(
+      const myRelationshipWithUser = await resolvers.User.myRelationshipWithUser(
         { user_id: userId },
         {},
         context
       );
-    },
+
+      const myData = await resolvers.Query.user({}, { userId: user.userId }, context);
+      console.log(myData)
+
+      if (myRelationshipWithUser.type === 'friend') {
+        await sendNotifications(
+          {
+            userIds: [userId],
+            title: `${myData.first_name} ${myData.last_name} accepted your friend request`,
+            urlPath: `/user/${user.userId}`,
+          }
+        );
+      } else if (myRelationshipWithUser.type === 'outgoing_friend_request') {
+        await sendNotifications(
+          {
+            userIds: [userId],
+            title: `${myData.first_name} ${myData.last_name} sent you a friend request`,
+            urlPath: `/user/${user.userId}`,
+          }
+        );
+      }
+
+      return myRelationshipWithUser;
+    },        
     checkNotification: async (
       _: any,
       { notificationId }: { notificationId: number },
@@ -236,8 +276,6 @@ const resolvers = {
           real_created_at: any;
           real_updated_at: any;
         }) => {
-          console.log(record);
-
           return {
             target_user: record,
             point_of_view_user: me,
@@ -463,6 +501,124 @@ const resolvers = {
         )
       )[0];
     },
+    async groupRelationships(
+      { user_id }: { user_id: number },
+      _: any,
+      { connection }: Context
+    ) {
+      return (
+        await connection.query(
+          `SELECT * FROM \`groups\` AS g
+          JOIN group_user_relationships AS gur
+          ON g.group_id = gur.group_id
+          WHERE user_id = ?`,
+          [user_id]
+        )
+      )[0];
+    },
+    async createdGroups(
+      { user_id }: { user_id: number },
+      _: any,
+      { connection }: Context
+    ) {
+      return (
+        await connection.query(
+          `SELECT * FROM \`groups\`
+          WHERE created_by_user_id = ?`,
+          [user_id]
+        )
+      )[0];
+    },
+    async memberOfGroups(
+      { user_id }: { user_id: number },
+      _: any,
+      { connection }: Context
+    ) {
+      return (
+        await connection.query(
+          `SELECT * FROM \`groups\` AS g
+          JOIN group_user_relationships AS gur
+          ON g.group_id = gur.group_id
+          WHERE user_id = ? AND type = 'member' AND visibility = 'visible'`,
+          [user_id]
+        )
+      )[0];
+    },
+    async adminOfGroups(
+      { user_id }: { user_id: number },
+      _: any,
+      { connection }: Context
+    ) {
+      return (
+        await connection.query(
+          `SELECT * FROM \`groups\` AS g
+          JOIN group_user_relationships AS gur
+          ON g.group_id = gur.group_id
+          WHERE user_id = ? AND type = 'admin' AND visibility = 'visible'`,
+          [user_id]
+        )
+      )[0];
+    },
+    async bannedFromGroups(
+      { user_id }: { user_id: number },
+      _: any,
+      { connection }: Context
+    ) {
+      return (
+        await connection.query(
+          `SELECT * FROM \`groups\` AS g
+          JOIN group_user_relationships AS gur
+          ON g.group_id = gur.group_id
+          WHERE user_id = ? AND type = 'banned' AND visibility = 'visible'`,
+          [user_id]
+        )
+      )[0];
+    },
+    async sentMemberRequestsToGroups(
+      { user_id }: { user_id: number },
+      _: any,
+      { connection }: Context
+    ) {
+      return (
+        await connection.query(
+          `SELECT * FROM \`groups\` AS g
+          JOIN group_user_relationships AS gur
+          ON g.group_id = gur.group_id
+          WHERE user_id = ? AND type = 'member_request' AND visibility = 'visible'`,
+          [user_id]
+        )
+      )[0];
+    },
+    async groupsRejectedMemberRequest(
+      { user_id }: { user_id: number },
+      _: any,
+      { connection }: Context
+    ) {
+      return (
+        await connection.query(
+          `SELECT * FROM \`groups\` AS g
+          JOIN group_user_relationships AS gur
+          ON g.group_id = gur.group_id
+          WHERE user_id = ? AND type = 'rejected_member_request' AND visibility = 'visible'`,
+          [user_id]
+        )
+      )[0];
+    },
+    async invitedToGroups(
+      { user_id }: { user_id: number },
+      _: any,
+      { connection }: Context
+    ) {
+      return (
+        await connection.query(
+          `SELECT * FROM \`groups\` AS g
+          JOIN group_user_relationships AS gur
+          ON g.group_id = gur.group_id
+          WHERE user_id = ? AND type = 'invite' AND visibility = 'visible'`,
+          [user_id]
+        )
+      )[0];
+    }
   },
   Notification: {
     user: ({ user_id }: { user_id: number }, _: any, context: Context) =>

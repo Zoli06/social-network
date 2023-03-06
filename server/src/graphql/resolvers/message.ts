@@ -480,7 +480,7 @@ const resolvers = {
           userIds: [userId],
           title: 'New reaction',
           description: `${userName} reacted to your message`,
-          urlPath: `/groups/${reaction.group_id}/message/${messageId}`,
+          urlPath: `/group/${reaction.group_id}/message/${messageId}`,
         });
       }
 
@@ -544,7 +544,7 @@ const resolvers = {
           userIds: [message.user_id],
           title: 'New vote on your message',
           description: `${userName} voted to your message`,
-          urlPath: `/groups/${message.group_id}/message/${messageId}`,
+          urlPath: `/group/${message.group_id}/message/${messageId}`,
         });
       }
 

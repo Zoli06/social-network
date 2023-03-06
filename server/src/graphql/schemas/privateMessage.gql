@@ -5,6 +5,8 @@ type PrivateMessage {
   text: String!
   createdAt: Date!
   updatedAt: Date!
+  seenAt: Date
+  isDeleted: Boolean!
 }
 
 input PrivateMessageInput {

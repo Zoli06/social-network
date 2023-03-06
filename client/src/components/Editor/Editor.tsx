@@ -1,23 +1,17 @@
-import React, { useState } from "react";
-import "./Editor.scss";
-import { gql } from "@apollo/client";
-import MDEditor from "@uiw/react-md-editor";
-import rehypeSanitize from "rehype-sanitize";
+import { useState } from 'react';
+import { gql } from '@apollo/client';
+import MDEditor from '@uiw/react-md-editor';
+import rehypeSanitize from 'rehype-sanitize';
+import { Form, Button } from 'react-daisyui';
 
-export let openEditor = (
-  _onSubmit: OnSubmit,
-  _textValue?: string
-) => {};
+export let openEditor = (_onSubmit: OnSubmit, _textValue?: string) => {};
 
 export const Editor = () => {
-  const [textValue, setTextValue] = useState("");
-  const [onSubmit, setOnSubmit] = useState<OnSubmit>(() => { })
+  const [textValue, setTextValue] = useState('');
+  const [onSubmit, setOnSubmit] = useState<OnSubmit>(() => {});
   const [displayEditor, setDisplayEditor] = useState(false);
 
-  openEditor = (
-    _onSubmit,
-    _textValue = "",
-  ) => {
+  openEditor = (_onSubmit, _textValue = '') => {
     setTextValue(_textValue);
     // Bit of hack
     // https://medium.com/swlh/how-to-store-a-function-with-the-usestate-hook-in-react-8a88dd4eede1
@@ -27,7 +21,7 @@ export const Editor = () => {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    if (textValue === "") return;
+    if (textValue === '') return;
 
     onSubmit(textValue);
 
@@ -35,40 +29,34 @@ export const Editor = () => {
   };
 
   const handleClose = () => {
-    setTextValue("");
+    setTextValue('');
     setDisplayEditor(false);
   };
 
   return displayEditor ? (
-    <div className="editor-container">
-      <form
-        onSubmit={handleSubmit}
-        className="editor"
-        id="editor"
-        name="editor"
-      >
+    <Form
+      onSubmit={handleSubmit}
+      className='fixed top-0 left-0 w-full h-full z-50 bg-black bg-opacity-50 flex flex-col justify-center items-center gap-4 p-4'
+    >
+      <div className='md:w-3/4 w-full max-w-2xl md:h-[50vh] flex-grow md:flex-grow-0'>
         <MDEditor
           value={textValue}
           // @ts-ignore
           onChange={setTextValue}
-          id="editor-text"
           previewOptions={{ rehypePlugins: [[rehypeSanitize]] }}
-          height={"50vh"}
+          preview='edit'
+          height='100%'
         />
-        <svg id="close-button" onClick={handleClose}>
-          <use href="/assets/images/svg-bundle.svg#close-button-2" />
-        </svg>
-        <label>
-          <input type="submit" style={{ display: "none" }} />
-          <svg id="submit-button">
-            <use
-              href="/assets/images/svg-bundle.svg#ok"
-              onClick={handleSubmit}
-            />
-          </svg>
-        </label>
-      </form>
-    </div>
+      </div>
+      <div className='md:w-3/4 w-full max-w-2xl grid md:grid-cols-2 grid-cols-1 gap-4'>
+        <Button onClick={handleClose} className='btn-secondary'>
+          Cancel
+        </Button>
+        <Button type='submit' className='btn-primary'>
+          Submit
+        </Button>
+      </div>
+    </Form>
   ) : (
     <></>
   );
@@ -92,4 +80,4 @@ export type EditorGQLData = {
   group: { groupId: string };
 };
 
-export type EditorProps = {};
+type EditorProps = {};

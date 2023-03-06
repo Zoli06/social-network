@@ -1,15 +1,21 @@
 import { deny, allow, and } from 'graphql-shield';
-import { isAuthenticated, isUserViewingOwnThing, isUserCheckingOwnNotification } from './rules';
+import {
+  isAuthenticated,
+  isUserViewingOwnThing,
+  isUserCheckingOwnNotification,
+} from './rules';
 
 export default {
   Query: {
     user: isAuthenticated,
     me: isAuthenticated,
+    searchUsers: isAuthenticated,
   },
   Mutation: {
     register: allow,
     login: allow,
-    updateUser: isAuthenticated,
+    updateMe: isAuthenticated,
+    deleteMe: isAuthenticated,
     createUserUserRelationship: isAuthenticated,
     checkNotification: and(isAuthenticated, isUserCheckingOwnNotification),
   },
@@ -22,7 +28,6 @@ export default {
     mobileNumber: and(isAuthenticated),
     email: and(isAuthenticated),
     registratedAt: isAuthenticated,
-    lastLoginAt: isAuthenticated,
     intro: isAuthenticated,
     friends: isAuthenticated,
     incomingFriendRequests: and(isAuthenticated, isUserViewingOwnThing),
@@ -33,10 +38,18 @@ export default {
     profileImage: isAuthenticated,
     notifications: and(isAuthenticated, isUserViewingOwnThing),
     myPrivateMessagesWithUser: isAuthenticated,
+    groupRelationships: and(isAuthenticated, isUserViewingOwnThing),
+    createdGroups: isAuthenticated,
+    adminOfGroups: isAuthenticated,
+    memberOfGroups: isAuthenticated,
+    bannedFromGroups: and(isAuthenticated, isUserViewingOwnThing),
+    sentMemberRequestsToGroups: and(isAuthenticated, isUserViewingOwnThing),
+    groupsRejectedMemberRequest: and(isAuthenticated, isUserViewingOwnThing),
+    invitedToGroups: and(isAuthenticated, isUserViewingOwnThing),
   },
   // TODO: do todo in user.gql then write permissions for this field
   UserUserRelationship: {
-    '*': isAuthenticated
+    '*': isAuthenticated,
   },
   AuthPayload: {
     token: allow,

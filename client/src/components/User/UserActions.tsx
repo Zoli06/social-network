@@ -1,6 +1,5 @@
 import { gql, useMutation } from '@apollo/client';
-import React from 'react';
-import './UserActions.scss';
+import { Button } from 'react-daisyui';
 
 const CREATE_USER_USER_RELATIONSHIP_MUTATION = gql`
   mutation CreateUserUserRelationshipMutation(
@@ -14,7 +13,9 @@ const CREATE_USER_USER_RELATIONSHIP_MUTATION = gql`
 `;
 
 export const UserActions = ({ isMe, user }: UserActionsProps) => {
-  const { myRelationshipWithUser: { type: relationshipType } } = user;
+  const {
+    myRelationshipWithUser: { type: relationshipType },
+  } = user;
   const [createUserUserRelationship] = useMutation(
     CREATE_USER_USER_RELATIONSHIP_MUTATION,
     // update cache with new relationship
@@ -89,36 +90,41 @@ export const UserActions = ({ isMe, user }: UserActionsProps) => {
   };
 
   return (
-    <div className='user-actions'>
+    <div>
       {isMe && (
-        <div className='edit-profile'>
-          <a href='/edit-profile'>Edit Profile</a>
-        </div>
+        <a href='/edit-profile'>
+          <Button>Edit Profile</Button>
+        </a>
       )}
       {!isMe && (
-        <div className='friend-actions'>
+        <div className='flex flex-col gap-2'>
           <>
             {relationshipType === 'none' && (
               <>
-                <button onClick={handleAddFriend}>Add Friend</button>
-                <button onClick={handleBlock}>Block</button>
+                <Button onClick={handleAddFriend}>Add Friend</Button>
+                <Button onClick={handleBlock}>Block</Button>
               </>
             )}
             {relationshipType === 'outgoing_friend_request' && (
-              <button onClick={handleCancelFriendRequest}>Cancel Friend Request</button>
+              <Button onClick={handleCancelFriendRequest}>
+                Cancel Friend Request
+              </Button>
             )}
             {relationshipType === 'incoming_friend_request' && (
-              <button onClick={handleAcceptFriendRequest}>Accept Friend Request</button>
+              <Button onClick={handleAcceptFriendRequest}>
+                Accept Friend Request
+              </Button>
             )}
             {relationshipType === 'friend' && (
-              <button onClick={handleRemoveFriend}>Remove Friend</button>
+              <Button onClick={handleRemoveFriend}>Remove Friend</Button>
             )}
             {relationshipType === 'outgoing_blocking' && (
-              <button onClick={handleCancelBlocking}>Cancel Blocking</button>
+              <Button onClick={handleCancelBlocking}>Cancel Blocking</Button>
             )}
             {relationshipType === 'incoming_blocking' &&
               {
                 /* Logged in user is blocked by the user */
+                /* TODO: display some text informing the user that they are blocked */
               }}
           </>
         </div>

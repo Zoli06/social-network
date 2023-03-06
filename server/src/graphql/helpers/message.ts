@@ -73,3 +73,7 @@ export const deleteAllMessagesFromGroup = async (
 
   return rootMessageIds;
 };
+
+export const deleteUserReactions = async (userId: number, connection: any) => {
+  await connection.query(`DELETE FROM reactions WHERE user_id = ?`, [userId]);
+}
