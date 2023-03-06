@@ -11,3 +11,15 @@ export const deleteMedia = async (mediaId: number, connection: any) => {
     mediaId,
   ]);
 };
+
+export const deleteUserMedias = async (userId: number, connection: any) => {
+  const medias = (
+    await connection.query(`SELECT * FROM medias WHERE user_id = ?`, [
+      userId,
+    ])
+  )[0];
+
+  for (const media of medias) {
+    await deleteMedia(media.media_id, connection);
+  }
+}

@@ -1,5 +1,4 @@
 import { rule } from 'graphql-shield';
-import context from '../context';
 
 // TODO: refactor these functions
 const findGroupId = async (
@@ -77,7 +76,6 @@ const findUserId = async (
       userId?: number;
     };
   },
-  connection: any
 ) => {
   const userId =
     args?.userId ||
@@ -108,7 +106,6 @@ const findMessageId = async (
       messageId?: number;
     };
   },
-  connection: any
 ) => {
   const messageId =
     args?.messageId ||
@@ -139,7 +136,6 @@ const findNotificationId = async (
       notificationId?: number;
     };
   },
-  connection: any
 ) => {
   const notificationId =
     args?.notificationId ||
@@ -298,7 +294,7 @@ export const isBannedFromGroup = rule()(async (parent, args, ctx, info) => {
 });
 
 export const isMessageCreator = rule()(async (parent, args, ctx, info) => {
-  const messageId = await findMessageId(args, parent, ctx.connection);
+  const messageId = await findMessageId(args, parent);
   const {
     user: { userId },
     connection,
@@ -323,7 +319,7 @@ export const isAuthenticated = rule()(async (parent, args, ctx, info) => {
 });
 
 export const isUserViewingOwnThing = rule()(async (parent, args, ctx, info) => {
-  const viewedUserId = await findUserId(args, parent, ctx.connection);
+  const viewedUserId = await findUserId(args, parent);
   const { userId } = ctx.user;
 
   return userId === viewedUserId;
@@ -390,7 +386,7 @@ export const isUserCheckingOwnNotification = rule()(
     const { connection } = ctx;
     const { userId } = ctx.user;
 
-    const notificationId = await findNotificationId(args, parent, connection);
+    const notificationId = await findNotificationId(args, parent);
 
     const notificationUserIds = (
       await connection.query(
@@ -459,6 +455,32 @@ export const isPrivateMessageReceiverFriend = rule()(
     if (relationships.length !== 2) return false;
 
     if (relationships[0].type && relationships[1].type) {
+      return true;
+    }
+
+    return false;
+  }
+);
+
+export const isPrivateMessageDeleted = rule()(
+  async (parent, args, ctx, info) => {
+    const { connection } = ctx;
+    const { userId } = ctx.user;
+
+    const privateMessageId = await findPrivateMessageId(
+      args,
+      parent
+    );
+
+    const privateMessage = (
+      await connection.query(
+        `SELECT is_deleted FROM private_messages
+        WHERE private_message_id = ?`,
+        [privateMessageId]
+      )
+    )[0][0];
+
+    if (privateMessage.is_deleted) {
       return true;
     }
 

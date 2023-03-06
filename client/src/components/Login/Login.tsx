@@ -1,6 +1,6 @@
+import { useState, FormEvent } from 'react';
 import { gql, useMutation } from '@apollo/client';
-import React from 'react';
-import { Input, Button } from 'react-daisyui';
+import { Input, Button, Link } from 'react-daisyui';
 
 const LOGIN_MUTATION = gql`
   mutation Login($email: String!, $password: String!) {
@@ -14,10 +14,10 @@ export const Login = () => {
   const [login] = useMutation<LoginMutationGQLData, LoginMutationGQLVariables>(
     LOGIN_MUTATION
   );
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (typeof email === 'string' && typeof password === 'string') {
@@ -38,23 +38,14 @@ export const Login = () => {
   };
 
   return (
-    // <form onSubmit={handleSubmit}>
-    //   <label htmlFor='email'>Email</label>
-    //   <input type='email' name='email' id='email' />
-    //   <label htmlFor='password'>Password</label>
-    //   <input type='password' name='password' id='password' />
-    //   <button type='submit'>Login</button>
-    //   <a href='/register'>Register</a>
-    // </form>
-
-    <div>
-      <h1 className='text-3xl font-bold'>Login</h1>
+    <div className='container max-w-fit bg-black/20 rounded-md p-4'>
+      <h1 className='text-3xl font-bold text-center mb-4'>Login</h1>
       <form
         className='flex items-center justify-center gap-2'
         onSubmit={handleSubmit}
       >
         <div className='form-control max-w-xs'>
-          <label className='label'>
+          <label className='label pt-0'>
             <span className='label-text'>Email address</span>
           </label>
           <Input
@@ -75,11 +66,11 @@ export const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          <div className='py-2'>
+          <div className='pt-2'>
             <Button type='submit' className='w-full btn-primary'>
               Login
             </Button>
-            <a href='/register' className='hover:underline'>Register</a>
+            <Link href='/register'>Register</Link>
           </div>
         </div>
       </form>

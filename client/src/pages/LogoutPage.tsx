@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const LogoutPage = () => {
   // delete the token from local storage
   localStorage.removeItem('token');

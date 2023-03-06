@@ -1,6 +1,6 @@
+import { useState } from 'react';
 import { gql, useMutation } from '@apollo/client';
-import React from 'react';
-import { Input, Button, Textarea } from 'react-daisyui';
+import { Input, Button, Textarea, Link } from 'react-daisyui';
 
 const REGISTER_MUTATION = gql`
   mutation Register($user: UserInput!) {
@@ -16,15 +16,15 @@ export const Register = () => {
     RegisterMutationGQLVariables
   >(REGISTER_MUTATION);
 
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [confirmPassword, setConfirmPassword] = React.useState('');
-  const [firstName, setFirstName] = React.useState('');
-  const [lastName, setLastName] = React.useState('');
-  const [middleName, setMiddleName] = React.useState('');
-  const [phone, setPhone] = React.useState('');
-  const [userName, setUsername] = React.useState('');
-  const [intro, setIntro] = React.useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [middleName, setMiddleName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [userName, setUsername] = useState('');
+  const [intro, setIntro] = useState('');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -78,30 +78,8 @@ export const Register = () => {
   };
 
   return (
-    // <form onSubmit={handleSubmit}>
-    //   <label htmlFor='email'>Email</label>
-    //   <input type='email' name='email' id='email' />
-    //   <label htmlFor='password'>Password</label>
-    //   <input type='password' name='password' id='password' />
-    //   <label htmlFor='confirmPassword'>Confirm Password</label>
-    //   <input type='password' name='confirmPassword' id='confirmPassword' />
-    //   <label htmlFor='firstName'>First Name</label>
-    //   <input type='text' name='firstName' id='firstName' />
-    //   <label htmlFor='lastName'>Last Name</label>
-    //   <input type='text' name='lastName' id='lastName' />
-    //   <label htmlFor='middleName'>Middle Name</label>
-    //   <input type='text' name='middleName' id='middleName' />
-    //   <label htmlFor='phone'>Phone</label>
-    //   <input type='tel' name='phone' id='phone' />
-    //   <label htmlFor='username'>Username</label>
-    //   <input type='text' name='username' id='username' />
-    //   <label htmlFor='intro'>Intro</label>
-    //   <textarea name='intro' id='intro' />
-    //   <button type='submit'>Register</button>
-    // </form>
-
-    <div>
-      <h1 className='text-3xl font-bold text-center mb-2'>Register</h1>
+    <div className='max-w-fit bg-black/20 rounded-md p-4'>
+      <h1 className='text-3xl font-bold text-center mb-4'>Register</h1>
       <form onSubmit={handleSubmit} className='grid md:grid-cols-2 gap-2'>
         <div className='form-control'>
           <label className='label pt-0'>
@@ -203,7 +181,7 @@ export const Register = () => {
             Register
           </Button>
           <p>
-            Already have an account? <a href='/login' className='hover:underline'>Login</a>
+            Already have an account? <Link href='/login'>Login</Link>
           </p>
         </div>
       </form>

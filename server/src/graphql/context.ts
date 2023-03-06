@@ -1,5 +1,5 @@
 import { PubSub } from 'graphql-subscriptions';
-import connection from '../db/sql_connect';
+import connection from '../db/sqlConnect';
 import * as jwt from 'jsonwebtoken';
 
 const pubsub = new PubSub();

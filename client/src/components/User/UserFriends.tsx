@@ -1,18 +1,50 @@
-import './UserFriends.scss';
 import { UserCard, UserCardGQLData } from './UserCard';
 import { gql } from '@apollo/client';
+import { useState } from 'react';
+import { Button } from 'react-daisyui';
 
 export const UserFriends = ({ user: { friends } }: UserFriendsProps) => {
+  // TODO: don't hardcode it
+  // default tailwind breakpoints
+  const breakpoints = {
+    sm: 640,
+    md: 768,
+    lg: 1024,
+    xl: 1280,
+    '2xl': 1536,
+  };
+
+  const startingMaxDisplayedFriends = (() => {
+    if (window.innerWidth >= breakpoints.lg) {
+      return 3;
+    } else if (window.innerWidth >= breakpoints.md) {
+      return 2;
+    } else {
+      return 1;
+    }
+  })();
+
+  // TODO: add pagination
+  const [maxDisplayedFriends, setMaxDisplayedFriends] = useState(startingMaxDisplayedFriends);
+
   return (
-    <div className='friends-list-container'>
-      {friends.length > 0 ? <h3>Friends</h3> : <h3>No friends</h3>}
-      <div className='friends-list'>
-        {friends?.map(({ targetUser }) => (
-          <div className='friend' key={targetUser.userId}>
-            <UserCard user={targetUser} />
-            </div>
+    <div>
+      <h1 className='text-xl font-bold'>
+        {friends.length > 0 ? 'Friends' : 'No friends'}
+      </h1>
+      <div className={`grid gap-2 grid-cols-1 ${friends.length >= 2 ? 'md:grid-cols-2' : ''} ${friends.length >= 3 ? 'lg:grid-cols-3' : ''}`}>
+        {friends?.slice(0, maxDisplayedFriends).map(({ targetUser }) => (
+          <UserCard key={targetUser.userId} user={targetUser} />
         ))}
       </div>
+      {friends?.length > maxDisplayedFriends && (
+        <Button
+          onClick={() => setMaxDisplayedFriends(maxDisplayedFriends + 5)}
+          className='w-full mt-2'
+        >
+          Load more
+        </Button>
+      )}
     </div>
   );
 };

@@ -1,18 +1,24 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { gql, useQuery } from '@apollo/client';
-import './User.scss';
 import { ProfileImage } from './ProfileImage';
 import { UserInfos, UserInfosGQLData } from './UserInfos';
 import { UserActions, UserActionsGQLData } from './UserActions';
 import { PrivateMessages, PrivateMessagesGQLData } from './PrivateMessages';
+import {
+  UserDisplayedName,
+  UserDisplayedNameGQLData,
+} from './UserDisplayedName';
 import { UserContext } from '../../App';
 
 // import { Theme, Button } from 'react-daisyui'
 
 export const User = ({ userId }: UserProps) => {
-  const { data, loading, error, subscribeToMore } = useQuery<UserQueryGQLData>(USER_QUERY, {
-    variables: { userId },
-  });
+  const { data, loading, error, subscribeToMore } = useQuery<UserQueryGQLData>(
+    USER_QUERY,
+    {
+      variables: { userId },
+    }
+  );
   const { userId: loggedInUserId } = useContext(UserContext)!;
 
   const isMe = loggedInUserId === userId;
@@ -24,22 +30,21 @@ export const User = ({ userId }: UserProps) => {
   }
 
   return (
-    <div className='user'>
-      <div className='user-actions-wrapper'>
-        <UserActions isMe={isMe} user={data!.user} />
+    <div className='flex flex-col items-center justify-center p-0 md:p-4 rounded-md max-w-2xl gap-2 md:min-w-0 min-w-full bg-black/20'>
+      <div className='w-full grid md:grid-cols-3 grid-cols-2 gap-2'>
+        {/* placeholder div */}
+        <div className='hidden md:block' />
+        <div className='flex justify-center flex-col items-center'>
+          <ProfileImage user={data!.user} />
+          <UserDisplayedName user={data!.user} />
+        </div>
+        <div className='flex justify-end'>
+          {/* TODO: move isMe to UserActions */}
+          <UserActions isMe={isMe} user={data!.user} />
+        </div>
       </div>
-      <div className='profile-image-wrapper'>
-        <ProfileImage user={data!.user} />
-      </div>
-      <div className='user-infos-wrapper'>
-        <UserInfos user={data!.user} />
-      </div>
-      <div className='private-messages-wrapper'>
-        <PrivateMessages user={data!.user} subscribeToMore={subscribeToMore} />
-      </div>
-      {/* <Theme dataTheme="dark">
-        <Button color="primary">Click me, dark!</Button>
-      </Theme> */}
+      <UserInfos user={data!.user} />
+      <PrivateMessages user={data!.user} subscribeToMore={subscribeToMore} />
     </div>
   );
 };
@@ -56,22 +61,27 @@ const USER_QUERY = gql`
       ...UserInfos
       ...UserActions
       ...PrivateMessages
+      ...UserDisplayedName
     }
   }
 
   ${UserInfos.fragments.user}
   ${UserActions.fragments.user}
   ${PrivateMessages.fragments.user}
+  ${UserDisplayedName.fragments.user}
 `;
 
 type UserQueryGQLData = {
-  user: UserInfosGQLData & UserActionsGQLData & PrivateMessagesGQLData & {
-    userId: string;
-    profileImage: {
-      mediaId: string;
-      url: string;
+  user: UserInfosGQLData &
+    UserActionsGQLData &
+    PrivateMessagesGQLData &
+    UserDisplayedNameGQLData & {
+      userId: string;
+      profileImage: {
+        mediaId: string;
+        url: string;
+      };
     };
-  };
 };
 
 type UserProps = {

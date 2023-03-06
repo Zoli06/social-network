@@ -12,7 +12,8 @@ import {
 
 export default {
   Query: {
-    group: and(isAuthenticated, isGroupVisibleToUser)
+    group: and(isAuthenticated, isGroupVisibleToUser),
+    searchGroups: isAuthenticated,
   },
   Mutation: {
     createGroup: isAuthenticated,
@@ -81,7 +82,9 @@ export default {
       isAuthenticated,
       race(isGroupAdmin, isGroupCreator)
     ),
-    myRelationshipWithGroup: isAuthenticated,
+    myRelationshipWithGroup: and(isAuthenticated, isGroupVisibleToUser),
+    indexImage: and(isAuthenticated, isGroupVisibleToUser),
+    bannerImage: and(isAuthenticated, isGroupVisibleToUser)
   },
   GroupUserRelationship: {
     // user: isAuthenticated,

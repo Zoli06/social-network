@@ -1,13 +1,10 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { gql, useLazyQuery } from '@apollo/client';
 import {
   SendPrivateMessage,
   SendPrivateMessageGQLData,
 } from './SendPrivateMessage';
-import {
-  PrivateMessageActions,
-  PrivateMessageActionsGQLData,
-} from './PrivateMessageActions';
+import { PrivateMessage, PrivateMessageGQLData } from './PrivateMessage';
 import { cache } from '../../index';
 
 const PRIVATE_MESSAGE_ADDED_SUBSCRIPTION = gql`
@@ -70,8 +67,8 @@ export const PrivateMessages = ({
     subscribeToMore({
       document: PRIVATE_MESSAGE_ADDED_SUBSCRIPTION,
       variables: { senderUserId: user.userId },
-      updateQuery: async (
-        prev: { myPrivateMessagesWithUser: any[] },
+      updateQuery: (
+        prev: { user: PrivateMessagesGQLData },
         {
           subscriptionData,
         }: { subscriptionData: { data: { privateMessageAdded: string } } }
@@ -89,8 +86,8 @@ export const PrivateMessages = ({
     subscribeToMore({
       document: PRIVATE_MESSAGE_EDITED_SUBSCRIPTION,
       variables: { senderUserId: user.userId },
-      updateQuery: async (
-        prev: { myPrivateMessagesWithUser: any[] },
+      updateQuery: (
+        prev: { user: PrivateMessagesGQLData },
         {
           subscriptionData,
         }: { subscriptionData: { data: { privateMessageEdited: string } } }
@@ -108,8 +105,8 @@ export const PrivateMessages = ({
     subscribeToMore({
       document: PRIVATE_MESSAGE_DELETED_SUBSCRIPTION,
       variables: { senderUserId: user.userId },
-      updateQuery: async (
-        prev: { myPrivateMessagesWithUser: any[] },
+      updateQuery: (
+        prev: { user: PrivateMessagesGQLData },
         {
           subscriptionData,
         }: { subscriptionData: { data: { privateMessageDeleted: string } } }
@@ -117,36 +114,41 @@ export const PrivateMessages = ({
         if (!subscriptionData.data) return prev;
         const { privateMessageDeleted } = subscriptionData.data;
 
-        return { ...prev, myPrivateMessagesWithUser: prev.myPrivateMessagesWithUser.filter((privateMessage) => privateMessage.privateMessageId !== privateMessageDeleted) };
+        // set isDeleted to true
+        return {
+          ...prev,
+          user: {
+            ...prev.user,
+            myPrivateMessagesWithUser: prev.user.myPrivateMessagesWithUser.map(
+              (privateMessage) => {
+                if (privateMessage.privateMessageId === privateMessageDeleted) {
+                  return {
+                    ...privateMessage,
+                    isDeleted: true,
+                  };
+                }
+                return privateMessage;
+              }
+            ),
+          },
+        };
       }
     });
   });
 
   return (
-    <div className='private-messages-container'>
+    <div className='w-full'>
       {user.myPrivateMessagesWithUser.length > 0 && (
-        <>
-          <h2>Private Messages</h2>
-          <ul>
+        <div>
+          <h1 className='text-xl font-bold text-center'>Private Messages</h1>
+          <div className='flex flex-col'>
             {user.myPrivateMessagesWithUser.map((privateMessage) => (
-              <li key={privateMessage.privateMessageId}>
-                <p>{privateMessage.text}</p>
-                <p>
-                  {new Date(privateMessage.createdAt).toLocaleDateString(
-                    'en-us',
-                    {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    }
-                  )}
-                </p>
-                <PrivateMessageActions privateMessage={privateMessage} />
-              </li>
+              <div key={privateMessage.privateMessageId}>
+                <PrivateMessage privateMessage={privateMessage} />
+              </div>
             ))}
-          </ul>
-        </>
+          </div>
+        </div>
       )}
       <SendPrivateMessage user={user} />
     </div>
@@ -159,15 +161,14 @@ PrivateMessages.fragments = {
       userId
       myPrivateMessagesWithUser {
         privateMessageId
-        text
-        createdAt
-        ...PrivateMessageActions
+        isDeleted
+        ...PrivateMessage
       }
       ...SendPrivateMessage
     }
 
     ${SendPrivateMessage.fragments.user}
-    ${PrivateMessageActions.fragments.privateMessage}
+    ${PrivateMessage.fragments.privateMessage}
   `,
 };
 
@@ -175,9 +176,8 @@ export type PrivateMessagesGQLData = {
   userId: string;
   myPrivateMessagesWithUser: ({
     privateMessageId: string;
-    text: string;
-    createdAt: string;
-  } & PrivateMessageActionsGQLData)[];
+    isDeleted: boolean;
+  } & PrivateMessageGQLData)[];
 } & SendPrivateMessageGQLData;
 
 type PrivateMessagesProps = {

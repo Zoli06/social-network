@@ -1,5 +1,8 @@
 {
-  "include": ["src/*", "src/pages/HomePage.tsx"],
+  "include": [
+    "**/*.tsx",
+    "**/**/*.tsx",
+  ],
   "compilerOptions": {
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",

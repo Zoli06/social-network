@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { gql, useMutation } from '@apollo/client';
 import { openEditor } from '../Editor/Editor';
 import { UserContext } from '../../App';
@@ -26,7 +26,6 @@ export const PrivateMessageActions = ({
 }: PrivateMessageActionsProps) => {
   const [editPrivateMessage] = useMutation(EDIT_PRIVATE_MESSAGE_MUTATION, {
     update(cache, { data: { editPrivateMessage: editedPrivateMessage } }) {
-      console.log(cache.identify(privateMessage));
       cache.modify({
         id: cache.identify(privateMessage),
         fields: {
@@ -39,14 +38,21 @@ export const PrivateMessageActions = ({
   });
   const [deletePrivateMessage] = useMutation(DELETE_PRIVATE_MESSAGE_MUTATION, {
     update(cache) {
-      cache.evict({ id: cache.identify(privateMessage) });
+      // set isDeleted to true
+      cache.modify({
+        id: cache.identify(privateMessage),
+        fields: {
+          isDeleted() {
+            return true;
+          }
+        }
+      })
     },
   });
 
-  console.log(privateMessage)
-
   const { userId } = useContext(UserContext)!;
 
+  // TODO: show icons instead text
   return (
     <div>
       {privateMessage.senderUser.userId === userId && (

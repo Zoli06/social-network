@@ -1,20 +1,16 @@
-import './GroupInfo.scss';
-
-import React from 'react';
 import { gql, useQuery } from '@apollo/client';
-import {
-  GroupMemberElement,
-  GroupMemberElementGQLData,
-} from '../Group/GroupMemberElement';
-import { GroupActions, GroupActionsGQLData } from './GroupActions';
+import { GroupHeader, GroupHeaderGQLData } from '../Group/GroupHeader';
+import { GroupMember, GroupMemberGQLData } from '../Group/GroupMember';
 
 export const GroupInfo = ({ groupId }: GroupInfoProps) => {
-  const { data, loading, error, subscribeToMore } =
-    useQuery<GroupInfoQueryGQLData>(GROUP_INFO_QUERY, {
+  const { data, loading, error } = useQuery<GroupInfoQueryGQLData>(
+    GROUP_INFO_QUERY,
+    {
       variables: {
         groupId,
       },
-    });
+    }
+  );
 
   if (loading) return <p>Loading...</p>;
   if (error) {
@@ -25,25 +21,31 @@ export const GroupInfo = ({ groupId }: GroupInfoProps) => {
     console.error(error);
   }
 
-  const { name, description, createdAt, visibility } = data!.group;
+  const { description, createdAt, visibility } = data!.group;
 
   return (
-    <div>
-      <GroupActions group={data!.group} />
-      <h1>{name}</h1>
-      <p>{description}</p>
-      <p>Creator user</p>
-      <GroupMemberElement user={data!.group.creatorUser} />
-      <p>
-        Created at:{' '}
-        {new Date(createdAt).toLocaleDateString('en-us', {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })}
-      </p>
-      <p>{visibility === 'hidden' ? 'This group is visible to members only' : 'This group is visible to everyone'}</p>
+    <div className='w-fit bg-black/20 rounded-md p-4 flex flex-col gap-4'>
+      <GroupHeader group={data!.group} />
+      <div className='flex flex-col gap-2'>
+        <h1 className='text-xl font-bold'>Description</h1>
+        <p>{description}</p>
+        <h1 className='text-xl font-bold'>Creator user</h1>
+        <GroupMember user={data!.group.creatorUser} />
+        <h1 className='text-xl font-bold'>Created at</h1>
+        <p>
+          {new Date(createdAt).toLocaleDateString('en-us', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          })}
+        </p>
+        <p className='font-bold'>
+          {visibility === 'hidden'
+            ? 'This group is visible to members only'
+            : 'This group is visible to everyone'}
+        </p>
+      </div>
     </div>
   );
 };
@@ -55,27 +57,27 @@ const GROUP_INFO_QUERY = gql`
       name
       description
       creatorUser {
-        ...GroupMemberElement
+        ...GroupMember
       }
       createdAt
       visibility
       ...GroupActions
+      ...GroupHeader
     }
   }
 
-  ${GroupMemberElement.fragments.user}
-  ${GroupActions.fragments.group}
+  ${GroupMember.fragments.user}
+  ${GroupHeader.fragments.group}
 `;
 
 type GroupInfoQueryGQLData = {
   group: {
     groupId: string;
-    name: string;
     description: string;
-    creatorUser: GroupMemberElementGQLData;
+    creatorUser: GroupMemberGQLData;
     createdAt: string;
     visibility: 'visible' | 'hidden';
-  } & GroupActionsGQLData;
+  } & GroupHeaderGQLData;
 };
 
 type GroupInfoProps = {

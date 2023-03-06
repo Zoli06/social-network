@@ -1,18 +1,16 @@
-import { gql } from "@apollo/client";
-import "./ProfileImage.scss";
+import { gql } from '@apollo/client';
+import { Avatar } from 'react-daisyui';
 
-// This component renders a profile image. If no url is provided, a default image is shown.
-export const ProfileImage = ({ user }: ProfileImageProps) => {
+// This component renders a profile image. If no url is provided, a default image is being shown.
+export const ProfileImage = ({ user, size }: ProfileImageProps) => {
   const { url } = user.profileImage || {};
 
   return (
-    <div className="profile-image-container">
-    <img
-      src={!!url ? url : "/assets/images/blank-profile-image.webp"}
-      className="profile-image"
-      alt="profile"
-      />
-      </div>
+    <Avatar
+      src={url || '/assets/images/blank-profile-image.webp'}
+      shape='circle'
+      size={size}
+    />
   );
 };
 
@@ -37,4 +35,5 @@ export type ProfileImageGQLData = {
 
 type ProfileImageProps = {
   user: ProfileImageGQLData;
+  size?: 'xs' | 'sm' | 'md' | 'lg';
 };

@@ -1,19 +1,22 @@
-import React from 'react';
 import { gql } from '@apollo/client';
-import { openEditor } from '../Editor/Editor';
+import { Form, Input, Button } from 'react-daisyui';
 import { useMutation } from '@apollo/client';
+import { useState } from 'react';
+import { PrivateMessage } from './PrivateMessage';
 
 const SEND_PRIVATE_MESSAGE_MUTATION = gql`
   mutation SendPrivateMessageMutation($privateMessage: PrivateMessageInput!) {
     sendPrivateMessage(privateMessage: $privateMessage) {
       privateMessageId
-      text
-      createdAt
+      ...PrivateMessage
     }
   }
+
+  ${PrivateMessage.fragments.privateMessage}
 `;
 
 export const SendPrivateMessage = ({ user }: SendPrivateMessageProps) => {
+  const [text, setText] = useState('');
   const [sendPrivateMessage] = useMutation(SEND_PRIVATE_MESSAGE_MUTATION, {
     update(cache, { data: { sendPrivateMessage: newPrivateMessage } }) {
       cache.modify({
@@ -29,23 +32,33 @@ export const SendPrivateMessage = ({ user }: SendPrivateMessageProps) => {
 
   const { myRelationshipWithUser: { type: relationshipType } } = user;
 
-  const handleClick = () => {
-    openEditor((text: string) => {
-      sendPrivateMessage({
-        variables: {
-          privateMessage: {
-            text,
-            receiverUserId: user.userId,
-          }
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    await sendPrivateMessage({
+      variables: {
+        privateMessage: {
+          text,
+          receiverUserId: user.userId
         }
-      });
+      }
     });
-  };
+
+    setText('');
+  }
 
   return (
     <>
       {relationshipType === 'friend' && (
-        <button onClick={handleClick}>Send private message</button>
+        <Form onSubmit={handleSubmit} className="flex gap-2 flex-row">
+          <Input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Send a private message"
+            className='flex-grow'
+          />
+          <Button type="submit">Send</Button>
+        </Form>
       )}
     </>
   )
