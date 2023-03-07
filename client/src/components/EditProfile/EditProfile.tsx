@@ -43,6 +43,7 @@ export const EditProfile = () => {
   const [email, setEmail] = useState<string>('');
   const [intro, setIntro] = useState<string>('');
   // profileImageURL is not used yet
+  // TODO: provide option to set profile image
   const [profileImageURL, setProfileImageURL] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [passwordConfirm, setPasswordConfirm] = useState<string>('');
@@ -80,7 +81,7 @@ export const EditProfile = () => {
       return;
     }
     const _password = password.length > 0 ? password : undefined;
-    // TODO: Bug here: if not required filled is empty, it won't be updated
+    // XXX: Bug here: if not required filled is empty, it won't be updated
     await editProfile({
       variables: {
         user: {

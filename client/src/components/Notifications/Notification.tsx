@@ -7,9 +7,9 @@ const CHECK_NOTIFICATION_MUTATION = gql`
   }
 `;
 
-export const NotificationElement = ({
+export const Notification = ({
   notification: { notificationId, seenAt, title, description, urlPath },
-}: NotificationElementProps) => {
+}: NotificationProps) => {
   const [checkNotification] = useMutation(CHECK_NOTIFICATION_MUTATION);
 
   const handleCheckNotification = async () => {
@@ -35,9 +35,9 @@ export const NotificationElement = ({
   );
 };
 
-NotificationElement.fragments = {
+Notification.fragments = {
   notification: gql`
-    fragment NotificationElement on Notification {
+    fragment Notification on Notification {
       notificationId
       title
       description
@@ -47,7 +47,7 @@ NotificationElement.fragments = {
   `,
 };
 
-export type NotificationElementGQLData = {
+export type NotificationGQLData = {
   notificationId: string;
   title: string;
   description?: string;
@@ -55,6 +55,6 @@ export type NotificationElementGQLData = {
   urlPath: string;
 };
 
-type NotificationElementProps = {
-  notification: NotificationElementGQLData;
+type NotificationProps = {
+  notification: NotificationGQLData;
 };

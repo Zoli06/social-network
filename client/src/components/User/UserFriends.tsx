@@ -32,7 +32,7 @@ export const UserFriends = ({ user: { friends } }: UserFriendsProps) => {
       <h1 className='text-xl font-bold'>
         {friends.length > 0 ? 'Friends' : 'No friends'}
       </h1>
-      <div className={`grid gap-2 grid-cols-1 ${friends.length >= 2 ? 'md:grid-cols-2' : ''} ${friends.length >= 3 ? 'lg:grid-cols-3' : ''}`}>
+      <div className='max-w-xl flex gap-4 overflow-x-scroll'>
         {friends?.slice(0, maxDisplayedFriends).map(({ targetUser }) => (
           <UserCard key={targetUser.userId} user={targetUser} />
         ))}
