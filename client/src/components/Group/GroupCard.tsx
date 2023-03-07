@@ -12,7 +12,7 @@ export const GroupCard = ({
 }: GroupCardProps) => {
   return (
     <a href={`/group/${groupId}`}>
-      <Artboard className='rounded-md cursor-pointer p-4 flex gap-2 flex-col items-center justify-center'>
+      <Artboard className='rounded-md cursor-pointer p-4 flex gap-2 w-48'>
         <Avatar src={indexImageUrl} shape='circle' />
         <h1 className='text-xl font-bold'>{name}</h1>
       </Artboard>

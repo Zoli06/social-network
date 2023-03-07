@@ -102,21 +102,21 @@ export const UserActions = ({ isMe, user }: UserActionsProps) => {
             {relationshipType === 'none' && (
               <>
                 <Button onClick={handleAddFriend}>Add Friend</Button>
-                <Button onClick={handleBlock}>Block</Button>
+                <Button onClick={handleBlock} color='secondary'>Block</Button>
               </>
             )}
             {relationshipType === 'outgoing_friend_request' && (
-              <Button onClick={handleCancelFriendRequest}>
+              <Button onClick={handleCancelFriendRequest} color='secondary'>
                 Cancel Friend Request
               </Button>
             )}
             {relationshipType === 'incoming_friend_request' && (
-              <Button onClick={handleAcceptFriendRequest}>
+              <Button onClick={handleAcceptFriendRequest} color='success'>
                 Accept Friend Request
               </Button>
             )}
             {relationshipType === 'friend' && (
-              <Button onClick={handleRemoveFriend}>Remove Friend</Button>
+              <Button onClick={handleRemoveFriend} color='secondary'>Remove Friend</Button>
             )}
             {relationshipType === 'outgoing_blocking' && (
               <Button onClick={handleCancelBlocking}>Cancel Blocking</Button>

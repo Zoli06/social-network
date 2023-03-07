@@ -1,4 +1,5 @@
-// TODO: move it to subcomponent of Message.tsx
+// TODO: clean this mess up. I don't think we need this file.
+// XXX
 
 import { Message } from './Message';
 import { MessageGQLData } from './Message';

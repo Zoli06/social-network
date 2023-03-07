@@ -27,6 +27,7 @@ export const GroupInfo = ({ groupId }: GroupInfoProps) => {
     <div className='w-fit bg-black/20 rounded-md p-4 flex flex-col gap-4'>
       <GroupHeader group={data!.group} />
       <div className='flex flex-col gap-2'>
+        {/* TODO: remove reapeating code here */}
         <h1 className='text-xl font-bold'>Description</h1>
         <p>{description}</p>
         <h1 className='text-xl font-bold'>Creator user</h1>

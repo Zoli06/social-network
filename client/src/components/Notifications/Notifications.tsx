@@ -1,8 +1,8 @@
 import { gql, useQuery } from '@apollo/client';
 import {
-  NotificationElement,
-  NotificationElementGQLData,
-} from './NotificationElement';
+  Notification,
+  NotificationGQLData,
+} from './Notification';
 
 const NOTIFICATIONS_QUERY = gql`
   query Notifications {
@@ -11,12 +11,12 @@ const NOTIFICATIONS_QUERY = gql`
       notifications(showAll: true) {
         notificationId
         createdAt
-        ...NotificationElement
+        ...Notification
       }
     }
   }
 
-  ${NotificationElement.fragments.notification}
+  ${Notification.fragments.notification}
 `;
 
 export const Notifications = () => {
@@ -51,8 +51,8 @@ export const Notifications = () => {
               return <p className='pl-2'>No notifications today</p>;
             } else {
               return todayNotifications.map(
-                (notification: NotificationElementGQLData) => (
-                  <NotificationElement
+                (notification: NotificationGQLData) => (
+                  <Notification
                     notification={notification}
                     key={notification.notificationId.toString()}
                   />
@@ -82,8 +82,8 @@ export const Notifications = () => {
               return <p className='pl-2'>No notifications earlier</p>;
             } else {
               return earlierNotifications.map(
-                (notification: NotificationElementGQLData) => (
-                  <NotificationElement
+                (notification: NotificationGQLData) => (
+                  <Notification
                     notification={notification}
                     key={notification.notificationId.toString()}
                   />
@@ -102,6 +102,6 @@ type NotificationsQueryGQLData = {
     notifications: ({
       notificationId: number;
       createdAt: string;
-    } & NotificationElementGQLData)[];
+    } & NotificationGQLData)[];
   };
 };

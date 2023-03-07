@@ -30,15 +30,13 @@ export const User = ({ userId }: UserProps) => {
   }
 
   return (
-    <div className='flex flex-col items-center justify-center p-0 md:p-4 rounded-md max-w-2xl gap-2 md:min-w-0 min-w-full bg-black/20'>
-      <div className='w-full grid md:grid-cols-3 grid-cols-2 gap-2'>
-        {/* placeholder div */}
-        <div className='hidden md:block' />
+    <div className='flex flex-col items-center justify-center p-0 md:p-4 rounded-md gap-2 md:min-w-0 min-w-full bg-black/20'>
+      <div className='flex gap-2 flex-col'>
         <div className='flex justify-center flex-col items-center'>
           <ProfileImage user={data!.user} />
           <UserDisplayedName user={data!.user} />
         </div>
-        <div className='flex justify-end'>
+        <div>
           {/* TODO: move isMe to UserActions */}
           <UserActions isMe={isMe} user={data!.user} />
         </div>

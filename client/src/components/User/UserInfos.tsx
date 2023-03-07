@@ -2,22 +2,26 @@ import { gql } from '@apollo/client';
 import { UserFriends, UserFriendsGQLData } from './UserFriends';
 import { UserGroups, UserGroupsGQLData } from './UserGroups';
 
+const UserInfo = ({ title, content }: { title: string; content?: string }) => {
+  return (
+    <div>
+      <h1 className='text-xl font-bold'>{title}</h1>
+      <p className='text-lg'>{content || <i>Not provided</i>}</p>
+    </div>
+  );
+};
+
 export const UserInfos = ({
   user,
   user: { email, mobileNumber, intro },
 }: UserInfosProps) => {
   return (
     <div className='flex flex-col gap-2 w-full'>
-      <h1 className='text-xl font-bold'>Email</h1>
-      <p className='text-lg'>{email}</p>
-      <h1 className='text-xl font-bold'>Mobile number</h1>
-      <p className='text-lg'>{mobileNumber || <i>No mobile number provided</i>}</p>
-      <h1 className='text-xl font-bold'>Intro</h1>
-      <p className='text-lg'>{intro || <i>User doesn't have intro</i>}</p>
-      <div>
-        <UserFriends user={user} />
-        <UserGroups user={user} />
-      </div>
+      <UserInfo title='Email' content={email} />
+      <UserInfo title='Mobile number' content={mobileNumber} />
+      <UserInfo title='Intro' content={intro} />
+      <UserFriends user={user} />
+      <UserGroups user={user} />
     </div>
   );
 };
@@ -46,7 +50,8 @@ export type UserInfosGQLData = {
   mobileNumber?: string;
   email: string;
   registratedAt: string;
-} & UserFriendsGQLData & UserGroupsGQLData;
+} & UserFriendsGQLData &
+  UserGroupsGQLData;
 
 type UserInfosProps = {
   user: UserInfosGQLData;

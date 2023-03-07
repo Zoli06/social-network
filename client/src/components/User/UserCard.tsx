@@ -6,7 +6,7 @@ import { Artboard } from 'react-daisyui';
 export const UserCard = ({ user }: UserCardProps) => {
   return (
     <Link to={`/user/${user.userId}`}>
-      <Artboard className='rounded-md cursor-pointer p-4 flex gap-2'>
+      <Artboard className='rounded-md cursor-pointer p-4 flex gap-2 w-48'>
         <ProfileImage user={user} />
         <h1 className='text-xl font-bold'>
           {user.firstName} {user.middleName} {user.lastName}
