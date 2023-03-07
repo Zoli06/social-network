@@ -20,6 +20,7 @@ const UPDATE_GROUP_MUTATION = gql`
 const groupVisibilityOptions = [
   { value: 'visible', label: 'Visible to everyone' },
   { value: 'hidden', label: 'Only visible to members' },
+  { value: 'open', label: 'Open to everyone' },
 ];
 
 export const GroupSettings = ({
@@ -150,7 +151,7 @@ export type GroupSettingsGQLData = {
   groupId: string;
   name: string;
   description: string;
-  visibility: string;
+  visibility: 'visible' | 'hidden' | 'open';
   notificationFrequency: 'off' | 'low' | 'frequent';
   createdAt: string;
 

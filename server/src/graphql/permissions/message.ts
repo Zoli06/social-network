@@ -1,33 +1,47 @@
-import { and, race, allow } from 'graphql-shield';
+import { and, race, allow, not } from 'graphql-shield';
 import {
   isGroupMember,
   isAuthenticated,
   isMessageCreator,
   isGroupAdmin,
   isGroupCreator,
+  isGroupOpen,
+  isBannedFromGroup,
 } from './rules';
 
 export default {
   Query: {
     message: and(
       isAuthenticated,
-      race(isGroupMember, isGroupAdmin, isGroupCreator, isMessageCreator)
+      race(
+        isGroupMember,
+        isGroupAdmin,
+        isGroupCreator,
+        isMessageCreator,
+        isGroupOpen
+      )
     ),
   },
   Mutation: {
     sendMessage: and(
       isAuthenticated,
-      race(isGroupMember, isGroupAdmin, isGroupCreator)
+      race(isGroupMember, isGroupAdmin, isGroupCreator, isGroupOpen),
+      not(isBannedFromGroup)
     ),
     editMessage: and(isAuthenticated, isMessageCreator),
-    deleteMessage: and(isAuthenticated, race(isMessageCreator, isGroupAdmin, isGroupCreator)),
+    deleteMessage: and(
+      isAuthenticated,
+      race(isMessageCreator, isGroupAdmin, isGroupCreator)
+    ),
     createReaction: and(
       isAuthenticated,
-      race(isGroupMember, isGroupAdmin, isGroupCreator)
+      race(isGroupMember, isGroupAdmin, isGroupCreator, isGroupOpen),
+      not(isBannedFromGroup)
     ),
     createVote: and(
       isAuthenticated,
-      race(isGroupMember, isGroupAdmin, isGroupCreator)
+      race(isGroupMember, isGroupAdmin, isGroupCreator, isGroupOpen),
+      not(isBannedFromGroup)
     ),
   },
   Subscription: {
@@ -42,11 +56,11 @@ export default {
     // XXX: subscription rules doesn't work because it has to be implemented yet in graphql-shield
     // TODO: find a workaround or make a pull request to graphql-shield
     // see: https://github.com/dimatill/graphql-shield/issues/27
-    // also: subscriptions only exposes IDs of the messages and messages wich user already knows since they are providing it to the subscription
-    '*': allow
+    // also: subscriptions only exposes IDs of the messages and groups wich user already knows since they are providing it to the subscription
+    '*': allow,
   },
   Message: {
-    // messageId: isAuthenticated,
+    messageId: isAuthenticated,
     // group: isAuthenticated,
     // author: isAuthenticated,
     // createdAt: isAuthenticated,
@@ -64,7 +78,13 @@ export default {
     // medias: isAuthenticated,
     '*': and(
       isAuthenticated,
-      race(isGroupMember, isGroupAdmin, isGroupCreator, isMessageCreator)
+      race(
+        isGroupMember,
+        isGroupAdmin,
+        isGroupCreator,
+        isMessageCreator,
+        isGroupOpen
+      )
     ),
     myPermissionToMessage: isAuthenticated, // every user has right to check their own permission to message
   },

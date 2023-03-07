@@ -5,8 +5,9 @@ enum NotificationFrequency {
 }
 
 enum Visibility {
-  visible
   hidden
+  visible
+  open
 }
 
 enum GroupUserRelationshipType {

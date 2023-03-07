@@ -8,6 +8,7 @@ import {
   isBannedFromGroup,
   didUserSentMemberRequest,
   isGroupVisibleToUser,
+  isGroupOpen,
 } from './rules';
 
 export default {
@@ -33,6 +34,7 @@ export default {
     sendMemberRequest: and(
       isAuthenticated,
       isGroupVisibleToUser,
+      // TODO: review what happens when user is invited to group
       not(race(isGroupAdmin, isGroupCreator, isGroupMember)),
       not(isBannedFromGroup)
     ),
@@ -58,23 +60,23 @@ export default {
     name: and(isAuthenticated, isGroupVisibleToUser),
     messages: and(
       isAuthenticated,
-      race(isGroupMember, isGroupAdmin, isGroupCreator)
+      race(isGroupMember, isGroupAdmin, isGroupCreator, isGroupOpen)
     ),
     members: and(
       isAuthenticated,
-      race(isGroupMember, isGroupAdmin, isGroupCreator)
+      race(isGroupMember, isGroupAdmin, isGroupCreator, isGroupOpen)
     ),
     bannedUsers: and(isAuthenticated, race(isGroupAdmin, isGroupCreator)),
     invitedUsers: and(isAuthenticated, race(isGroupAdmin, isGroupCreator)),
     admins: and(
       isAuthenticated,
-      race(isGroupMember, isGroupAdmin, isGroupCreator)
+      race(isGroupMember, isGroupAdmin, isGroupCreator, isGroupOpen)
     ),
     memberRequests: and(isAuthenticated, race(isGroupAdmin, isGroupCreator)),
     rejectedUsers: and(isAuthenticated, race(isGroupAdmin, isGroupCreator)),
     notificationFrequency: and(
       isAuthenticated,
-      race(isGroupMember, isGroupAdmin, isGroupCreator)
+      race(isGroupMember, isGroupAdmin, isGroupCreator, isGroupOpen)
     ),
     description: and(isAuthenticated, isGroupVisibleToUser),
     visibility: and(isAuthenticated, isGroupVisibleToUser),
