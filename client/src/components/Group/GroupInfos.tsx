@@ -2,6 +2,8 @@ import { gql, useMutation } from '@apollo/client';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Select } from 'react-daisyui';
+import { UserContext } from '../../App';
+import { useContext } from 'react';
 
 const SET_NOTIFICATION_FREQUENCY_MUTATION = gql`
   mutation SetNotificationFrequency(
@@ -15,17 +17,24 @@ const SET_NOTIFICATION_FREQUENCY_MUTATION = gql`
 const groupVisibilityOptions = [
   { value: 'visible', label: 'Visible to everyone' },
   { value: 'hidden', label: 'Only visible to members' },
+  { value: 'open', label: 'Open to everyone' },
 ];
 
-export const GroupInfos = ({ group }: GroupInfosProps) => {
-  const {
+export const GroupInfos = ({
+  group: {
     groupId,
     name,
     description,
     visibility,
     notificationFrequency,
     createdAt,
-  } = group;
+    myRelationshipWithGroup: { type: myRelationshipWithGroupType },
+    creatorUser: { userId: creatorUserId },
+  },
+}: GroupInfosProps) => {
+  const { userId: myUserId } = useContext(UserContext)!;
+  const isCreator = creatorUserId === myUserId;
+
   const [setNotificationFrequency] = useMutation(
     SET_NOTIFICATION_FREQUENCY_MUTATION,
     {
@@ -83,20 +92,25 @@ export const GroupInfos = ({ group }: GroupInfosProps) => {
           })}
         </p>
       </div>
-      <div>
-        <h2 className='text-lg font-bold'>Notification Frequency</h2>
-        <Select
-          value={notificationFrequency}
-          onChange={(frequency) => {
-            handleSetNotificationFrequency(frequency);
-          }}
-          className='w-full'
-        >
-          <Select.Option value='off'>Off</Select.Option>
-          <Select.Option value='low'>Low</Select.Option>
-          <Select.Option value='frequent'>Frequent</Select.Option>
-        </Select>
-      </div>
+      {((myRelationshipWithGroupType &&
+        ['admin', 'member'].includes(myRelationshipWithGroupType)) ||
+        isCreator) && (
+        <div>
+          <h2 className='text-lg font-bold'>Notification Frequency</h2>
+
+          <Select
+            value={notificationFrequency}
+            onChange={(frequency) => {
+              handleSetNotificationFrequency(frequency);
+            }}
+            className='w-full'
+          >
+            <Select.Option value='off'>Off</Select.Option>
+            <Select.Option value='low'>Low</Select.Option>
+            <Select.Option value='frequent'>Frequent</Select.Option>
+          </Select>
+        </div>
+      )}
     </div>
   );
 };
@@ -110,6 +124,12 @@ GroupInfos.fragments = {
       visibility
       notificationFrequency
       createdAt
+      myRelationshipWithGroup {
+        type
+      }
+      creatorUser {
+        userId
+      }
     }
   `,
 };
@@ -118,9 +138,22 @@ export type GroupInfosGQLData = {
   groupId: string;
   name: string;
   description: string;
-  visibility: string;
+  visibility: 'visible' | 'hidden' | 'open';
   notificationFrequency: 'off' | 'low' | 'frequent';
   createdAt: string;
+  myRelationshipWithGroup: {
+    type:
+      | 'member'
+      | 'banned'
+      | 'admin'
+      | 'member_request'
+      | 'member_request_rejected'
+      | 'invited'
+      | null;
+  };
+  creatorUser: {
+    userId: string;
+  };
 };
 
 type GroupInfosProps = {

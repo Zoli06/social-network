@@ -152,13 +152,15 @@ const resolvers = {
       _: any,
       { user, connection }: Context
     ) {
-      return (
+      const notificationFrequency = (
         await connection.query(
           `SELECT notification_frequency FROM group_user_relationships
-          WHERE group_id = ? AND user_id = ?`,
+          WHERE group_id = ? AND user_id = ? AND type = 'member' OR type = 'admin'`,
           [group_id, user.userId]
         )
       )[0][0].notification_frequency;
+
+      return notificationFrequency || 'off';
     },
     async userRelationshipWithGroup(
       { group_id }: { group_id: number },
@@ -677,6 +679,8 @@ const resolvers = {
         description: `Kick doesn't mean ban: try to send a member request`,
         urlPath: `/group/${groupId}/info`,
       });
+
+      return true;
     },
 
     async setNotificationFrequency(

@@ -1,4 +1,4 @@
-import { rule } from 'graphql-shield';
+import { race, rule } from 'graphql-shield';
 
 // TODO: refactor these functions
 const findGroupId = async (
@@ -347,39 +347,67 @@ export const didUserSentMemberRequest = rule()(
   }
 );
 
-export const isGroupVisibleToUser = rule()(async (parent, args, ctx, info) => {
-  const { connection } = ctx;
-  const { userId } = ctx.user;
-  const groupId = await findGroupId(args, parent, connection);
-
-  const group = (
+const getGroupVisibility = async (groupId: number, connection: any) => {
+  const visibility = (
     await connection.query(
-      `SELECT visibility, created_by_user_id FROM \`groups\`
+      `SELECT visibility FROM \`groups\`
       WHERE group_id = ?`,
       [groupId]
     )
-  )[0][0];
+  )[0][0]?.visibility;
 
-  if (group.visibility === 'hidden') {
-    const relationshipType = (
-      await connection.query(
-        `SELECT type FROM group_user_relationships
-        WHERE group_id = ? AND user_id = ?`,
-        [groupId, userId]
-      )
-    )[0][0]?.type;
+  return visibility;
+};
 
-    if (
-      ['invited', 'member', 'admin'].includes(relationshipType) ||
-      group.created_by_user_id === userId
-    ) {
-      return true;
-    }
-    return false;
+export const isGroupHidden = rule()(async (parent, args, ctx, info) => {
+  const { connection } = ctx;
+  const groupId = await findGroupId(args, parent, connection);
+
+  const visibility = await getGroupVisibility(groupId, connection);
+
+  if (visibility === 'hidden') {
+    return true;
   }
 
-  return true;
+  return false;
 });
+
+export const isGroupVisible = rule()(async (parent, args, ctx, info) => {
+  const { connection } = ctx;
+  const groupId = await findGroupId(args, parent, connection);
+
+  const visibility = await getGroupVisibility(groupId, connection);
+
+  if (visibility === 'visible') {
+    return true;
+  }
+
+  return false;
+})
+
+export const isGroupOpen = rule()(
+  async (parent, args, ctx, info) => {
+    const { connection } = ctx;
+    const groupId = await findGroupId(args, parent, connection);
+
+    const visibility = await getGroupVisibility(groupId, connection);
+
+    if (visibility === 'open') {
+      return true;
+    }
+
+    return false;
+  }
+)
+
+export const isGroupVisibleToUser = race(
+  isGroupVisible,
+  isGroupOpen,
+  isGroupMember,
+  isGroupAdmin,
+  isGroupCreator,
+  isInvitedToGroup
+);
 
 export const isUserCheckingOwnNotification = rule()(
   async (parent, args, ctx, info) => {

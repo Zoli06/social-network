@@ -38,7 +38,7 @@ const resolvers = {
           [query]
         )
       )[0];
-    }
+    },
   },
   Mutation: {
     async register(
@@ -193,35 +193,36 @@ const resolvers = {
         ON DUPLICATE KEY UPDATE type = ?, updated_at = DEFAULT`,
         [user.userId, userId, type, type]
       );
-      const myRelationshipWithUser = await resolvers.User.myRelationshipWithUser(
-        { user_id: userId },
+      const myRelationshipWithUser =
+        await resolvers.User.myRelationshipWithUser(
+          { user_id: userId },
+          {},
+          context
+        );
+
+      const myData = await resolvers.Query.user(
         {},
+        { userId: user.userId },
         context
       );
-
-      const myData = await resolvers.Query.user({}, { userId: user.userId }, context);
-      console.log(myData)
+      console.log(myData);
 
       if (myRelationshipWithUser.type === 'friend') {
-        await sendNotifications(
-          {
-            userIds: [userId],
-            title: `${myData.first_name} ${myData.last_name} accepted your friend request`,
-            urlPath: `/user/${user.userId}`,
-          }
-        );
+        await sendNotifications({
+          userIds: [userId],
+          title: `${myData.first_name} ${myData.last_name} accepted your friend request`,
+          urlPath: `/user/${user.userId}`,
+        });
       } else if (myRelationshipWithUser.type === 'outgoing_friend_request') {
-        await sendNotifications(
-          {
-            userIds: [userId],
-            title: `${myData.first_name} ${myData.last_name} sent you a friend request`,
-            urlPath: `/user/${user.userId}`,
-          }
-        );
+        await sendNotifications({
+          userIds: [userId],
+          title: `${myData.first_name} ${myData.last_name} sent you a friend request`,
+          urlPath: `/user/${user.userId}`,
+        });
       }
 
       return myRelationshipWithUser;
-    },        
+    },
     checkNotification: async (
       _: any,
       { notificationId }: { notificationId: number },
@@ -519,27 +520,14 @@ const resolvers = {
     async createdGroups(
       { user_id }: { user_id: number },
       _: any,
-      { connection }: Context
+      { connection, user }: Context
     ) {
       return (
         await connection.query(
           `SELECT * FROM \`groups\`
-          WHERE created_by_user_id = ?`,
-          [user_id]
-        )
-      )[0];
-    },
-    async memberOfGroups(
-      { user_id }: { user_id: number },
-      _: any,
-      { connection }: Context
-    ) {
-      return (
-        await connection.query(
-          `SELECT * FROM \`groups\` AS g
-          JOIN group_user_relationships AS gur
-          ON g.group_id = gur.group_id
-          WHERE user_id = ? AND type = 'member' AND visibility = 'visible'`,
+          WHERE created_by_user_id = ? ${
+            user.userId === user_id ? '' : 'AND visibility != "hidden"'
+          }`,
           [user_id]
         )
       )[0];
@@ -547,18 +535,38 @@ const resolvers = {
     async adminOfGroups(
       { user_id }: { user_id: number },
       _: any,
-      { connection }: Context
+      { connection, user }: Context
     ) {
       return (
         await connection.query(
           `SELECT * FROM \`groups\` AS g
           JOIN group_user_relationships AS gur
           ON g.group_id = gur.group_id
-          WHERE user_id = ? AND type = 'admin' AND visibility = 'visible'`,
+          WHERE user_id = ? AND type = 'admin' ${
+            user.userId === user_id ? '' : 'AND visibility != "hidden"'
+          }`,
           [user_id]
         )
       )[0];
     },
+    async memberOfGroups(
+      { user_id }: { user_id: number },
+      _: any,
+      { connection, user }: Context
+    ) {
+      return (
+        await connection.query(
+          `SELECT * FROM \`groups\` AS g
+          JOIN group_user_relationships AS gur
+          ON g.group_id = gur.group_id
+          WHERE user_id = ? AND type = 'member' ${
+            user.userId === user_id ? '' : 'AND visibility != "hidden"'
+          }`,
+          [user_id]
+        )
+      )[0];
+    },
+    // no need to check visibility because only users who have relationship with the group can see this field
     async bannedFromGroups(
       { user_id }: { user_id: number },
       _: any,
@@ -569,7 +577,7 @@ const resolvers = {
           `SELECT * FROM \`groups\` AS g
           JOIN group_user_relationships AS gur
           ON g.group_id = gur.group_id
-          WHERE user_id = ? AND type = 'banned' AND visibility = 'visible'`,
+          WHERE user_id = ? AND type = 'banned'`,
           [user_id]
         )
       )[0];
@@ -584,7 +592,7 @@ const resolvers = {
           `SELECT * FROM \`groups\` AS g
           JOIN group_user_relationships AS gur
           ON g.group_id = gur.group_id
-          WHERE user_id = ? AND type = 'member_request' AND visibility = 'visible'`,
+          WHERE user_id = ? AND type = 'member_request'`,
           [user_id]
         )
       )[0];
@@ -599,7 +607,7 @@ const resolvers = {
           `SELECT * FROM \`groups\` AS g
           JOIN group_user_relationships AS gur
           ON g.group_id = gur.group_id
-          WHERE user_id = ? AND type = 'rejected_member_request' AND visibility = 'visible'`,
+          WHERE user_id = ? AND type = 'rejected_member_request'`,
           [user_id]
         )
       )[0];
@@ -614,11 +622,11 @@ const resolvers = {
           `SELECT * FROM \`groups\` AS g
           JOIN group_user_relationships AS gur
           ON g.group_id = gur.group_id
-          WHERE user_id = ? AND type = 'invite' AND visibility = 'visible'`,
+          WHERE user_id = ? AND type = 'invite'`,
           [user_id]
         )
       )[0];
-    }
+    },
   },
   Notification: {
     user: ({ user_id }: { user_id: number }, _: any, context: Context) =>
