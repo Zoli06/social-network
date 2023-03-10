@@ -3,7 +3,7 @@ import { gql, useMutation } from '@apollo/client';
 import { v4 as uuidv4 } from 'uuid';
 import { openEditor } from '../../Editor/Editor';
 import { GroupQueryGQLData } from '../Group';
-import { MessageGQLData } from './Message';
+import { MessageOnMessageGQLData } from './Message';
 import { SvgButton } from '../../../utilities/SvgButton';
 import { EmojiButton } from '../../../utilities/EmojiButton';
 
@@ -102,7 +102,7 @@ export const MessageActions = ({
           ...prev,
           group: {
             ...prev.group,
-            messages: prev.group.messages.map((message: MessageGQLData) => {
+            messages: prev.group.messages.map((message: MessageOnMessageGQLData) => {
               if (message.messageId === messageId) {
                 return {
                   ...message,
@@ -133,7 +133,7 @@ export const MessageActions = ({
           ...prev,
           group: {
             ...prev.group,
-            messages: prev.group.messages.map((message: MessageGQLData) => {
+            messages: prev.group.messages.map((message: MessageOnMessageGQLData) => {
               if (message.messageId === messageId) {
                 return {
                   ...message,

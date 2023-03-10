@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 import { useQuery, useLazyQuery, gql } from '@apollo/client';
 import { Navigate } from 'react-router-dom';
 
-import { Message, MessageGQLData } from './Message/Message';
-import { MessagesWrapper } from './Message/MessagesWrapper';
+import { Messages, MessagesGQLData } from './Messages/Messages';
+import { Message, MessageOnMessageGQLData } from './Messages/Message';
 import { AddRootMessage, AddRootMessageGQLData } from './AddRootMessage';
 import { GroupMembers, GroupMembersGQLData } from './GroupMembers';
 import { GroupInfos, GroupInfosGQLData } from './GroupInfos';
@@ -13,7 +13,7 @@ import { cache } from '../../index';
 const MESSAGE_QUERY = gql`
   query GetMessage($messageId: ID!) {
     message(messageId: $messageId) {
-      ...Message
+      ...MessageOnMessage
     }
   }
 
@@ -68,7 +68,9 @@ export const Group = ({
         prev,
         {
           subscriptionData,
-        }: { subscriptionData: { data: { messageAdded: MessageGQLData } } }
+        }: {
+          subscriptionData: { data: { messageAdded: MessageOnMessageGQLData } };
+        }
       ) => {
         if (!subscriptionData.data) {
           return prev;
@@ -113,7 +115,11 @@ export const Group = ({
         prev,
         {
           subscriptionData,
-        }: { subscriptionData: { data: { messageEdited: MessageGQLData } } }
+        }: {
+          subscriptionData: {
+            data: { messageEdited: MessageOnMessageGQLData };
+          };
+        }
       ) => {
         if (!subscriptionData.data) {
           return prev;
@@ -203,7 +209,6 @@ export const Group = ({
   }
 
   const group = data!.group;
-  const messages = group.messages;
 
   return (
     <div className='flex flex-col gap-6'>
@@ -216,21 +221,14 @@ export const Group = ({
         </div>
         <div className='lg:max-w-xl order-3 ég:order-2'>
           <div className='bg-black/10 p-4 rounded-md'>
-            {data?.group.messages.map(
-              (message) =>
-                ((!onlyInterestedInMessageId && message.responseTo === null) ||
-                  (onlyInterestedInMessageId &&
-                    onlyInterestedInMessageId === message.messageId)) && (
-                  <MessagesWrapper
-                    messageId={message.messageId}
-                    subscribeToMore={subscribeToMore}
-                    messages={messages}
-                    maxDepth={maxDepth}
-                    queriedDepth={queriedDepth}
-                    key={message.messageId}
-                  />
-                )
-            )}
+            <Messages
+              group={group}
+              subscribeToMore={subscribeToMore}
+              onlyInterestedInMessageId={onlyInterestedInMessageId}
+              queriedDepth={queriedDepth}
+              maxDepth={maxDepth}
+              maxDisplayedResponses={3}
+            />
           </div>
         </div>
         <div className='order-2 lg:order-3 lg:max-w-lg'>
@@ -253,27 +251,16 @@ const GROUP_QUERY = gql`
     $maxDepth: Int
   ) {
     group(groupId: $groupId) {
-      messages(
-        onlyInterestedInMessageId: $onlyInterestedInMessageId
-        maxDepth: $maxDepth
-      ) {
-        ...Message
-      }
-
+      groupId
+      ...Messages
       ...AddRootMessage
       ...GroupMembers
       ...GroupInfos
       ...GroupHeader
-
-      groupId
-      name
-      myRelationshipWithGroup {
-        type
-      }
     }
   }
 
-  ${Message.fragments.message}
+  ${Messages.fragments.group}
   ${AddRootMessage.fragments.group}
   ${GroupMembers.fragments.group}
   ${GroupInfos.fragments.group}
@@ -282,13 +269,13 @@ const GROUP_QUERY = gql`
 
 export type GroupQueryGQLData = {
   group: {
-    messages: MessageGQLData[];
     groupId: string;
     name: string;
   } & AddRootMessageGQLData &
     GroupMembersGQLData &
     GroupInfosGQLData &
-    GroupHeaderGQLData;
+    GroupHeaderGQLData &
+    MessagesGQLData;
 };
 
 type GroupProps = {

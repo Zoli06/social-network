@@ -14,6 +14,7 @@ export const GroupMembersAdministration = ({
     rejectedUsers,
     bannedUsers,
     invitedUsers,
+    otherUsers,
   },
   group,
 }: GroupMembersAdministrationProps) => {
@@ -66,6 +67,12 @@ export const GroupMembersAdministration = ({
           title='Invited users'
           noUserDescription='No invited users'
         />
+        <GroupMemberCategoryAsAdmin
+          group={group}
+          users={otherUsers}
+          title='Other users'
+          noUserDescription='No other users'
+        />
       </div>
     </div>
   );
@@ -111,6 +118,11 @@ GroupMembersAdministration.fragments = {
         ...GroupMemberCategoryAsAdminOnUser
       }
 
+      otherUsers {
+        userId
+        ...GroupMemberCategoryAsAdminOnUser
+      }
+
       ...GroupMemberCategoryAsAdminOnGroup
     }
 
@@ -128,6 +140,7 @@ export type GroupMembersAdministrationGQLData = {
   rejectedUsers: GroupMemberCategoryAsAdminOnUserGQLData[];
   bannedUsers: GroupMemberCategoryAsAdminOnUserGQLData[];
   invitedUsers: GroupMemberCategoryAsAdminOnUserGQLData[];
+  otherUsers: GroupMemberCategoryAsAdminOnUserGQLData[];
 } & GroupMemberCategoryAsAdminOnGroupGQLData;
 
 type GroupMembersAdministrationProps = {

@@ -40,6 +40,7 @@ type Group {
   invitedUsers: [User!]!
   admins: [User!]!
   rejectedUsers: [User!]!
+  otherUsers: [User!]!
   notificationFrequency: NotificationFrequency!
   description: String
   visibility: Visibility!

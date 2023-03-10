@@ -326,13 +326,13 @@ export const GroupMemberModify = ({
 
   const isLoggedInUserGroupCreator = creatorUserId === loggedInUserId;
 
-  const isEditedUserAdmin = admins?.some((admin) => admin.userId === userId);
-  const isEditedUserBanned = bannedUsers?.some(
+  const isEditedUserAdmin = admins.some((admin) => admin.userId === userId);
+  const isEditedUserBanned = bannedUsers.some(
     (bannedUser) => bannedUser.userId === userId
   );
   const isEditedUserMember = members.some((member) => member.userId === userId);
   const isEditedUserGroupCreator = creatorUserId === userId;
-  const isMemberRequestIncoming = memberRequests?.some(
+  const isMemberRequestIncoming = memberRequests.some(
     (memberRequest) => memberRequest.userId === userId
   );
 
@@ -341,7 +341,8 @@ export const GroupMemberModify = ({
       text: 'Ban',
       onClick: banUser,
       key: 'ban',
-      condition: isEditedUserMember,
+      // admins can ban everyone except other admins and the group creator. admins can be banned by the group creator
+      condition: (isLoggedInUserGroupCreator || !isEditedUserAdmin)  && !isEditedUserBanned && !isEditedUserGroupCreator,
     },
     {
       text: 'Unban',

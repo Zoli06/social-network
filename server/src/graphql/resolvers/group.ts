@@ -147,6 +147,39 @@ const resolvers = {
         )
       )[0];
     },
+    async otherUsers(
+      { group_id }: { group_id: number },
+      _: any,
+      { connection }: Context
+    ) {
+      // users who voted, reacted, or sent message on a message but doen't have a relationship with the group
+      // tables: group_user_relationships, messages, reactions, votes
+      return (
+        await connection.query(
+          `SELECT * FROM users
+          WHERE user_id IN (
+            SELECT user_id FROM messages
+            WHERE group_id = :group_id
+            UNION
+            SELECT user_id FROM reactions
+            WHERE message_id IN (
+              SELECT message_id FROM messages
+              WHERE group_id = :group_id
+            )
+            UNION
+            SELECT user_id FROM votes
+            WHERE message_id IN (
+              SELECT message_id FROM messages
+              WHERE group_id = :group_id
+            )
+          ) AND user_id NOT IN (
+            SELECT user_id FROM group_user_relationships
+            WHERE group_id = :group_id AND type IS NOT NULL
+          )`,
+          { group_id }
+        )
+      )[0];
+    },
     async notificationFrequency(
       { group_id }: { group_id: number },
       _: any,
