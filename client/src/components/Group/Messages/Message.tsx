@@ -8,8 +8,9 @@ import { useState } from 'react';
 
 // If messages is provided, message responses will be rendered
 export const Message = ({
-  message,
-  messages,
+  group,
+  group: { messages },
+  messageId,
   subscribeToMore,
   currentDepth,
   maxDepth,
@@ -19,6 +20,15 @@ export const Message = ({
   const [currentMaxDepth, setCurrentMaxDepth] = useState(maxDepth);
   const [currentMaxDisplayedResponses, setCurrentMaxDisplayedResponses] =
     useState(maxDisplayedResponses);
+
+  const message = messages.find((message) => message.messageId === messageId);
+
+  if (!message) {
+    console.error(`Message with id ${messageId} not queried`);
+    return null;
+  }
+
+  const isBanned = group.myRelationshipWithGroup.type === 'banned';
 
   return (
     <div
@@ -32,7 +42,9 @@ export const Message = ({
           <MessageModify message={message} />
         </div>
         <MessageText message={message} />
-        <MessageActions message={message} subscribeToMore={subscribeToMore} />
+        {!isBanned && (
+          <MessageActions message={message} subscribeToMore={subscribeToMore} />
+        )}
       </div>
       {messages &&
         (() => {
@@ -47,8 +59,8 @@ export const Message = ({
                 }
                 displayedResponses.push(
                   <Message
-                    message={_message}
-                    messages={messages}
+                    group={group}
+                    messageId={_message.messageId}
                     key={_message.messageId}
                     subscribeToMore={subscribeToMore}
                     currentDepth={currentDepth + 1}
@@ -107,54 +119,83 @@ export const Message = ({
   );
 };
 
-Message.fragments = {
-  message: gql`
-    fragment Message on Message {
-      messageId
-      group {
-        groupId
-      }
-      author {
-        ...MessageAuthor
-      }
-
-      ...AddResponse
-      ...MessageActions
-      ...MessageText
-      ...MessageModify
-
-      responseTo {
-        messageId
-      }
-      responsesCount
-      createdAt
+const MessageFragmentOnMessage = gql`
+  fragment MessageOnMessage on Message {
+    messageId
+    author {
+      ...MessageAuthor
     }
 
-    ${MessageActions.fragments.message}
-    ${MessageAuthor.fragments.user}
-    ${MessageText.fragments.message}
-    ${Editor.fragments.message}
-    ${MessageModify.fragments.message}
-  `,
+    ...AddResponse
+    ...MessageActions
+    ...MessageText
+    ...MessageModify
+
+    responseTo {
+      messageId
+    }
+    responsesCount
+    createdAt
+  }
+
+  ${MessageActions.fragments.message}
+  ${MessageAuthor.fragments.user}
+  ${MessageText.fragments.message}
+  ${Editor.fragments.message}
+  ${MessageModify.fragments.message}
+`;
+
+const MessageFragmentOnGroup = gql`
+  fragment MessageOnGroup on Group {
+    groupId
+    myRelationshipWithGroup {
+      type
+    }
+    messages(
+      onlyInterestedInMessageId: $onlyInterestedInMessageId
+      maxDepth: $maxDepth
+    ) {
+      ...MessageOnMessage
+    }
+  }
+
+  ${MessageFragmentOnMessage}
+`;
+
+Message.fragments = {
+  message: MessageFragmentOnMessage,
+  group: MessageFragmentOnGroup,
 };
 
-export type MessageGQLData = MessageTextGQLData &
+export type MessageOnMessageGQLData = {
+  messageId: string;
+  responseTo?: { messageId: string };
+  responsesCount: number;
+  author: MessageAuthorGQLData;
+  createdAt: number;
+} & MessageTextGQLData &
   MessageModifyGQLData &
   MessageActionsGQLData &
-  EditorGQLData & {
-    messageId: string;
-    group: {
-      groupId: string;
-    };
-    responseTo?: { messageId: string };
-    responsesCount: number;
-    author: MessageAuthorGQLData;
-    createdAt: number;
+  EditorGQLData;
+
+export type MessageOnGroupGQLData = {
+  groupId: string;
+  myRelationshipWithGroup: {
+    type:
+      | 'member'
+      | 'banned'
+      | 'admin'
+      | 'member_request'
+      | 'member_request_rejected'
+      | 'invited'
+      | null;
   };
+  messages: MessageOnMessageGQLData[];
+};
 
 export type MessageProps = {
-  message: MessageGQLData;
-  messages?: MessageGQLData[];
+  group: MessageOnGroupGQLData;
+  messageId: string;
   subscribeToMore: Function;
   currentDepth: number;
   maxDepth: number;
