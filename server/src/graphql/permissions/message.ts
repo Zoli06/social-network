@@ -21,6 +21,7 @@ export default {
         isGroupOpen
       )
     ),
+    searchMessages: isAuthenticated
   },
   Mutation: {
     sendMessage: and(

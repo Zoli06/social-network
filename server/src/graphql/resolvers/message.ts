@@ -237,6 +237,32 @@ const resolvers = {
 
       return message;
     },
+    async searchMessages(
+      _: any,
+      { query }: { query: string },
+      { connection, user: { userId } }: Context
+    ) {
+      return (
+        await connection.query(
+          `SELECT * FROM messages AS m
+          JOIN \`groups\` AS g
+            ON m.group_id = g.group_id
+          JOIN group_user_relationships AS gur
+            ON g.group_id = gur.group_id AND gur.user_id = :userId
+          WHERE
+            MATCH text AGAINST (:query IN NATURAL LANGUAGE MODE)
+            AND (
+              g.visibility = 'open'
+              OR g.created_by_user_id = :userId
+              OR gur.type = 'admin'
+              OR gur.type = 'member'
+              OR gur.type = 'invited'
+            )
+          `,
+          { query, userId }
+        )
+      )[0];
+    },
   },
   Mutation: {
     async sendMessage(

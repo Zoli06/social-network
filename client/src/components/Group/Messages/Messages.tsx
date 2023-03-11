@@ -1,62 +1,98 @@
 // god help me
 
 import { gql } from '@apollo/client';
-import { Message, MessageOnGroupGQLData } from './Message';
+import { Artboard } from 'react-daisyui';
+import { Message, MessageGQLData } from './Message';
 
 export const Messages = ({
-  group,
+  messages,
   subscribeToMore,
   maxDepth = 2,
   onlyInterestedInMessageId: _onlyInterestedInMessageId = null,
   queriedDepth,
   maxDisplayedResponses,
+  renderedFromSearch = false,
 }: MessagesProps) => {
   const onlyInterestedInMessageId = _onlyInterestedInMessageId || null;
 
-  const rootMessages = group.messages.filter((message) =>
+  const rootMessages = messages.filter((message) =>
     onlyInterestedInMessageId
       ? message.messageId === onlyInterestedInMessageId
-      : message.responseTo === null
+      : !messages.some(
+          ({ messageId }) => messageId === message.responseTo?.messageId
+        )
   );
 
   return (
     <div>
-      {rootMessages.map((message) => (
-        <Message
-          key={message.messageId}
-          group={group}
-          messageId={message.messageId}
-          subscribeToMore={subscribeToMore}
-          currentDepth={0}
-          maxDepth={maxDepth}
-          queriedDepth={queriedDepth}
-          maxDisplayedResponses={maxDisplayedResponses}
-        />
-      ))}
+      {renderedFromSearch ? (
+        <div className='flex flex-col gap-4'>
+          {rootMessages.map((message) => (
+            <a
+              href={`/group/${message.group.groupId}/message/${message.messageId}`}
+            >
+              <Artboard className='rounded-md cursor-pointer p-4 flex gap-2 w-96'>
+                <Message
+                  key={message.messageId}
+                  messages={messages}
+                  messageId={message.messageId}
+                  subscribeToMore={subscribeToMore}
+                  currentDepth={0}
+                  maxDepth={maxDepth}
+                  queriedDepth={queriedDepth}
+                  maxDisplayedResponses={maxDisplayedResponses}
+                  renderedFromSearch={renderedFromSearch}
+                />
+              </Artboard>
+            </a>
+          ))}
+        </div>
+      ) : (
+        rootMessages.map((message) => (
+          <Message
+            key={message.messageId}
+            messages={messages}
+            messageId={message.messageId}
+            subscribeToMore={subscribeToMore}
+            currentDepth={0}
+            maxDepth={maxDepth}
+            queriedDepth={queriedDepth}
+            maxDisplayedResponses={maxDisplayedResponses}
+            renderedFromSearch={renderedFromSearch}
+          />
+        ))
+      )}
     </div>
   );
 };
 
 Messages.fragments = {
-  group: gql`
-    fragment Messages on Group {
-      groupId
-      ...MessageOnGroup
+  message: gql`
+    fragment Messages on Message {
+      messageId
+      group {
+        groupId
+      }
+      ...Message
     }
 
-    ${Message.fragments.group}
+    ${Message.fragments.message}
   `,
 };
 
 export type MessagesGQLData = {
-  groupId: string;
-} & MessageOnGroupGQLData;
+  messageId: string;
+  group: {
+    groupId: string;
+  };
+} & MessageGQLData;
 
 export type MessagesProps = {
-  group: MessagesGQLData;
+  messages: MessagesGQLData[];
   subscribeToMore: Function;
   onlyInterestedInMessageId?: string | null;
   queriedDepth: number;
   maxDepth: number;
   maxDisplayedResponses: number;
+  renderedFromSearch?: boolean;
 };
