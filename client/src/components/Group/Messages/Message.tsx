@@ -8,14 +8,14 @@ import { useState } from 'react';
 
 // If messages is provided, message responses will be rendered
 export const Message = ({
-  group,
-  group: { messages },
+  messages,
   messageId,
   subscribeToMore,
   currentDepth,
   maxDepth,
   queriedDepth,
   maxDisplayedResponses,
+  renderedFromSearch,
 }: MessageProps) => {
   const [currentMaxDepth, setCurrentMaxDepth] = useState(maxDepth);
   const [currentMaxDisplayedResponses, setCurrentMaxDisplayedResponses] =
@@ -28,12 +28,14 @@ export const Message = ({
     return null;
   }
 
-  const isBanned = group.myRelationshipWithGroup.type === 'banned';
+  const isBanned = message.group.myRelationshipWithGroup.type === 'banned';
 
   return (
     <div
       className={`flex flex-col gap-4 w-full ${
-        currentDepth === 0 ? 'mb-4 rounded-lg' : ''
+        currentDepth === 0
+          ? `rounded-lg ${renderedFromSearch ? '' : 'mb-4'}`
+          : ''
       }`}
     >
       <div>
@@ -47,6 +49,7 @@ export const Message = ({
         )}
       </div>
       {messages &&
+        !renderedFromSearch &&
         (() => {
           if (currentDepth < currentMaxDepth) {
             let displayedResponses = [];
@@ -59,7 +62,7 @@ export const Message = ({
                 }
                 displayedResponses.push(
                   <Message
-                    group={group}
+                    messages={messages}
                     messageId={_message.messageId}
                     key={_message.messageId}
                     subscribeToMore={subscribeToMore}
@@ -67,6 +70,7 @@ export const Message = ({
                     maxDepth={currentMaxDepth}
                     queriedDepth={queriedDepth}
                     maxDisplayedResponses={maxDisplayedResponses}
+                    renderedFromSearch={renderedFromSearch}
                   />
                 );
               }
@@ -119,86 +123,72 @@ export const Message = ({
   );
 };
 
-const MessageFragmentOnMessage = gql`
-  fragment MessageOnMessage on Message {
-    messageId
-    author {
-      ...MessageAuthor
-    }
-
-    ...AddResponse
-    ...MessageActions
-    ...MessageText
-    ...MessageModify
-
-    responseTo {
-      messageId
-    }
-    responsesCount
-    createdAt
-  }
-
-  ${MessageActions.fragments.message}
-  ${MessageAuthor.fragments.user}
-  ${MessageText.fragments.message}
-  ${Editor.fragments.message}
-  ${MessageModify.fragments.message}
-`;
-
-const MessageFragmentOnGroup = gql`
-  fragment MessageOnGroup on Group {
-    groupId
-    myRelationshipWithGroup {
-      type
-    }
-    messages(
-      onlyInterestedInMessageId: $onlyInterestedInMessageId
-      maxDepth: $maxDepth
-    ) {
-      ...MessageOnMessage
-    }
-  }
-
-  ${MessageFragmentOnMessage}
-`;
-
 Message.fragments = {
-  message: MessageFragmentOnMessage,
-  group: MessageFragmentOnGroup,
+  message: gql`
+    fragment Message on Message {
+      messageId
+      author {
+        ...MessageAuthor
+      }
+
+      ...AddResponse
+      ...MessageActions
+      ...MessageText
+      ...MessageModify
+
+      responseTo {
+        messageId
+      }
+      responsesCount
+      createdAt
+
+      group {
+        groupId
+        myRelationshipWithGroup {
+          type
+        }
+      }
+    }
+
+    ${MessageActions.fragments.message}
+    ${MessageAuthor.fragments.user}
+    ${MessageText.fragments.message}
+    ${Editor.fragments.message}
+    ${MessageModify.fragments.message}
+  `,
 };
 
-export type MessageOnMessageGQLData = {
+export type MessageGQLData = {
   messageId: string;
   responseTo?: { messageId: string };
   responsesCount: number;
   author: MessageAuthorGQLData;
   createdAt: number;
+  group: {
+    groupId: string;
+    myRelationshipWithGroup: {
+      type:
+        | 'member'
+        | 'banned'
+        | 'admin'
+        | 'member_request'
+        | 'member_request_rejected'
+        | 'invited'
+        | null;
+    };
+  };
 } & MessageTextGQLData &
   MessageModifyGQLData &
   MessageActionsGQLData &
   EditorGQLData;
 
-export type MessageOnGroupGQLData = {
-  groupId: string;
-  myRelationshipWithGroup: {
-    type:
-      | 'member'
-      | 'banned'
-      | 'admin'
-      | 'member_request'
-      | 'member_request_rejected'
-      | 'invited'
-      | null;
-  };
-  messages: MessageOnMessageGQLData[];
-};
-
 export type MessageProps = {
-  group: MessageOnGroupGQLData;
+  messages: MessageGQLData[];
   messageId: string;
   subscribeToMore: Function;
   currentDepth: number;
   maxDepth: number;
   queriedDepth: number;
   maxDisplayedResponses: number;
+  renderedFromSearch: boolean;
 };

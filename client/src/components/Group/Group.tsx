@@ -3,7 +3,6 @@ import { useQuery, useLazyQuery, gql } from '@apollo/client';
 import { Navigate } from 'react-router-dom';
 
 import { Messages, MessagesGQLData } from './Messages/Messages';
-import { Message, MessageOnMessageGQLData } from './Messages/Message';
 import { AddRootMessage, AddRootMessageGQLData } from './AddRootMessage';
 import { GroupMembers, GroupMembersGQLData } from './GroupMembers';
 import { GroupInfos, GroupInfosGQLData } from './GroupInfos';
@@ -13,11 +12,11 @@ import { cache } from '../../index';
 const MESSAGE_QUERY = gql`
   query GetMessage($messageId: ID!) {
     message(messageId: $messageId) {
-      ...MessageOnMessage
+      ...Messages
     }
   }
 
-  ${Message.fragments.message}
+  ${Messages.fragments.message}
 `;
 
 const MESSAGE_ADDED_SUBSCRIPTION = gql`
@@ -69,7 +68,7 @@ export const Group = ({
         {
           subscriptionData,
         }: {
-          subscriptionData: { data: { messageAdded: MessageOnMessageGQLData } };
+          subscriptionData: { data: { messageAdded: MessagesGQLData } };
         }
       ) => {
         if (!subscriptionData.data) {
@@ -117,7 +116,7 @@ export const Group = ({
           subscriptionData,
         }: {
           subscriptionData: {
-            data: { messageEdited: MessageOnMessageGQLData };
+            data: { messageEdited: MessagesGQLData };
           };
         }
       ) => {
@@ -222,7 +221,7 @@ export const Group = ({
         <div className='lg:max-w-xl order-3 ég:order-2'>
           <div className='bg-black/10 p-4 rounded-md'>
             <Messages
-              group={group}
+              messages={group.messages}
               subscribeToMore={subscribeToMore}
               onlyInterestedInMessageId={onlyInterestedInMessageId}
               queriedDepth={queriedDepth}
@@ -252,7 +251,12 @@ const GROUP_QUERY = gql`
   ) {
     group(groupId: $groupId) {
       groupId
-      ...Messages
+      messages(
+        onlyInterestedInMessageId: $onlyInterestedInMessageId
+        maxDepth: $maxDepth
+      ) {
+        ...Messages
+      }
       ...AddRootMessage
       ...GroupMembers
       ...GroupInfos
@@ -260,7 +264,7 @@ const GROUP_QUERY = gql`
     }
   }
 
-  ${Messages.fragments.group}
+  ${Messages.fragments.message}
   ${AddRootMessage.fragments.group}
   ${GroupMembers.fragments.group}
   ${GroupInfos.fragments.group}
@@ -271,11 +275,13 @@ export type GroupQueryGQLData = {
   group: {
     groupId: string;
     name: string;
+    messages: ({
+      messageId: string;
+    } & MessagesGQLData)[];
   } & AddRootMessageGQLData &
     GroupMembersGQLData &
     GroupInfosGQLData &
-    GroupHeaderGQLData &
-    MessagesGQLData;
+    GroupHeaderGQLData;
 };
 
 type GroupProps = {

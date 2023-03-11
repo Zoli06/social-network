@@ -1,6 +1,7 @@
 import { gql, useQuery } from '@apollo/client';
 import { UserCard, UserCardGQLData } from '../User/UserCard';
 import { GroupCard, GroupCardGQLData } from '../Group/GroupCard';
+import { Messages, MessagesGQLData } from '../Group/Messages/Messages';
 
 const SearchQuery = gql`
   query SearchQuery($query: String!) {
@@ -13,14 +14,20 @@ const SearchQuery = gql`
       groupId
       ...GroupCard
     }
+
+    searchMessages(query: $query) {
+      messageId
+      ...Messages
+    }
   }
 
   ${UserCard.fragments.user}
   ${GroupCard.fragments.group}
+  ${Messages.fragments.message}
 `;
 
 export const Search = ({ query, type }: SearchProps) => {
-  const { data, loading, error } = useQuery<SearchQueryGQLData>(SearchQuery, {
+  const { data, loading, error, subscribeToMore } = useQuery<SearchQueryGQLData>(SearchQuery, {
     variables: {
       query,
     },
@@ -61,6 +68,21 @@ export const Search = ({ query, type }: SearchProps) => {
           )}
         </div>
       </div>
+      <div className={['messages', 'all'].includes(type) ? '' : 'hidden'}>
+        <h2 className='text-lg font-bold'>Messages</h2>
+          {data!.searchMessages.length > 0 ? (
+            <Messages
+              messages={data!.searchMessages}
+              subscribeToMore={subscribeToMore}
+              maxDepth={0}
+              queriedDepth={0}
+              maxDisplayedResponses={0}
+              renderedFromSearch={true}
+            />
+          ) : (
+            <i>No messages found</i>
+          )}
+      </div>
     </div>
   );
 };
@@ -72,9 +94,12 @@ type SearchQueryGQLData = {
   searchGroups: ({
     groupId: string;
   } & GroupCardGQLData)[];
+  searchMessages: ({
+    messageId: string;
+  } & MessagesGQLData)[]
 };
 
 type SearchProps = {
   query: string;
-  type: 'groups' | 'users' | 'all';
+  type: 'groups' | 'users' | 'messages' | 'all';
 };

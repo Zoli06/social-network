@@ -237,24 +237,30 @@ const resolvers = {
       _: any,
       { connection }: Context
     ) {
-      return (await connection.query(
-        `SELECT * FROM \`groups\`
+      return (
+        await connection.query(
+          `SELECT * FROM \`groups\`
         JOIN medias
         ON index_image_media_id = media_id
-        WHERE group_id = ?`
-      , [group_id]))[0][0]
+        WHERE group_id = ?`,
+          [group_id]
+        )
+      )[0][0];
     },
     async bannerImage(
       { group_id }: { group_id: number },
       _: any,
       { connection }: Context
     ) {
-      return (await connection.query(
-        `SELECT * FROM \`groups\`
+      return (
+        await connection.query(
+          `SELECT * FROM \`groups\`
         JOIN medias
         ON index_image_media_id = media_id
-        WHERE group_id = ?`
-      , [group_id]))[0][0]
+        WHERE group_id = ?`,
+          [group_id]
+        )
+      )[0][0];
     },
   },
   GroupUserRelationship: {
@@ -289,13 +295,24 @@ const resolvers = {
     async searchGroups(
       _: any,
       { query }: { query: string },
-      { connection }: Context
+      { connection, user: { userId } }: Context
     ) {
       return (
         await connection.query(
-          `SELECT * FROM \`groups\`
-          WHERE MATCH (name, description) AGAINST (? IN NATURAL LANGUAGE MODE)`,
-          [query]
+          `SELECT * FROM \`groups\` AS g
+          JOIN group_user_relationships AS gur
+          ON g.group_id = gur.group_id AND gur.user_id = :userId
+          WHERE
+            MATCH (g.name, g.description) AGAINST (:query IN NATURAL LANGUAGE MODE)
+            AND (
+              g.visibility != 'hidden'
+              OR g.created_by_user_id = :userId
+              OR gur.type = 'admin'
+              OR gur.type = 'member'
+              OR gur.type = 'invited'
+            )
+            `,
+          { query, userId }
         )
       )[0];
     },
@@ -405,7 +422,7 @@ const resolvers = {
       await sendNotifications({
         userIds: [userId],
         title: `${userName} sent you an invitation to ${groupName}`,
-        urlPath: `/group/${groupId}/info`,
+        urlPath: `/group/${groupId}`,
       });
 
       return true;
@@ -457,7 +474,7 @@ const resolvers = {
       await sendNotifications({
         userIds: [userId],
         title: `You has been banned from ${groupName}`,
-        urlPath: `/group/${groupId}/info`,
+        urlPath: `/group/${groupId}`,
       });
 
       return true;
@@ -487,7 +504,7 @@ const resolvers = {
         title: `You has been unbanned from ${groupName}`,
         description:
           'You can now send a member request and see if the admins let you go back',
-        urlPath: `/group/${groupId}/info`,
+        urlPath: `/group/${groupId}`,
       });
 
       return true;
@@ -515,7 +532,7 @@ const resolvers = {
       await sendNotifications({
         userIds: [userId],
         title: `You are now an admin in ${groupName}`,
-        urlPath: `/group/${groupId}/info`,
+        urlPath: `/group/${groupId}`,
       });
 
       return true;
@@ -543,7 +560,7 @@ const resolvers = {
       await sendNotifications({
         userIds: [userId],
         title: `You are no longer an admin in ${groupName}`,
-        urlPath: `/group/${groupId}/info`,
+        urlPath: `/group/${groupId}`,
       });
 
       return true;
@@ -561,36 +578,40 @@ const resolvers = {
         [groupId, user.userId]
       );
 
-      const userIds = [...new Set([
-        ...(
-          await connection.query(
-            `
+      const userIds = [
+        ...new Set([
+          ...(
+            await connection.query(
+              `
             SELECT user_id FROM group_user_relationships
             WHERE type = 'admin' AND group_id = ?
           `,
-            [groupId]
-          )
-        )[0].map(({ user_id }: { user_id: number }) => {
-          return user_id;
-        }),
-        (
-          await connection.query(
-            `
+              [groupId]
+            )
+          )[0].map(({ user_id }: { user_id: number }) => {
+            return user_id;
+          }),
+          (
+            await connection.query(
+              `
             SELECT created_by_user_id FROM \`groups\`
             WHERE group_id = ?
           `,
-            [groupId]
-          )
-        )[0][0]['created_by_user_id'],
-      ])];
+              [groupId]
+            )
+          )[0][0]['created_by_user_id'],
+        ]),
+      ];
 
-      const userName = (await connection.query(
-        `
+      const userName = (
+        await connection.query(
+          `
             SELECT user_name FROM users
             WHERE user_id = ?
           `,
-        [user.userId]
-      ))[0][0]['user_name'];
+          [user.userId]
+        )
+      )[0][0]['user_name'];
 
       const groupName = (
         await connection.query(
@@ -659,7 +680,7 @@ const resolvers = {
       await sendNotifications({
         userIds: [userId],
         title: `Your member request has been rejected in ${groupName}`,
-        urlPath: `/group/${groupId}/info`,
+        urlPath: `/group/${groupId}`,
       });
 
       return true;
@@ -710,7 +731,7 @@ const resolvers = {
         userIds: [userId],
         title: `You has been kicked from ${groupName}`,
         description: `Kick doesn't mean ban: try to send a member request`,
-        urlPath: `/group/${groupId}/info`,
+        urlPath: `/group/${groupId}`,
       });
 
       return true;
@@ -728,7 +749,7 @@ const resolvers = {
         [frequency, user.userId, groupId]
       );
       return frequency;
-    }
+    },
   },
 };
 

@@ -6,7 +6,7 @@ export const SearchPage = () => {
   const query = searchParams.get('q');
   const _type = searchParams.get('type');
 
-  const type = _type === 'users' || _type === 'groups' ? _type : 'all';
+  const type = _type === 'users' || _type === 'groups' || _type === 'messages' ? _type : 'all';
 
   return (
     <Search query={query || ''} type={type} />

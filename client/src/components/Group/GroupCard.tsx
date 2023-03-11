@@ -1,4 +1,3 @@
-import { ProfileImage, ProfileImageGQLData } from '../User/ProfileImage';
 import { gql } from '@apollo/client';
 import { Artboard, Avatar } from 'react-daisyui';
 
@@ -6,7 +5,6 @@ export const GroupCard = ({
   group: {
     groupId,
     name,
-    creatorUser,
     indexImage: { url: indexImageUrl },
   },
 }: GroupCardProps) => {
@@ -35,18 +33,12 @@ GroupCard.fragments = {
         url
       }
     }
-
-    ${ProfileImage.fragments.user}
   `,
 };
 
 export type GroupCardGQLData = {
   groupId: number;
   name: string;
-  creatorUser: {
-    userId: number;
-    userName: string;
-  } & ProfileImageGQLData;
   indexImage: {
     mediaId: number;
     url: string;

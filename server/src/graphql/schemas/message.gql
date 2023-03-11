@@ -54,6 +54,7 @@ input MessageEditInput {
 
 type Query {
   message(messageId: ID!): Message!
+  searchMessages(query: String!): [Message!]!
 }
 
 type Mutation {
