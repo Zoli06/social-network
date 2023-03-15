@@ -18,6 +18,7 @@ import { EditProfilePage } from './pages/EditProfilePage';
 import { GroupAdministrationPage } from './pages/GroupAdministrationPage';
 import { GroupInfoPage } from './pages/GroupInfoPage';
 import { SearchPage } from './pages/SearchPage';
+import { CreateGroupPage } from './pages/CreateGroupPage';
 import { useQuery, gql } from '@apollo/client';
 import { Editor } from './components/Editor/Editor';
 import { Header, HeaderGQLData } from './components/Header/Header';
@@ -80,6 +81,7 @@ export function App() {
           <Header user={me} />
           <div className='flex flex-col items-center p-8 md:pt-8 pt-0'>
             <Routes>
+              {/* TODO: convert to nested routes */}
               <Route path='/group/:groupId' element={<GroupPage />} />
               <Route
                 path='/group/:groupId/message/:messageId'
@@ -90,6 +92,7 @@ export function App() {
                 path='group/:groupId/admin'
                 element={<GroupAdministrationPage />}
               />
+              <Route path='/create-group' element={<CreateGroupPage />} />
               <Route path='/user/:userId' element={<UserPage />} />
               <Route path='/edit-profile' element={<EditProfilePage />} />
               <Route path='/login' element={<LoginPage />} />
