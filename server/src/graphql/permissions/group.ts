@@ -74,6 +74,7 @@ export default {
     ),
     memberRequests: and(isAuthenticated, race(isGroupAdmin, isGroupCreator)),
     rejectedUsers: and(isAuthenticated, race(isGroupAdmin, isGroupCreator)),
+    otherUsers: and(isAuthenticated, race(isGroupAdmin, isGroupCreator)),
     notificationFrequency: and(
       isAuthenticated,
       race(isGroupMember, isGroupAdmin, isGroupCreator, isGroupOpen)

@@ -22,7 +22,7 @@ export const PrivateMessage = ({
           '/assets/images/blank-profile-image.webp'
         }
       />
-      <ChatBubble.Message color={isMe ? 'primary' : undefined}>
+      <ChatBubble.Message color={isMe ? 'primary' : undefined} className='max-w-md'>
         {isDeleted ?
           <i>Message deleted</i> :
           text

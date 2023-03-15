@@ -22,6 +22,7 @@ pool.getConnection((err, connection) => {
     if (err.code === 'ECONNREFUSED') {
       console.error('Database connection was refused.');
     }
+    console.error(err);
   } else {
     console.log('Connected to database');
   }

@@ -1,4 +1,4 @@
 {
-  "watch": ["./"],
+  "watch": ["./src"],
   "ext": "ts, js, gql"
 }

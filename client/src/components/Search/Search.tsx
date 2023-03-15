@@ -1,8 +1,9 @@
 import { gql, useQuery } from '@apollo/client';
 import { UserCard, UserCardGQLData } from '../User/UserCard';
 import { GroupCard, GroupCardGQLData } from '../Group/GroupCard';
-import { Messages, MessagesGQLData } from '../Group/Messages/Messages';
+import { Messages, MessagesGQLData } from '../Messages/Messages';
 
+// TODO: split this into multiple files
 const SearchQuery = gql`
   query SearchQuery($query: String!) {
     searchUsers(query: $query) {
@@ -42,11 +43,11 @@ export const Search = ({ query, type }: SearchProps) => {
   }
 
   return (
-    <div className='max-w-fit bg-black/20 rounded-md p-4 flex flex-col gap-4'>
+    <div className='max-w-2xl bg-black/20 rounded-md p-4 flex flex-col gap-4'>
       <h1 className='text-2xl font-bold text-center'>Search results for {query}</h1>
       <div className={['groups', 'all'].includes(type) ? '' : 'hidden'}>
         <h2 className='text-lg font-bold'>Groups</h2>
-        <div className='flex flex-col gap-4'>
+        <div className='flex flex-wrap gap-4'>
           {data!.searchGroups.length > 0 ? (
             data!.searchGroups.map((group) => {
               return <GroupCard group={group} key={group.groupId} />;
@@ -58,7 +59,7 @@ export const Search = ({ query, type }: SearchProps) => {
       </div>
       <div className={['users', 'all'].includes(type) ? '' : 'hidden'}>
         <h2 className='text-lg font-bold'>Users</h2>
-        <div className='flex flex-col gap-4'>
+        <div className='flex flex-wrap gap-4'>
           {data!.searchUsers.length > 0 ? (
             data!.searchUsers.map((user) => {
               return <UserCard user={user} key={user.userId} />;
@@ -77,7 +78,7 @@ export const Search = ({ query, type }: SearchProps) => {
               maxDepth={0}
               queriedDepth={0}
               maxDisplayedResponses={0}
-              renderedFromSearch={true}
+              renderAsLink={true}
             />
           ) : (
             <i>No messages found</i>

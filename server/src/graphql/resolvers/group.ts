@@ -35,11 +35,11 @@ const resolvers = {
       const _maxDepth =
         _onlyInterestedInMessageId === null ? maxDepth + 1 : maxDepth;
 
-      const responseTree = await getMessageResponseTree(
+      const responseTree = (await getMessageResponseTree(
         { message_id: _onlyInterestedInMessageId },
         { maxDepth: _maxDepth },
         context
-      );
+      )).filter((message: { group_id: number }) => message.group_id === group_id);
       if (_onlyInterestedInMessageId !== null) {
         const message = await getMessage(
           {},

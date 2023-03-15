@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useQuery, useLazyQuery, gql } from '@apollo/client';
 import { Navigate } from 'react-router-dom';
 
-import { Messages, MessagesGQLData } from './Messages/Messages';
+import { Messages, MessagesGQLData } from '../Messages/Messages';
 import { AddRootMessage, AddRootMessageGQLData } from './AddRootMessage';
 import { GroupMembers, GroupMembersGQLData } from './GroupMembers';
 import { GroupInfos, GroupInfosGQLData } from './GroupInfos';
@@ -218,7 +218,7 @@ export const Group = ({
             <GroupMembers group={group} />
           </div>
         </div>
-        <div className='lg:max-w-xl order-3 ég:order-2'>
+        <div className='max-w-xl order-3 lg:order-2'>
           <div className='bg-black/10 p-4 rounded-md'>
             <Messages
               messages={group.messages}

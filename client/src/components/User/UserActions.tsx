@@ -62,6 +62,15 @@ export const UserActions = ({ isMe, user }: UserActionsProps) => {
     });
   };
 
+  const handleDeclineFriendRequest = () => {
+    createUserUserRelationship({
+      variables: {
+        userId: user.userId,
+        type: 'none',
+      },
+    });
+  };
+
   const handleRemoveFriend = () => {
     createUserUserRelationship({
       variables: {
@@ -93,7 +102,9 @@ export const UserActions = ({ isMe, user }: UserActionsProps) => {
     <div>
       {isMe && (
         <a href='/edit-profile'>
-          <Button>Edit Profile</Button>
+          <div className='flex flex-col gap-2'>
+            <Button>Edit Profile</Button>
+          </div>
         </a>
       )}
       {!isMe && (
@@ -102,7 +113,9 @@ export const UserActions = ({ isMe, user }: UserActionsProps) => {
             {relationshipType === 'none' && (
               <>
                 <Button onClick={handleAddFriend}>Add Friend</Button>
-                <Button onClick={handleBlock} color='secondary'>Block</Button>
+                <Button onClick={handleBlock} color='secondary'>
+                  Block
+                </Button>
               </>
             )}
             {relationshipType === 'outgoing_friend_request' && (
@@ -111,12 +124,19 @@ export const UserActions = ({ isMe, user }: UserActionsProps) => {
               </Button>
             )}
             {relationshipType === 'incoming_friend_request' && (
-              <Button onClick={handleAcceptFriendRequest} color='success'>
-                Accept Friend Request
-              </Button>
+              <>
+                <Button onClick={handleAcceptFriendRequest} color='success'>
+                  Accept Friend Request
+                </Button>
+                <Button onClick={handleDeclineFriendRequest} color='secondary'>
+                  Decline Friend Request
+                </Button>
+              </>
             )}
             {relationshipType === 'friend' && (
-              <Button onClick={handleRemoveFriend} color='secondary'>Remove Friend</Button>
+              <Button onClick={handleRemoveFriend} color='secondary'>
+                Remove Friend
+              </Button>
             )}
             {relationshipType === 'outgoing_blocking' && (
               <Button onClick={handleCancelBlocking}>Cancel Blocking</Button>

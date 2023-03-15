@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm';
 
 export const MessageText = ({ message: { text } }: MessageTextProps) => {
   return (
-    <div className='min-h-8 flex items-center flex-wrap'>
+    <div className='min-h-8 flex items-center flex-wrap overflow-scroll'>
       <ReactMarkdown
         children={text}
         remarkPlugins={[remarkGfm]}
