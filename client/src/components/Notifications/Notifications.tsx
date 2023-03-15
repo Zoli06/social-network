@@ -27,7 +27,7 @@ export const Notifications = () => {
   if (error) return <div>Error</div>;
 
   return (
-    <div className='overflow-x-auto flex justify-center flex-col items-center pb-2 bg-black/20 p-4 rounded-md'>
+    <div className='overflow-x-auto max-w-xl flex justify-center flex-col items-center pb-2 bg-black/20 p-4 rounded-md'>
       <h1 className='text-2xl font-bold mb-4'>Notifications</h1>
       <div className='w-full'>
         <div className='flex flex-col gap-2'>

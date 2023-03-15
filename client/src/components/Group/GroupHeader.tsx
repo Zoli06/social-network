@@ -9,8 +9,8 @@ export const GroupHeader = ({
   group: {
     groupId,
     name,
-    indexImage: { url: indexImageUrl },
-    bannerImage: { url: bannerImageUrl },
+    indexImage,
+    bannerImage,
     creatorUser,
     myRelationshipWithGroup: { type: myRelationShipWithGroupType },
   },
@@ -22,6 +22,9 @@ export const GroupHeader = ({
 
   const isAdmin = myRelationShipWithGroupType === 'admin';
   const isCreator = creatorUser.userId === loggedInUserId;
+
+  const indexImageUrl = indexImage?.url || '/images/default-group-index-image.png';
+  const bannerImageUrl = bannerImage?.url || '/images/default-group-banner-image.png';
 
   return (
     <div className='w-full'>
@@ -102,11 +105,11 @@ export type GroupHeaderGQLData = {
       | 'invited'
       | null;
   };
-  indexImage: {
+  indexImage?: {
     mediaId: number;
     url: string;
   };
-  bannerImage: {
+  bannerImage?: {
     mediaId: number;
     url: string;
   };

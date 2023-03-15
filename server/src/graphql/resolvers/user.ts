@@ -17,7 +17,6 @@ const resolvers = {
       )[0][0];
     },
     async me(_: any, __: any, context: Context) {
-      // console.log('me', context.user)
       return await resolvers.Query.user(
         _,
         { userId: context.user.userId },
@@ -205,8 +204,6 @@ const resolvers = {
         { userId: user.userId },
         context
       );
-      console.log(myData);
-
       if (myRelationshipWithUser.type === 'friend') {
         await sendNotifications({
           userIds: [userId],
@@ -496,8 +493,8 @@ const resolvers = {
       return (
         await connection.query(
           `SELECT * FROM private_messages
-        WHERE (sender_user_id = ? AND receiver_user_id = ?) OR (sender_user_id = ? AND receiver_user_id = ?)
-        ORDER BY created_at ASC`,
+          WHERE (sender_user_id = ? AND receiver_user_id = ?) OR (sender_user_id = ? AND receiver_user_id = ?)
+          ORDER BY created_at ASC`,
           [user.userId, user_id, user_id, user.userId]
         )
       )[0];
@@ -522,13 +519,27 @@ const resolvers = {
       _: any,
       { connection, user }: Context
     ) {
+      // if group is hidden only show it to creator, admins and members
       return (
         await connection.query(
-          `SELECT * FROM \`groups\`
-          WHERE created_by_user_id = ? ${
-            user.userId === user_id ? '' : 'AND visibility != "hidden"'
-          }`,
-          [user_id]
+          `SELECT * FROM \`groups\` AS g
+          JOIN group_user_relationships AS gur
+          ON g.group_id = gur.group_id
+          WHERE
+            gur.user_id = :querierUserId AND
+            (
+              g.visibility != 'hidden' OR
+              gur.type = 'admin' OR
+              gur.type = 'member' OR
+              gur.type = 'invited' OR
+              g.created_by_user_id = :querierUserId
+            )
+            AND g.created_by_user_id = :userId
+          `,
+          {
+            querierUserId: user.userId,
+            userId: user_id,
+          }
         )
       )[0];
     },
@@ -540,12 +551,30 @@ const resolvers = {
       return (
         await connection.query(
           `SELECT * FROM \`groups\` AS g
-          JOIN group_user_relationships AS gur
-          ON g.group_id = gur.group_id
-          WHERE user_id = ? AND type = 'admin' ${
-            user.userId === user_id ? '' : 'AND visibility != "hidden"'
-          }`,
-          [user_id]
+          JOIN group_user_relationships AS gur1
+          ON g.group_id = gur1.group_id
+          JOIN group_user_relationships AS gur2
+          ON g.group_id = gur2.group_id
+          WHERE
+            (
+              gur1.user_id = :querierUserId AND
+              (
+                g.visibility != 'hidden' OR
+                gur1.type = 'admin' OR
+                gur1.type = 'member' OR
+                gur1.type = 'invited' OR
+                g.created_by_user_id = :querierUserId
+              )
+            )
+            AND (
+              gur2.user_id = :userId AND
+              gur2.type = 'admin'
+            )
+          `,
+          {
+            querierUserId: user.userId,
+            userId: user_id,
+          }
         )
       )[0];
     },
@@ -557,12 +586,30 @@ const resolvers = {
       return (
         await connection.query(
           `SELECT * FROM \`groups\` AS g
-          JOIN group_user_relationships AS gur
-          ON g.group_id = gur.group_id
-          WHERE user_id = ? AND type = 'member' ${
-            user.userId === user_id ? '' : 'AND visibility != "hidden"'
-          }`,
-          [user_id]
+          JOIN group_user_relationships AS gur1
+          ON g.group_id = gur1.group_id
+          JOIN group_user_relationships AS gur2
+          ON g.group_id = gur2.group_id
+          WHERE
+            (
+              gur1.user_id = :querierUserId AND
+              (
+                g.visibility != 'hidden' OR
+                gur1.type = 'admin' OR
+                gur1.type = 'member' OR
+                gur1.type = 'invited' OR
+                g.created_by_user_id = :querierUserId
+              )
+            )
+            AND (
+              gur2.user_id = :userId AND
+              gur2.type = 'member'
+            )
+          `,
+          {
+            querierUserId: user.userId,
+            userId: user_id,
+          }
         )
       )[0];
     },
@@ -624,6 +671,106 @@ const resolvers = {
           ON g.group_id = gur.group_id
           WHERE user_id = ? AND type = 'invite'`,
           [user_id]
+        )
+      )[0];
+    },
+    async points(
+      { user_id }: { user_id: number },
+      _: any,
+      { connection }: Context
+    ) {
+      const points = (
+        await connection.query(
+          `SELECT SUM(v.type = 'up') - SUM(v.type = 'down') AS points FROM votes AS v
+          JOIN messages AS m
+          ON v.message_id = m.message_id
+          WHERE m.user_id = ?`,
+          [user_id]
+        )
+      )[0][0].points;
+
+      return points || 0;
+    },
+    async friendSuggestions(
+      { user_id }: { user_id: number },
+      _: any,
+      { connection }: Context
+    ) {
+      // I have a mysql database. Two table is relevant. One is users table which has a user_id column. Other is user_user_relationships table. user_user_relationships table has three relevant column: initiating_user_id, target_user_id and type. type can be 'friend', 'blocked' or null. Two user are friends if both consider each other friend. For example user 1 and user 2 are friends if a record exists in user_user_relationships that 1 consider 2 a friend and an other record if 2 consider 1 a friend request. I want to make a query that returns suggested friends for user. One user is suggested if he is a friend of one of user's friend.
+
+      // NOT IMPLEMENTED: If user1 has a null relationship with a user2, user2 will be suggested to user1 if but user1 will be suggested to user2
+      // COMMENT OUT is not null condition in the query to activate this feature
+
+      // good luck to debug this xd
+
+      return (
+        await connection.query(
+          `SELECT * FROM users WHERE user_id IN(
+            SELECT DISTINCT uur4.initiating_user_id FROM users AS u
+
+            JOIN user_user_relationships AS uur1
+              ON uur1.type = 'friend' AND uur1.initiating_user_id = u.user_id
+            JOIN user_user_relationships AS uur2
+              ON uur1.type = 'friend' AND uur1.target_user_id = uur2.initiating_user_id AND uur2.target_user_id = uur1.initiating_user_id
+
+            JOIN user_user_relationships AS uur3
+              ON uur3.type = 'friend' AND uur3.initiating_user_id = uur2.initiating_user_id
+            JOIN user_user_relationships AS uur4
+              ON uur1.type = 'friend' AND uur3.target_user_id = uur4.initiating_user_id AND uur4.target_user_id = uur3.initiating_user_id
+
+            WHERE uur1.initiating_user_id = :userId
+            AND uur4.initiating_user_id NOT IN (
+              SELECT target_user_id FROM user_user_relationships
+              WHERE initiating_user_id = :userId AND type IS NOT null
+            )
+            AND uur4.initiating_user_id NOT IN (
+                SELECT initiating_user_id FROM user_user_relationships 
+                WHERE target_user_id = :userId AND type IS NOT null
+            )
+            AND uur4.initiating_user_id != :userId
+          )`,
+          {
+            userId: user_id,
+          }
+        )
+      )[0];
+    },
+    async groupSuggestions(
+      { user_id }: { user_id: number },
+      _: any,
+      { connection }: Context
+    ) {
+      // user_user_relationships table. user_user_relationships table has three relevant column: initiating_user_id, target_user_id and type. type can be 'friend', 'blocked' or null. Two user are friends if both consider each other friend. For example user 1 and user 2 are friends if a record exists in user_user_relationships that 1 consider 2 a friend and an other record if 2 consider 1 a friend request. I want to make a query that returns suggested friends for user. One user is suggested if he is a friend of one of user's friend.
+
+      // Select groups that user's friends are in
+
+      return (
+        await connection.query(
+          `SELECT * FROM \`groups\` AS g
+          JOIN group_user_relationships AS gur
+          ON g.group_id = gur.group_id
+          WHERE gur.user_id IN (
+            SELECT uur2.initiating_user_id FROM users AS u
+            JOIN user_user_relationships AS uur1
+              ON uur1.type = 'friend' AND uur1.initiating_user_id = u.user_id
+            JOIN user_user_relationships AS uur2
+              ON uur1.type = 'friend' AND uur1.target_user_id = uur2.initiating_user_id AND uur2.target_user_id = uur1.initiating_user_id
+            WHERE uur1.initiating_user_id = :userId
+          )
+          AND gur.user_id != :userId
+          AND (
+            gur.type = 'member'
+            OR gur.type = 'admin'
+            )
+            AND gur.group_id NOT IN (
+              SELECT group_id FROM group_user_relationships
+              WHERE user_id = :userId
+            )
+            AND g.visibility != 'hidden'
+            `,
+          {
+            userId: user_id,
+          }
         )
       )[0];
     },

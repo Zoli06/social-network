@@ -14,6 +14,7 @@ export const UserFriends = ({ user: { friends } }: UserFriendsProps) => {
     '2xl': 1536,
   };
 
+  // TODO: increase value when window is resized
   const startingMaxDisplayedFriends = (() => {
     if (window.innerWidth >= breakpoints.lg) {
       return 3;

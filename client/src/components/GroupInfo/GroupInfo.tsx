@@ -16,7 +16,7 @@ export const GroupInfo = ({ groupId }: GroupInfoProps) => {
   if (error) {
     if (error.message === 'Not Authorised!') {
       console.log(error);
-      return <h1>This group is hidden</h1>;
+      return <h1>This group doesn't exist or is private</h1>;
     }
     console.error(error);
   }

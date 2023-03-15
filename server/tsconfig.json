@@ -15,6 +15,7 @@
   "exclude": ["node_modules", "**/*.spec.ts"],
   "types": ["node"],
   "ts-node": {
-    "esm": true
+    "esm": true,
+    "transpileOnly": true
   }
 }
