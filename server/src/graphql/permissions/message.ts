@@ -21,7 +21,9 @@ export default {
         isGroupOpen
       )
     ),
-    searchMessages: isAuthenticated
+    searchMessages: isAuthenticated,
+    topMessages: isAuthenticated,
+    trendingMessages: isAuthenticated,
   },
   Mutation: {
     sendMessage: and(

@@ -1,5 +1,5 @@
 import { gql } from '@apollo/client';
-import { Editor, EditorGQLData } from '../../Editor/Editor';
+import { Editor, EditorGQLData } from '../Editor/Editor';
 import { MessageAuthor, MessageAuthorGQLData } from './MessageAuthor';
 import { MessageModify, MessageModifyGQLData } from './MessageModify';
 import { MessageText, MessageTextGQLData } from './MessageText';
@@ -15,7 +15,7 @@ export const Message = ({
   maxDepth,
   queriedDepth,
   maxDisplayedResponses,
-  renderedFromSearch,
+  renderAsLink,
 }: MessageProps) => {
   const [currentMaxDepth, setCurrentMaxDepth] = useState(maxDepth);
   const [currentMaxDisplayedResponses, setCurrentMaxDisplayedResponses] =
@@ -28,14 +28,12 @@ export const Message = ({
     return null;
   }
 
-  const isBanned = message.group.myRelationshipWithGroup.type === 'banned';
+  const isBanned = message.group.myRelationshipWithGroup.type === 'banned';  
 
   return (
     <div
       className={`flex flex-col gap-4 w-full ${
-        currentDepth === 0
-          ? `rounded-lg ${renderedFromSearch ? '' : 'mb-4'}`
-          : ''
+        currentDepth === 0 ? `rounded-lg ${renderAsLink ? '' : 'mb-4'}` : ''
       }`}
     >
       <div>
@@ -49,7 +47,7 @@ export const Message = ({
         )}
       </div>
       {messages &&
-        !renderedFromSearch &&
+        !renderAsLink &&
         (() => {
           if (currentDepth < currentMaxDepth) {
             let displayedResponses = [];
@@ -70,7 +68,7 @@ export const Message = ({
                     maxDepth={currentMaxDepth}
                     queriedDepth={queriedDepth}
                     maxDisplayedResponses={maxDisplayedResponses}
-                    renderedFromSearch={renderedFromSearch}
+                    renderAsLink={renderAsLink}
                   />
                 );
               }
@@ -190,5 +188,5 @@ export type MessageProps = {
   maxDepth: number;
   queriedDepth: number;
   maxDisplayedResponses: number;
-  renderedFromSearch: boolean;
+  renderAsLink: boolean;
 };

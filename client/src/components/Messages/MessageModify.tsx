@@ -1,6 +1,6 @@
 import { gql, useMutation } from "@apollo/client";
-import { SvgButton } from "../../../utilities/SvgButton";
-import { openEditor } from "../../Editor/Editor";
+import { SvgButton } from "../../utilities/SvgButton";
+import { openEditor } from "../Editor/Editor";
 
 const DELETE_MESSAGE_MUTATION = gql`
   mutation DeleteMessage($messageId: ID!) {

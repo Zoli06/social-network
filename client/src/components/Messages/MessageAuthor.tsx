@@ -1,5 +1,5 @@
 import { gql } from '@apollo/client';
-import { ProfileImage } from '../../User/ProfileImage';
+import { ProfileImage } from '../User/ProfileImage';
 
 export const MessageAuthor = ({
   user,

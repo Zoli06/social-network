@@ -55,6 +55,8 @@ input MessageEditInput {
 type Query {
   message(messageId: ID!): Message!
   searchMessages(query: String!): [Message!]!
+  topMessages(limit: Int, offset: Int): [Message!]!
+  trendingMessages(limit: Int, offset: Int): [Message!]!
 }
 
 type Mutation {
