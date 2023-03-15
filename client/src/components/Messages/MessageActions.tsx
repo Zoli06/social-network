@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { gql, useMutation } from '@apollo/client';
 import { v4 as uuidv4 } from 'uuid';
-import { openEditor } from '../../Editor/Editor';
-import { GroupQueryGQLData } from '../Group';
+import { openEditor } from '../Editor/Editor';
+import { GroupQueryGQLData } from '../Group/Group';
 import { MessagesGQLData } from './Messages';
-import { SvgButton } from '../../../utilities/SvgButton';
-import { EmojiButton } from '../../../utilities/EmojiButton';
+import { SvgButton } from '../../utilities/SvgButton';
+import { EmojiButton } from '../../utilities/EmojiButton';
 
 const ADD_RESPONSE_MUTATION = gql`
   mutation AddResponseMutation($message: MessageInput!) {

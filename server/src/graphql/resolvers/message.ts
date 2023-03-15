@@ -256,13 +256,74 @@ const resolvers = {
               OR g.created_by_user_id = :userId
               OR gur.type = 'admin'
               OR gur.type = 'member'
-              OR gur.type = 'invited'
             )
           `,
           { query, userId }
         )
       )[0];
     },
+    async topMessages (
+      _: any,
+      { limit = 10, offset = 0 }: { limit: number; offset: number },
+      { connection, user }: Context
+    ) {
+      return (
+        await connection.query(
+          `SELECT m.*, SUM(v.type = 'up') - SUM(v.type = 'down') AS votes
+          FROM messages AS m
+          LEFT JOIN votes AS v
+            ON m.message_id = v.message_id
+          JOIN group_user_relationships AS gur
+            ON gur.group_id = m.group_id
+          JOIN \`groups\` AS g
+            ON g.group_id = m.group_id
+          WHERE
+            gur.user_id = :userId
+            AND m.response_to_message_id IS NULL
+            AND
+              (g.visibility = 'open'
+              OR g.created_by_user_id = :userId
+              OR gur.type = 'admin'
+              OR gur.type = 'member')
+          GROUP BY m.message_id
+          ORDER BY votes DESC
+          LIMIT :limit
+          OFFSET :offset`,
+          { limit, offset, userId: user.userId }
+        )
+      )[0];
+    },
+    async trendingMessages(
+      _: any,
+      { limit = 10, offset = 0 }: { limit: number; offset: number },
+      { connection, user }: Context
+    ) {
+      return (
+        await connection.query(
+          `SELECT m.*, SUM(v.type = 'up') - SUM(v.type = 'down') AS votes
+          FROM messages AS m
+          LEFT JOIN votes AS v
+            ON m.message_id = v.message_id AND v.created_at > DATE_SUB(NOW(), INTERVAL 1 DAY)
+          JOIN group_user_relationships AS gur
+            ON gur.group_id = m.group_id
+          JOIN \`groups\` AS g
+            ON g.group_id = m.group_id
+          WHERE
+            gur.user_id = :userId
+            AND m.response_to_message_id IS NULL
+            AND
+              (g.visibility = 'open'
+              OR g.created_by_user_id = :userId
+              OR gur.type = 'admin'
+              OR gur.type = 'member')
+          GROUP BY m.message_id
+          ORDER BY votes DESC
+          LIMIT :limit
+          OFFSET :offset`,
+          { limit, offset, userId: user.userId }
+        )
+      )[0];
+    }
   },
   Mutation: {
     async sendMessage(
@@ -502,11 +563,18 @@ const resolvers = {
           )
         )[0][0].user_id;
 
+        const groupId = (
+          await connection.query(
+            `SELECT group_id FROM messages WHERE message_id = ?`,
+            [messageId]
+          )
+        )[0][0].group_id;
+
         await sendNotifications({
           userIds: [userId],
           title: 'New reaction',
           description: `${userName} reacted to your message`,
-          urlPath: `/group/${reaction.group_id}/message/${messageId}`,
+          urlPath: `/group/${groupId}/message/${messageId}`,
         });
       }
 
