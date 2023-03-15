@@ -52,6 +52,9 @@ export const Header = ({ user }: HeaderProps) => {
                   {user.notifications.length}
                 </span>
               </Dropdown.Item>
+              <Dropdown.Item href='/create-group'>
+                Create group
+              </Dropdown.Item>
               <Dropdown.Item href='/logout'>Logout</Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
