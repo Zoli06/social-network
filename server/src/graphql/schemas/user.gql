@@ -65,6 +65,9 @@ type User {
   sentMemberRequestsToGroups: [GroupUserRelationship!]!
   groupsRejectedMemberRequest: [GroupUserRelationship!]!
   invitedToGroups: [GroupUserRelationship!]!
+  points: Int!
+  friendSuggestions: [User!]!
+  groupSuggestions: [Group!]!
 }
 
 input UserInput {
