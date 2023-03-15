@@ -46,6 +46,9 @@ export default {
     sentMemberRequestsToGroups: and(isAuthenticated, isUserViewingOwnThing),
     groupsRejectedMemberRequest: and(isAuthenticated, isUserViewingOwnThing),
     invitedToGroups: and(isAuthenticated, isUserViewingOwnThing),
+    points: isAuthenticated,
+    friendSuggestions: and(isAuthenticated, isUserViewingOwnThing),
+    groupSuggestions: and(isAuthenticated, isUserViewingOwnThing),
   },
   // TODO: do todo in user.gql then write permissions for this field
   UserUserRelationship: {
