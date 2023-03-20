@@ -55,7 +55,7 @@ export const GroupHeader = ({
           </div>
         </div>
         <div className={`${displayActions ? '' : 'hidden'} -mt-6`}>
-          <GroupActions group={group} redirectToInfoPage={redirectToInfoPage} />
+          <GroupActions group={group} redirectToInfoPageWhenLeave={redirectToInfoPage} />
         </div>
       </div>
     </div>

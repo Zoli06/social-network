@@ -19,6 +19,8 @@ import { GroupAdministrationPage } from './pages/GroupAdministrationPage';
 import { GroupInfoPage } from './pages/GroupInfoPage';
 import { SearchPage } from './pages/SearchPage';
 import { CreateGroupPage } from './pages/CreateGroupPage';
+import { RelationshipsWithUsersPage } from './pages/RelationshipsWithUsersPage';
+import { RelationshipsWithGroupsPage } from './pages/RelationshipsWithGroupsPage';
 import { useQuery, gql } from '@apollo/client';
 import { Editor } from './components/Editor/Editor';
 import { Header, HeaderGQLData } from './components/Header/Header';
@@ -101,6 +103,15 @@ export function App() {
                 path='/me'
                 element={<Navigate to={`/user/${me.userId}`} />}
               />
+              <Route
+                path='/relationships-with-users'
+                element={<RelationshipsWithUsersPage />}
+              />
+              <Route
+                path='/relationships-with-groups'
+                element={<RelationshipsWithGroupsPage />}
+              />
+              
               <Route path='/logout' element={<LogoutPage />} />
 
               <Route path='/notifications' element={<Notifications />} />

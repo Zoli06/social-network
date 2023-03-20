@@ -30,7 +30,7 @@ export const User = ({ userId }: UserProps) => {
   }
 
   return (
-    <div className='flex flex-col items-center justify-center p-0 p-4 rounded-md gap-2 md:min-w-0 min-w-full bg-black/20'>
+    <div className='flex flex-col items-center justify-center p-4 rounded-md gap-2 md:min-w-0 min-w-full bg-black/20'>
       <div className='flex gap-2 flex-col'>
         <div className='flex justify-center flex-col items-center'>
           <ProfileImage user={data!.user} />

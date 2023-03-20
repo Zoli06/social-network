@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
-import { ProfileImage } from '../User/ProfileImage';
+import { ProfileImage } from './ProfileImage';
 
-export const GroupMember = ({ user }: GroupMemberProps) => {
+export const UserListElement = ({ user }: UserListElementProps) => {
   return (
     <a className='flex gap-4' href={`/user/${user.userId}`}>
       <div>
@@ -19,9 +19,9 @@ export const GroupMember = ({ user }: GroupMemberProps) => {
   );
 };
 
-GroupMember.fragments = {
+UserListElement.fragments = {
   user: gql`
-    fragment GroupMember on User {
+    fragment UserListElement on User {
       userId
       firstName
       lastName
@@ -35,7 +35,7 @@ GroupMember.fragments = {
   `,
 };
 
-export type GroupMemberGQLData = {
+export type UserListElementGQLData = {
   userId: string;
   firstName: string;
   lastName: string;
@@ -47,6 +47,6 @@ export type GroupMemberGQLData = {
   };
 };
 
-type GroupMemberProps = {
-  user: GroupMemberGQLData;
+type UserListElementProps = {
+  user: UserListElementGQLData;
 };

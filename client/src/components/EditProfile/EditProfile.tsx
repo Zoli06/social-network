@@ -81,7 +81,7 @@ export const EditProfile = () => {
       return;
     }
     const _password = password.length > 0 ? password : undefined;
-    // XXX: Bug here: if not required filled is empty, it won't be updated
+    // BUG: if not required filled is empty, it won't be updated
     await editProfile({
       variables: {
         user: {

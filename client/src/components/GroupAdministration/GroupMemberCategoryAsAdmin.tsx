@@ -1,4 +1,4 @@
-import { GroupMember, GroupMemberGQLData } from '../Group/GroupMember';
+import { UserListElement, UserListElementGQLData } from '../User/UserListElement';
 import {
   GroupMemberModify,
   GroupMemberModifyGQLData,
@@ -17,7 +17,7 @@ export const GroupMemberCategoryAsAdmin = ({
       {users.length > 0 ? (
         users.map((user) => (
           <div key={user.userId} className='flex flex-row justify-between'>
-            <GroupMember user={user} />
+            <UserListElement user={user} />
             <GroupMemberModify group={group} userId={user.userId} />
           </div>
         ))
@@ -42,10 +42,10 @@ GroupMemberCategoryAsAdmin.fragments = {
   user: gql`
     fragment GroupMemberCategoryAsAdminOnUser on User {
       userId
-      ...GroupMember
+      ...UserListElement
     }
 
-    ${GroupMember.fragments.user}
+    ${UserListElement.fragments.user}
   `,
 };
 
@@ -55,7 +55,7 @@ export type GroupMemberCategoryAsAdminOnGroupGQLData = {
 
 export type GroupMemberCategoryAsAdminOnUserGQLData = {
   userId: number;
-} & GroupMemberGQLData;
+} & UserListElementGQLData;
 
 type GroupMemberCategoryAsAdminProps = {
   users: GroupMemberCategoryAsAdminOnUserGQLData[];

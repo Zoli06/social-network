@@ -14,6 +14,7 @@ enum UserUserRelationshipInputType {
 }
 
 type UserUserRelationship {
+  # Sorry I'm bad at choosing names
   targetUser: User!
   pointOfViewUser: User!
   type: UserUserRelationshipType!
@@ -52,6 +53,7 @@ type User {
   incomingFriendRequests: [UserUserRelationship!]!
   outgoingFriendRequests: [UserUserRelationship!]!
   blockedUsers: [UserUserRelationship!]!
+  # TODO: make field for incoming blockings
   userRelationships: [UserUserRelationship!]! # all relationships
   myRelationshipWithUser: UserUserRelationship!
   profileImage: Media
