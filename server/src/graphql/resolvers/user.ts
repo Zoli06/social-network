@@ -249,7 +249,7 @@ const resolvers = {
     },
     async friends({ user_id }: { user_id: number }, _: any, context: Context) {
       const { connection } = context;
-      const me = await resolvers.Query.me({}, {}, context);
+      const pointOfViewUser = await resolvers.Query.user({}, {userId: user_id}, context);
 
       return (
         await connection.query(
@@ -276,7 +276,7 @@ const resolvers = {
         }) => {
           return {
             target_user: record,
-            point_of_view_user: me,
+            point_of_view_user: pointOfViewUser,
             type: record.type,
             created_at: record.real_created_at,
             updated_at: record.real_updated_at,
@@ -290,7 +290,7 @@ const resolvers = {
       context: Context
     ) {
       const { connection } = context;
-      const me = await resolvers.Query.me({}, {}, context);
+      const pointOfViewUser = await resolvers.Query.user({}, {userId: user_id}, context);
 
       return (
         await connection.query(
@@ -315,7 +315,7 @@ const resolvers = {
           updated_at: any;
         }) => ({
           target_user: record,
-          point_of_view_user: me,
+          point_of_view_user: pointOfViewUser,
           type: 'incoming_friend_request',
           created_at: record.created_at,
           updated_at: record.updated_at,
@@ -328,7 +328,7 @@ const resolvers = {
       context: Context
     ) {
       const { connection } = context;
-      const me = await resolvers.Query.me({}, {}, context);
+      const pointOfViewUser = await resolvers.Query.user({}, {userId: user_id}, context);
 
       return (
         await connection.query(
@@ -353,7 +353,7 @@ const resolvers = {
           updated_at: any;
         }) => ({
           target_user: record,
-          point_of_view_user: me,
+          point_of_view_user: pointOfViewUser,
           type: 'outgoing_friend_request',
           created_at: record.created_at,
           updated_at: record.updated_at,
@@ -366,7 +366,7 @@ const resolvers = {
       context: Context
     ) {
       const { connection } = context;
-      const me = await resolvers.Query.me({}, {}, context);
+      const pointOfViewUser = await resolvers.Query.user({}, {userId: user_id}, context);
 
       return (
         await connection.query(
@@ -374,7 +374,7 @@ const resolvers = {
         FROM user_user_relationships
         JOIN users
         ON user_id = target_user_id
-        WHERE type = 'outgoing_blocking' AND initiating_user_id = ?`,
+        WHERE type = 'blocked' AND initiating_user_id = ?`,
           [user_id]
         )
       )[0].map(
@@ -385,7 +385,7 @@ const resolvers = {
           updated_at: any;
         }) => ({
           target_user: record,
-          point_of_view_user: me,
+          point_of_view_user: pointOfViewUser,
           type: record.type,
           created_at: record.created_at,
           updated_at: record.updated_at,

@@ -43,13 +43,14 @@ export const HomeMessages = ({
 
   const [fetchMoreTopMessages] = useLazyQuery(FetchMoreTopMessages);
   const [fetchMoreTrendingMessages] = useLazyQuery(FetchMoreTrendingMessages);
+
   const [noMoreTopMessages, setNoMoreTopMessages] = useState(false);
   const [noMoreTrendingMessages, setNoMoreTrendingMessages] = useState(false);
 
-  const [currentTopMessagesOffset, setCurrentTopMessagesOffset] =
-    useState(topMessagesOffset);
-  const [currentTrendingMessagesOffset, setCurrentTrendingMessagesOffset] =
-    useState(trendingMessagesOffset);
+  const [topMessagesPage, setTopMessagesPage] = useState(1);
+  const [trendingMessagesPage, setTrendingMessagesPage] = useState(1);
+
+  const [isFetching, setIsFetching] = useState(false);
 
   const tabs = [
     {
@@ -74,98 +75,111 @@ export const HomeMessages = ({
 
   const [activeTab, setActiveTab] = useState(0);
 
+  useEffect(() => {
+    fetchMoreTopMessages({
+      variables: {
+        offset: topMessagesPage * topMessagesLimit + topMessagesOffset,
+        limit: topMessagesLimit,
+      },
+      onCompleted: (data) => {
+        cache.modify({
+          fields: {
+            topMessages(existingMessages = []) {
+              const newMessages = data.topMessages.filter((newMessage: any) => {
+                return !existingMessages.some(
+                  (existingMessage: any) =>
+                    existingMessage.messageId === newMessage.messageId
+                );
+              });
+
+              console.log(topMessagesPage);
+              console.log(data);
+
+              if (newMessages.length === 0) {
+                setNoMoreTopMessages(true);
+              }
+
+              setIsFetching(false);
+              return [...existingMessages, ...newMessages];
+            },
+          },
+        });
+
+      },
+    });
+  }, [
+    fetchMoreTopMessages,
+    noMoreTopMessages,
+    topMessagesLimit,
+    topMessagesOffset,
+    topMessagesPage,
+  ]);
+
+  useEffect(() => {
+    fetchMoreTrendingMessages({
+      variables: {
+        offset:
+          trendingMessagesPage * trendingMessagesLimit + trendingMessagesOffset,
+        limit: trendingMessagesLimit,
+      },
+      onCompleted: (data) => {
+        cache.modify({
+          fields: {
+            trendingMessages(existingMessages = []) {
+              const newMessages = data.trendingMessages.filter(
+                (newMessage: any) => {
+                  return !existingMessages.some(
+                    (existingMessage: any) =>
+                      existingMessage.messageId === newMessage.messageId
+                  );
+                }
+              );
+
+              if (newMessages.length === 0) {
+                setNoMoreTrendingMessages(true);
+              }
+
+              setIsFetching(false);
+              return [...existingMessages, ...newMessages];
+            },
+          },
+        });
+
+      },
+    });
+  }, [
+    fetchMoreTrendingMessages,
+    noMoreTrendingMessages,
+    trendingMessagesLimit,
+    trendingMessagesOffset,
+    trendingMessagesPage,
+  ]);
+
   // Fetch more messages when the user scrolls to the bottom of the page
+  // BUG: after a few fetch no more message fetched
   useEffect(() => {
     const handleScroll = () => {
-      if (
-        window.innerHeight + document.documentElement.scrollTop <
-        document.documentElement.offsetHeight * fetchWhenScrollingTo
-      ) {
+      const scrollHeight = document.documentElement.scrollHeight;
+      const scrollTop = document.documentElement.scrollTop;
+      const clientHeight = document.documentElement.clientHeight;
+
+      const scrollPosition = scrollTop + clientHeight;
+      const scrollPercentage = scrollPosition / scrollHeight;
+
+      if (scrollPercentage > fetchWhenScrollingTo && !isFetching) {
+        setIsFetching(true);
+
         if (activeTab === 0) {
-          const newOffset = currentTopMessagesOffset + topMessagesLimit;
-
-          if (noMoreTopMessages) return;
-
-          fetchMoreTopMessages({
-            variables: {
-              offset: newOffset,
-              limit: topMessagesLimit,
-            },
-            onCompleted: (data) => {
-              cache.modify({
-                fields: {
-                  topMessages(existingMessages = []) {
-                    const newMessages = data.topMessages.filter(
-                      (newMessage: any) => {
-                        return !existingMessages.some(
-                          (existingMessage: any) =>
-                            existingMessage.messageId === newMessage.messageId
-                        );
-                      }
-                    );
-
-                    if (newMessages.length === 0) {
-                      setNoMoreTopMessages(true);
-                    }
-
-                    return [...existingMessages, ...newMessages];
-                  },
-                },
-              });
-              setCurrentTopMessagesOffset(newOffset);
-            },
-          });
+          setTopMessagesPage(topMessagesPage + 1);
         } else {
-          const newOffset = currentTrendingMessagesOffset + trendingMessagesLimit;
-
-          if (noMoreTrendingMessages) return;
-
-          fetchMoreTrendingMessages({
-            variables: {
-              offset: newOffset,
-              limit: trendingMessagesLimit,
-            },
-            onCompleted: (data) => {
-              cache.modify({
-                fields: {
-                  trendingMessages(existingMessages = []) {
-                    const newMessages = data.trendingMessages.filter(
-                      (newMessage: any) => {
-                        return !existingMessages.some(
-                          (existingMessage: any) =>
-                            existingMessage.messageId === newMessage.messageId
-                        );
-                      }
-                    );
-
-                    if (newMessages.length === 0) {
-                      setNoMoreTrendingMessages(true);
-                    }
-
-                    return [...existingMessages, ...newMessages];
-                  },
-                },
-              });
-              setCurrentTrendingMessagesOffset(newOffset);
-            },
-          });
+          setTrendingMessagesPage(trendingMessagesPage + 1);
         }
       }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [
-    activeTab,
-    currentTopMessagesOffset,
-    currentTrendingMessagesOffset,
-    fetchMoreTopMessages,
-    fetchMoreTrendingMessages,
-    noMoreTopMessages,
-    noMoreTrendingMessages,
-    topMessagesLimit,
-    trendingMessagesLimit,
-  ]);
+  }, [activeTab, fetchWhenScrollingTo, isFetching, topMessagesPage, trendingMessagesPage]);
 
   return (
     <>
