@@ -240,6 +240,7 @@ export const Group = ({
         <AddRootMessage group={group} />
       </div>
     </div>
+    // TODO: fix padding at the bottom
   );
 };
 

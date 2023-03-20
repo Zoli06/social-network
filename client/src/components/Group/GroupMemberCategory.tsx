@@ -1,4 +1,4 @@
-import { GroupMember, GroupMemberGQLData } from './GroupMember';
+import { UserListElement, UserListElementGQLData } from '../User/UserListElement';
 import { gql } from '@apollo/client';
 
 export const GroupMemberCategory = ({
@@ -10,7 +10,7 @@ export const GroupMemberCategory = ({
     <div>
       <h1 className='text-xl font-semibold'>{title}</h1>
       {users.length > 0 ? (
-        users.map((user) => <GroupMember user={user} key={user.userId} />)
+        users.map((user) => <UserListElement user={user} key={user.userId} />)
       ) : (
         <div>
           <p>{noUserDescription}</p>
@@ -24,16 +24,16 @@ GroupMemberCategory.fragments = {
   user: gql`
     fragment GroupMemberCategory on User {
       userId
-      ...GroupMember
+      ...UserListElement
     }
 
-    ${GroupMember.fragments.user}
+    ${UserListElement.fragments.user}
   `,
 };
 
 export type GroupMemberCategoryGQLData = {
   userId: number;
-} & GroupMemberGQLData;
+} & UserListElementGQLData;
 
 type GroupMemberCategoryProps = {
   users: GroupMemberCategoryGQLData[];

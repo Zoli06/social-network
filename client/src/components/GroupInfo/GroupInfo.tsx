@@ -1,6 +1,6 @@
 import { gql, useQuery } from '@apollo/client';
 import { GroupHeader, GroupHeaderGQLData } from '../Group/GroupHeader';
-import { GroupMember, GroupMemberGQLData } from '../Group/GroupMember';
+import { UserListElement, UserListElementGQLData } from '../User/UserListElement';
 
 export const GroupInfo = ({ groupId }: GroupInfoProps) => {
   const { data, loading, error } = useQuery<GroupInfoQueryGQLData>(
@@ -31,7 +31,7 @@ export const GroupInfo = ({ groupId }: GroupInfoProps) => {
         <h1 className='text-xl font-bold'>Description</h1>
         <p>{description}</p>
         <h1 className='text-xl font-bold'>Creator user</h1>
-        <GroupMember user={data!.group.creatorUser} />
+        <UserListElement user={data!.group.creatorUser} />
         <h1 className='text-xl font-bold'>Created at</h1>
         <p>
           {new Date(createdAt).toLocaleDateString('en-us', {
@@ -58,7 +58,7 @@ const GROUP_INFO_QUERY = gql`
       name
       description
       creatorUser {
-        ...GroupMember
+        ...UserListElement
       }
       createdAt
       visibility
@@ -67,7 +67,7 @@ const GROUP_INFO_QUERY = gql`
     }
   }
 
-  ${GroupMember.fragments.user}
+  ${UserListElement.fragments.user}
   ${GroupHeader.fragments.group}
 `;
 
@@ -75,7 +75,7 @@ type GroupInfoQueryGQLData = {
   group: {
     groupId: string;
     description: string;
-    creatorUser: GroupMemberGQLData;
+    creatorUser: UserListElementGQLData;
     createdAt: string;
     visibility: 'visible' | 'hidden';
   } & GroupHeaderGQLData;

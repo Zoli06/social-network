@@ -33,7 +33,11 @@ const LEAVE_GROUP_MUTATION = gql`
   }
 `;
 
-export const GroupActions = ({ group, redirectToInfoPage }: GroupActionsProps) => {
+export const GroupActions = ({
+  group,
+  redirectToInfoPageWhenLeave,
+  onlyDisplayButtons = false,
+}: GroupActionsProps) => {
   const { userId: myUserId } = useContext(UserContext)!;
 
   const {
@@ -68,11 +72,8 @@ export const GroupActions = ({ group, redirectToInfoPage }: GroupActionsProps) =
         groupId,
       },
       update(cache) {
-        updateRelationshipWithGroup(
-          cache,
-          'member'
-        );
-      }
+        updateRelationshipWithGroup(cache, 'member');
+      },
     }
   );
 
@@ -83,11 +84,8 @@ export const GroupActions = ({ group, redirectToInfoPage }: GroupActionsProps) =
         groupId,
       },
       update(cache) {
-        updateRelationshipWithGroup(
-          cache,
-          null
-        );
-      }
+        updateRelationshipWithGroup(cache, null);
+      },
     }
   );
 
@@ -96,11 +94,8 @@ export const GroupActions = ({ group, redirectToInfoPage }: GroupActionsProps) =
       groupId,
     },
     update(cache) {
-      updateRelationshipWithGroup(
-        cache,
-        'member_request'
-      );
-    }
+      updateRelationshipWithGroup(cache, 'member_request');
+    },
   });
 
   const [cancelMemberRequest] = useMutation(CANCEL_MEMBER_REQUEST_MUTATION, {
@@ -108,11 +103,8 @@ export const GroupActions = ({ group, redirectToInfoPage }: GroupActionsProps) =
       groupId,
     },
     update(cache) {
-      updateRelationshipWithGroup(
-        cache,
-        null
-      );
-    }
+      updateRelationshipWithGroup(cache, null);
+    },
   });
 
   const [leaveGroup] = useMutation(LEAVE_GROUP_MUTATION, {
@@ -120,15 +112,12 @@ export const GroupActions = ({ group, redirectToInfoPage }: GroupActionsProps) =
       groupId,
     },
     update(cache) {
-      updateRelationshipWithGroup(
-        cache,
-        null
-      );
+      updateRelationshipWithGroup(cache, null);
 
-      if (redirectToInfoPage) {
+      if (redirectToInfoPageWhenLeave) {
         window.location.href = `/group/${groupId}/info`;
       }
-    }
+    },
   });
 
   const isCreator = myUserId === creatorUserId;
@@ -136,9 +125,11 @@ export const GroupActions = ({ group, redirectToInfoPage }: GroupActionsProps) =
   return (
     <div className='flex justify-end'>
       {isCreator ? (
-        <div>
-          <p>You are the creator of this group.</p>
-        </div>
+        !onlyDisplayButtons && (
+          <div>
+            <p>You are the creator of this group.</p>
+          </div>
+        )
       ) : (
         <>
           {myRelationshipWithGroupType === 'invited' && (
@@ -165,21 +156,23 @@ export const GroupActions = ({ group, redirectToInfoPage }: GroupActionsProps) =
               </Button>
             </div>
           )}
-          {myRelationshipWithGroupType === 'member_request_rejected' && (
-            <div>
-              <p>Sorry, your request was rejected.</p>
-            </div>
-          )}
-          {myRelationshipWithGroupType === 'banned' && (
+          {myRelationshipWithGroupType === 'member_request_rejected' &&
+            !onlyDisplayButtons && (
+              <div>
+                <p>Sorry, your request was rejected.</p>
+              </div>
+            )}
+          {myRelationshipWithGroupType === 'banned' && !onlyDisplayButtons && (
             <div>
               <p>You are banned from this group.</p>
             </div>
           )}
-          {(myRelationshipWithGroupType === 'member' || myRelationshipWithGroupType === 'admin') && (
+          {(myRelationshipWithGroupType === 'member' ||
+            myRelationshipWithGroupType === 'admin') && (
             <div className='flex gap-4'>
-                <Button onClick={() => leaveGroup()} color='secondary'>
-                  Leave
-                </Button>
+              <Button onClick={() => leaveGroup()} color='secondary'>
+                Leave
+              </Button>
             </div>
           )}
         </>
@@ -221,5 +214,6 @@ export type GroupActionsGQLData = {
 
 type GroupActionsProps = {
   group: GroupActionsGQLData;
-  redirectToInfoPage: boolean;
+  redirectToInfoPageWhenLeave: boolean;
+  onlyDisplayButtons?: boolean;
 };

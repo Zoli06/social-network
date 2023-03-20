@@ -1,3 +1,5 @@
+// TODO: rename this to GroupMemberActions
+
 import { gql, useMutation } from '@apollo/client';
 import { UserContext } from '../../App';
 import { useContext } from 'react';

@@ -178,6 +178,7 @@ export type UserActionsGQLData = {
 };
 
 type UserActionsProps = {
+  // TODO: derive isMe from user context
   isMe: boolean;
   user: UserActionsGQLData;
 };
