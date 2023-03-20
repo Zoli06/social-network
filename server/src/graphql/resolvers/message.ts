@@ -262,6 +262,8 @@ const resolvers = {
         )
       )[0];
     },
+    // BUG: OFFSET and LIMIT act weirdly. I think they are executed before DISTINCT
+    // Fix this as a priority cuz it affects home page
     async topMessages (
       _: any,
       { limit = 10, offset = 0 }: { limit: number; offset: number },
@@ -269,7 +271,7 @@ const resolvers = {
     ) {
       return (
         await connection.query(
-          `SELECT m.*, SUM(v.type = 'up') - SUM(v.type = 'down') AS votes
+          `SELECT DISTINCT m.*, SUM(v.type = 'up') - SUM(v.type = 'down') AS votes
           FROM messages AS m
           LEFT JOIN votes AS v
             ON m.message_id = v.message_id
@@ -300,7 +302,7 @@ const resolvers = {
     ) {
       return (
         await connection.query(
-          `SELECT m.*, SUM(v.type = 'up') - SUM(v.type = 'down') AS votes
+          `SELECT DISTINCT m.*, SUM(v.type = 'up') - SUM(v.type = 'down') AS votes
           FROM messages AS m
           LEFT JOIN votes AS v
             ON m.message_id = v.message_id AND v.created_at > DATE_SUB(NOW(), INTERVAL 1 DAY)
