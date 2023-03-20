@@ -82,34 +82,44 @@ export const Register = () => {
       <h1 className='text-3xl font-bold text-center mb-4'>Register</h1>
       <form onSubmit={handleSubmit} className='grid md:grid-cols-2 gap-2'>
         <div className='form-control'>
+          {/* TODO: refactor repeating code */}
           <label className='label pt-0'>
-            <span className='label-text'>Email address</span>
+            <span className='label-text'>
+              Email address <sup className='text-red-500'>*</sup>
+            </span>
           </label>
           <Input
             type='email'
             name='email'
             id='email'
             value={email}
+            required
             onChange={(e) => setEmail(e.target.value)}
           />
           <label className='label'>
-            <span className='label-text'>Password</span>
+            <span className='label-text'>
+              Password <sup className='text-red-500'>*</sup>
+            </span>
           </label>
           <Input
             type='password'
             name='password'
             id='password'
             value={password}
+            required
             onChange={(e) => setPassword(e.target.value)}
           />
           <label className='label'>
-            <span className='label-text'>Confirm Password</span>
+            <span className='label-text'>
+              Confirm Password <sup className='text-red-500'>*</sup>
+            </span>
           </label>
           <Input
             type='password'
             name='confirmPassword'
             id='confirmPassword'
             value={confirmPassword}
+            required
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
           <label className='label'>
@@ -125,23 +135,29 @@ export const Register = () => {
         </div>
         <div className='form-control'>
           <label className='label pt-0'>
-            <span className='label-text'>First Name</span>
+            <span className='label-text'>
+              First Name <sup className='text-red-500'>*</sup>
+            </span>
           </label>
           <Input
             type='text'
             name='firstName'
             id='firstName'
             value={firstName}
+            required
             onChange={(e) => setFirstName(e.target.value)}
           />
           <label className='label'>
-            <span className='label-text'>Last Name</span>
+            <span className='label-text'>
+              Last Name <sup className='text-red-500'>*</sup>
+            </span>
           </label>
           <Input
             type='text'
             name='lastName'
             id='lastName'
             value={lastName}
+            required
             onChange={(e) => setLastName(e.target.value)}
           />
           <label className='label'>
@@ -155,13 +171,16 @@ export const Register = () => {
             onChange={(e) => setMiddleName(e.target.value)}
           />
           <label className='label'>
-            <span className='label-text'>Username</span>
+            <span className='label-text'>
+              Username <sup className='text-red-500'>*</sup>
+            </span>
           </label>
           <Input
             type='text'
             name='username'
             id='username'
             value={userName}
+            required
             onChange={(e) => setUsername(e.target.value)}
           />
         </div>
