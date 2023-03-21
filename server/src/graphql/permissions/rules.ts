@@ -200,7 +200,6 @@ export const isGroupCreator = rule()(async (parent, args, ctx, info) => {
   if (group?.created_by_user_id === userId) {
     return true;
   }
-  // console.log('isGroupCreator', false);
   return false;
 });
 
@@ -222,7 +221,6 @@ export const isGroupAdmin = rule()(async (parent, args, ctx, info) => {
   if (relationship?.type === 'admin') {
     return true;
   }
-  // console.log('isGroupAdmin', false);
   return false;
 });
 
@@ -244,8 +242,6 @@ export const isGroupMember = rule()(async (parent, args, ctx, info) => {
   if (relationship?.type === 'member') {
     return true;
   }
-  // console.log(userId, groupId, relationship, args, parent);
-  // console.log('isGroupMember', false);
   return false;
 });
 
@@ -267,7 +263,6 @@ export const isInvitedToGroup = rule()(async (parent, args, ctx, info) => {
   if (relationship?.type === 'invited') {
     return true;
   }
-  // console.log('isInvitedToGroup', false);
   return false;
 });
 
@@ -289,7 +284,6 @@ export const isBannedFromGroup = rule()(async (parent, args, ctx, info) => {
   if (relationship?.type === 'banned') {
     return true;
   }
-  // console.log('isBannedFromGroup', false);
   return false;
 });
 
@@ -310,7 +304,6 @@ export const isMessageCreator = rule()(async (parent, args, ctx, info) => {
   if (message?.user_id === userId) {
     return true;
   }
-  // console.log('isMessageCreator', false);
   return false;
 });
 

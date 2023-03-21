@@ -75,10 +75,6 @@ export const GroupInvitationPopup = ({
     }
   }, [searchString, searchUsers, me.friends]);
 
-  useEffect(() => {
-    console.log(usersToInvite);
-  });
-
   return (
     // TODO: same wrapper as in Editor. Make it a component
     isOpen ? (

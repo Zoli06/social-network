@@ -92,9 +92,6 @@ export const HomeMessages = ({
                 );
               });
 
-              console.log(topMessagesPage);
-              console.log(data);
-
               if (newMessages.length === 0) {
                 setNoMoreTopMessages(true);
               }
