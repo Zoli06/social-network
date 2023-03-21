@@ -31,21 +31,23 @@ export const Notifications = () => {
     CHECK_ALL_NOTIFICATIONS_MUTATION,
     {
       update(cache, { data: { checkAllNotifications } }) {
-        cache.modify({
-          id: cache.identify({
-            __typename: 'User',
-            userId: data!.me.userId,
-          }),
-          fields: {
-            notifications(currentNotifications) {
-              return currentNotifications.map(
-                (currentNotification: { seenAt: string }) => {
-                  return { ...currentNotification, seenAt: Date.now() };
-                }
-              );
+        if (checkAllNotifications) {
+          cache.modify({
+            id: cache.identify({
+              __typename: 'User',
+              userId: data!.me.userId,
+            }),
+            fields: {
+              notifications(currentNotifications) {
+                return currentNotifications.map(
+                  (currentNotification: { seenAt: string }) => {
+                    return { ...currentNotification, seenAt: Date.now() };
+                  }
+                );
+              },
             },
-          },
-        });
+          });
+        }
       },
     }
   );
