@@ -62,7 +62,6 @@ const GROUP_INFO_QUERY = gql`
       }
       createdAt
       visibility
-      ...GroupActions
       ...GroupHeader
     }
   }

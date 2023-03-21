@@ -36,7 +36,7 @@ export const Editor = () => {
   return displayEditor ? (
     <Form
       onSubmit={handleSubmit}
-      className='fixed top-0 left-0 w-full h-full z-50 bg-black bg-opacity-50 flex flex-col justify-center items-center gap-4 p-4'
+      className='fixed top-0 left-0 w-full h-full z-50 bg-black/50 flex flex-col justify-center items-center gap-4 p-4'
     >
       <div className='md:w-3/4 w-full max-w-2xl md:h-[50vh] flex-grow md:flex-grow-0'>
         <MDEditor
