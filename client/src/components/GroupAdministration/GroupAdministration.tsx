@@ -5,6 +5,10 @@ import {
   GroupMembersAdministrationGQLData,
 } from './GroupMembersAdministration';
 import { GroupSettings, GroupSettingsGQLData } from './GroupSettings';
+import {
+  GroupInvitationPopup, GroupInvitationPopupOnGroupGQLData, GroupInvitationPopupOnMeGQLData,
+  openInvitationPopup
+} from './GroupInvitationPopup';
 
 export const GroupAdministration = ({ groupId }: GroupAdministrationProps) => {
   const { data, loading, error } = useQuery<GroupAdministrationQueryGQLData>(
@@ -31,6 +35,10 @@ export const GroupAdministration = ({ groupId }: GroupAdministrationProps) => {
           <Button>Back to group</Button>
         </a>
       </div>
+      <GroupInvitationPopup group={data!.group} me={data!.me} />
+      <div className='mb-2'>
+        <Button onClick={() => openInvitationPopup()}>Invite users to group</Button>
+      </div>
       <div className='bg-black/20 p-4 rounded-md'>
         <h1 className='text-2xl font-bold text-center'>Group Administration</h1>
         <h2 className='text-2xl font-bold text-center'>{data!.group.name}</h2>
@@ -54,11 +62,19 @@ const GROUP_ADMINISTRATION_QUERY = gql`
 
       ...GroupMembersAdministration
       ...GroupSettings
+      ...GroupInvitationPopupOnGroup
+    }
+
+    me {
+      userId
+      ...GroupInvitationPopupOnMe
     }
   }
 
   ${GroupMembersAdministration.fragments.group}
   ${GroupSettings.fragments.group}
+  ${GroupInvitationPopup.fragments.group}
+  ${GroupInvitationPopup.fragments.me}
 `;
 
 type GroupAdministrationQueryGQLData = {
@@ -69,7 +85,12 @@ type GroupAdministrationQueryGQLData = {
       type: string;
     };
   } & GroupMembersAdministrationGQLData &
-    GroupSettingsGQLData;
+  GroupSettingsGQLData &
+  GroupInvitationPopupOnGroupGQLData;
+  
+  me: {
+    userId: string;
+  } & GroupInvitationPopupOnMeGQLData;
 };
 
 type GroupAdministrationProps = {
