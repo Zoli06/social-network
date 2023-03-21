@@ -112,7 +112,7 @@ export const GroupInvitationPopup = ({
                   );
                 })
               ) : (
-                <i className='text-center'>No friends to invite</i>
+                <i className='text-center'>No users to invite</i>
               )}
             </div>
           </div>
