@@ -1,21 +1,16 @@
 import { gql } from '@apollo/client';
+import { Avatar } from 'react-daisyui';
 
 export const GroupListElement = ({
-  group: {
-    groupId,
-    name,
-    indexImage,
-  },
+  group: { groupId, name, indexImage },
 }: GroupListElementProps) => {
   return (
     <a className='flex gap-4' href={`/group/${groupId}`}>
-      <div>
-        <img
-          className='w-12 h-12 rounded-full'
-          src={indexImage?.url || '/images/default-group-index-image.png'}
-          alt='Group index'
-        />
-      </div>
+      <Avatar
+        src={indexImage?.url || '/images/default-group-index-image.png'}
+        shape='circle'
+        size='sm'
+      />
       <div className='flex flex-col justify-center'>
         <p className='text-lg font-semibold leading-5 overflow-ellipsis'>
           {name}

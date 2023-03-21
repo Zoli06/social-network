@@ -34,6 +34,7 @@ type Group {
   updatedAt: Date!
   name: String!
   messages(onlyInterestedInMessageId: ID, maxDepth: Int): [Message!]! # onlyInterestedInMessageId replaces post
+  # TODO: consider these return GroupUserRelationship
   members: [User!]!
   memberRequests: [User!]!
   bannedUsers: [User!]!

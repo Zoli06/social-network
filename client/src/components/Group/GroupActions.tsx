@@ -133,11 +133,11 @@ export const GroupActions = ({
       ) : (
         <>
           {myRelationshipWithGroupType === 'invited' && (
-            <div>
-              <Button onClick={() => acceptGroupInvitation()} color='secondary'>
+            <div className='flex flex-wrap gap-2 justify-end'>
+              <Button onClick={() => acceptGroupInvitation()} color='success'>
                 Accept invitation
               </Button>
-              <Button onClick={() => rejectGroupInvitation()} color='success'>
+              <Button onClick={() => rejectGroupInvitation()} color='secondary'>
                 Reject invitation
               </Button>
             </div>

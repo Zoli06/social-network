@@ -35,11 +35,15 @@ const resolvers = {
       const _maxDepth =
         _onlyInterestedInMessageId === null ? maxDepth + 1 : maxDepth;
 
-      const responseTree = (await getMessageResponseTree(
-        { message_id: _onlyInterestedInMessageId },
-        { maxDepth: _maxDepth },
-        context
-      )).filter((message: { group_id: number }) => message.group_id === group_id);
+      const responseTree = (
+        await getMessageResponseTree(
+          { message_id: _onlyInterestedInMessageId },
+          { maxDepth: _maxDepth },
+          context
+        )
+      ).filter(
+        (message: { group_id: number }) => message.group_id === group_id
+      );
       if (_onlyInterestedInMessageId !== null) {
         const message = await getMessage(
           {},
@@ -405,10 +409,12 @@ const resolvers = {
         [groupId, userId]
       );
 
-      const userName = connection.query(
-        `SELECT user_name FROM users
+      const userName = (
+        await connection.query(
+          `SELECT user_name FROM users
           WHERE user_id = ?`,
-        [user.userId]
+          [user.userId]
+        )
       )[0][0].user_name;
 
       const groupName = (

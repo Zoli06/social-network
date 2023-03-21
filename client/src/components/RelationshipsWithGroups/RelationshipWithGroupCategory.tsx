@@ -15,21 +15,27 @@ export const RelationshipWithGroupCategory = ({
     <div className='flex flex-col gap-2'>
       <h1 className='text-lg font-bold'>{title}</h1>
       {groups.length > 0 ? (
-      <div className='flex flex-wrap gap-4'>
-        {groups.map((group) => (
-          <Artboard className='p-4 flex flex-row w-full justify-between'
-            key={group.groupId}>
-            <GroupListElement group={group} />
-              <GroupActions group={group} redirectToInfoPageWhenLeave={false} onlyDisplayButtons={true} />
-          </Artboard>
-        ))}
+        <div className='flex flex-wrap gap-4'>
+          {groups.map((group) => (
+            <Artboard
+              className='p-4 flex flex-row w-full justify-between gap-4'
+              key={group.groupId}
+            >
+              <GroupListElement group={group} />
+              <GroupActions
+                group={group}
+                redirectToInfoPageWhenLeave={false}
+                onlyDisplayButtons={true}
+              />
+            </Artboard>
+          ))}
         </div>
       ) : (
-          <i>{noGroupsMessage}</i>
-        )}
+        <i>{noGroupsMessage}</i>
+      )}
     </div>
-  )
-}
+  );
+};
 
 RelationshipWithGroupCategory.fragments = {
   group: gql`

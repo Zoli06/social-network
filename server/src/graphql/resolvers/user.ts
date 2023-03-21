@@ -669,7 +669,7 @@ const resolvers = {
           `SELECT * FROM \`groups\` AS g
           JOIN group_user_relationships AS gur
           ON g.group_id = gur.group_id
-          WHERE user_id = ? AND type = 'invite'`,
+          WHERE user_id = ? AND type = 'invited'`,
           [user_id]
         )
       )[0];
