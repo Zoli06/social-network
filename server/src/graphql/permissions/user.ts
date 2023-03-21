@@ -18,6 +18,7 @@ export default {
     deleteMe: isAuthenticated,
     createUserUserRelationship: isAuthenticated,
     checkNotification: and(isAuthenticated, isUserCheckingOwnNotification),
+    checkAllNotifications: isAuthenticated
   },
   User: {
     userId: isAuthenticated,

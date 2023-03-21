@@ -1,8 +1,6 @@
-import { gql, useQuery } from '@apollo/client';
-import {
-  Notification,
-  NotificationGQLData,
-} from './Notification';
+import { gql, useMutation, useQuery } from '@apollo/client';
+import { Button } from 'react-daisyui';
+import { Notification, NotificationGQLData } from './Notification';
 
 const NOTIFICATIONS_QUERY = gql`
   query Notifications {
@@ -11,6 +9,7 @@ const NOTIFICATIONS_QUERY = gql`
       notifications(showAll: true) {
         notificationId
         createdAt
+        seenAt
         ...Notification
       }
     }
@@ -19,16 +18,50 @@ const NOTIFICATIONS_QUERY = gql`
   ${Notification.fragments.notification}
 `;
 
+const CHECK_ALL_NOTIFICATIONS_MUTATION = gql`
+  mutation CheckAllNotifications {
+    checkAllNotifications
+  }
+`;
+
 export const Notifications = () => {
   const { data, loading, error } =
     useQuery<NotificationsQueryGQLData>(NOTIFICATIONS_QUERY);
+  const [checkAllNotifications] = useMutation(
+    CHECK_ALL_NOTIFICATIONS_MUTATION,
+    {
+      update(cache, { data: { checkAllNotifications } }) {
+        cache.modify({
+          id: cache.identify({
+            __typename: 'User',
+            userId: data!.me.userId,
+          }),
+          fields: {
+            notifications(currentNotifications) {
+              return currentNotifications.map(
+                (currentNotification: { seenAt: string }) => {
+                  return { ...currentNotification, seenAt: Date.now() };
+                }
+              );
+            },
+          },
+        });
+      },
+    }
+  );
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error</div>;
 
   return (
-    <div className='overflow-x-auto max-w-xl flex justify-center flex-col items-center pb-2 bg-black/20 p-4 rounded-md'>
+    <div className='overflow-x-auto max-w-xl flex justify-center flex-col items-center pb-2 bg-black/20 p-4 rounded-md relative'>
       <h1 className='text-2xl font-bold mb-4'>Notifications</h1>
+      <Button
+        className='md:absolute top-4 right-4 self-start'
+        onClick={() => checkAllNotifications()}
+      >
+        Check all
+      </Button>
       <div className='w-full'>
         <div className='flex flex-col gap-2'>
           <h2 className='text-xl font-bold'>Today</h2>
@@ -99,9 +132,11 @@ export const Notifications = () => {
 
 type NotificationsQueryGQLData = {
   me: {
+    userId: string;
     notifications: ({
       notificationId: number;
       createdAt: string;
+      seenAt: string | null;
     } & NotificationGQLData)[];
   };
 };

@@ -220,20 +220,31 @@ const resolvers = {
 
       return myRelationshipWithUser;
     },
-    checkNotification: async (
+    async checkNotification(
       _: any,
       { notificationId }: { notificationId: number },
       context: Context
-    ) => {
+    ) {
       const { user, connection } = context;
       // TODO: auto update updated_at in database
       await connection.query(
         `UPDATE notifications as n
         JOIN user_notifications as nuc
         ON nuc.notification_id = n.notification_id
-        SET seen_at = NOW(), updated_at = DEFAULT
+        SET nuc.seen_at = NOW(), n.updated_at = DEFAULT
         WHERE n.notification_id = ?`,
-        [notificationId, user.userId]
+        [notificationId]
+      );
+      return true;
+    },
+    async checkAllNotifications(_: any, __: any, { user, connection }: Context) {
+      await connection.query(
+        `UPDATE notifications as n
+        JOIN user_notifications as nuc
+        ON nuc.notification_id = n.notification_id
+        SET nuc.seen_at = NOW(), updated_at = DEFAULT
+        WHERE nuc.user_id = ?`,
+        [user.userId]
       );
       return true;
     },
@@ -249,7 +260,11 @@ const resolvers = {
     },
     async friends({ user_id }: { user_id: number }, _: any, context: Context) {
       const { connection } = context;
-      const pointOfViewUser = await resolvers.Query.user({}, {userId: user_id}, context);
+      const pointOfViewUser = await resolvers.Query.user(
+        {},
+        { userId: user_id },
+        context
+      );
 
       return (
         await connection.query(
@@ -290,7 +305,11 @@ const resolvers = {
       context: Context
     ) {
       const { connection } = context;
-      const pointOfViewUser = await resolvers.Query.user({}, {userId: user_id}, context);
+      const pointOfViewUser = await resolvers.Query.user(
+        {},
+        { userId: user_id },
+        context
+      );
 
       return (
         await connection.query(
@@ -328,7 +347,11 @@ const resolvers = {
       context: Context
     ) {
       const { connection } = context;
-      const pointOfViewUser = await resolvers.Query.user({}, {userId: user_id}, context);
+      const pointOfViewUser = await resolvers.Query.user(
+        {},
+        { userId: user_id },
+        context
+      );
 
       return (
         await connection.query(
@@ -366,7 +389,11 @@ const resolvers = {
       context: Context
     ) {
       const { connection } = context;
-      const pointOfViewUser = await resolvers.Query.user({}, {userId: user_id}, context);
+      const pointOfViewUser = await resolvers.Query.user(
+        {},
+        { userId: user_id },
+        context
+      );
 
       return (
         await connection.query(
