@@ -112,4 +112,5 @@ type Mutation {
     type: UserUserRelationshipInputType
   ): UserUserRelationship! # also can be used to delete and update
   checkNotification(notificationId: ID!): Boolean!
+  checkAllNotifications: Boolean!
 }
