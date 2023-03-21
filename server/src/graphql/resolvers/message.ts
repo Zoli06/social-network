@@ -262,8 +262,6 @@ const resolvers = {
         )
       )[0];
     },
-    // BUG: OFFSET and LIMIT act weirdly. I think they are executed before DISTINCT
-    // Fix this as a priority cuz it affects home page
     async topMessages (
       _: any,
       { limit = 10, offset = 0 }: { limit: number; offset: number },
@@ -288,7 +286,7 @@ const resolvers = {
               OR gur.type = 'admin'
               OR gur.type = 'member')
           GROUP BY m.message_id
-          ORDER BY votes DESC
+          ORDER BY votes DESC, m.message_id
           LIMIT :limit
           OFFSET :offset`,
           { limit, offset, userId: user.userId }
@@ -319,7 +317,7 @@ const resolvers = {
               OR gur.type = 'admin'
               OR gur.type = 'member')
           GROUP BY m.message_id
-          ORDER BY votes DESC
+          ORDER BY votes DESC, m.message_id
           LIMIT :limit
           OFFSET :offset`,
           { limit, offset, userId: user.userId }
