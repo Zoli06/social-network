@@ -5,6 +5,7 @@ import {
   GroupInvitationPopupUserGQLData,
 } from './GroupInvitationPopupUser';
 import { useEffect, useState } from 'react';
+import { PopupWrapper } from '../../utilities/PopupWrapper';
 
 const SEARCH_USERS_QUERY = gql`
   query SearchUsers($query: String!) {
@@ -76,9 +77,8 @@ export const GroupInvitationPopup = ({
   }, [searchString, searchUsers, me.friends]);
 
   return (
-    // TODO: same wrapper as in Editor. Make it a component
     isOpen ? (
-      <div className='fixed top-0 left-0 w-full h-full z-50 bg-black/50 flex flex-col justify-center items-center gap-4 p-4'>
+      <PopupWrapper>
         <div className='relative md:w-3/4 w-full max-w-lg md:min-h-[33vh] flex-grow md:flex-grow-0 bg-[#0d1117] rounded-md p-4'>
           <Button
             onClick={() => setOpen(false)}
@@ -113,7 +113,7 @@ export const GroupInvitationPopup = ({
             </div>
           </div>
         </div>
-      </div>
+      </PopupWrapper>
     ) : null
   );
 };

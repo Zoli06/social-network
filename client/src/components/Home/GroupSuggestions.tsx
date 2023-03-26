@@ -7,7 +7,7 @@ export const GroupSuggestions = ({
   return (
     <div>
       <h1 className='text-3xl font-bold text-center mb-2'>Group suggestions</h1>
-      <div className='flex flex-row gap-4 overflow-x-scroll'>
+      <div className='flex flex-row gap-4 overflow-x-auto'>
         {groupSuggestions.length > 0 ? (
           groupSuggestions.map((group) => {
             return <GroupCard group={group} key={group.groupId} />;

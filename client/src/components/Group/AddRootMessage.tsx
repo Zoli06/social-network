@@ -2,8 +2,6 @@ import { gql, useMutation } from '@apollo/client';
 import { openEditor } from '../Editor/Editor';
 import { SvgButton } from '../../utilities/SvgButton';
 
-// TODO: Refactor this
-// Same code is used in MessageActions.tsx
 const ADD_ROOT_MESSAGE_MUTATION = gql`
   mutation AddRootMessageMutation($message: MessageInput!) {
     sendMessage(message: $message) {

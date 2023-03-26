@@ -12,7 +12,6 @@ const topMessagesOffset = 0;
 const trendingMessagesOffset = 0;
 
 export const Home = () => {
-  // TODO: add pagination
   const { data, loading, error, subscribeToMore } = useQuery<HomeQueryGQLData>(
     HOME_QUERY,
     {

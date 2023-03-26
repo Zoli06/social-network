@@ -39,12 +39,7 @@ export const Messages = ({
                     {message.group.name}
                   </a>
                 </p>
-                {/* TODO: get buttons working. Don't redirect when clicking it */}
-                {/* XXX */}
-                <a
-                  href={`/group/${message.group.groupId}/message/${message.messageId}`}
-                >
-                  <Artboard className='rounded-md cursor-pointer p-4'>
+                  <Artboard className='rounded-md p-4'>
                     <Message
                       messages={messages}
                       messageId={message.messageId}
@@ -56,7 +51,6 @@ export const Messages = ({
                       renderAsLink={renderAsLink}
                     />
                   </Artboard>
-                </a>
               </div>
             ))}
           </div>
@@ -76,7 +70,7 @@ export const Messages = ({
           ))
         )
       ) : (
-        <h1 className='text-xl font-bold text-center lg:w-96'>No messages</h1>
+        <h1 className='text-xl font-bold text-center w-full'>No messages</h1>
       )}
     </div>
   );

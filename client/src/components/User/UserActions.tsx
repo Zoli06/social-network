@@ -101,7 +101,7 @@ export const UserActions = ({ isMe, user }: UserActionsProps) => {
   return (
     <div>
       {isMe && (
-        <a href='/edit-profile'>
+        <a href='/me/edit'>
           <div className='flex flex-col gap-2'>
             <Button>Edit Profile</Button>
           </div>

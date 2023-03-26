@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { gql, useMutation } from '@apollo/client';
 import { Input, Button, Link } from 'react-daisyui';
+import { showNotification } from '../../utilities/Notification';
 
 const LOGIN_MUTATION = gql`
   mutation Login($email: String!, $password: String!) {
@@ -27,6 +28,16 @@ export const Login = () => {
           email,
           password,
         },
+        onError: (err) => {
+          console.error(err);
+          showNotification({
+            title: 'Error',
+            description: 'An error occurred while logging in',
+            backgroundColor: '#ff0000',
+            textColor: '#fff',
+            borderColor: '#ff0000',
+          });
+        }
       });
 
       // store the token in local storage
@@ -53,6 +64,7 @@ export const Login = () => {
             name='email'
             id='email'
             value={email}
+            required
             onChange={(e) => setEmail(e.target.value)}
           />
           <label className='label'>
@@ -62,6 +74,7 @@ export const Login = () => {
             type='password'
             name='password'
             id='password'
+            required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />

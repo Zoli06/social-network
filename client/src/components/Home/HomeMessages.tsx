@@ -152,8 +152,6 @@ export const HomeMessages = ({
     trendingMessagesPage,
   ]);
 
-  // Fetch more messages when the user scrolls to the bottom of the page
-  // BUG: after a few fetch no more message fetched
   useEffect(() => {
     const handleScroll = () => {
       const scrollHeight = document.documentElement.scrollHeight;

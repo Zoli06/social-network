@@ -7,7 +7,7 @@ export const FriendSuggestions = ({ me }: FriendSuggestionsProps) => {
       <h1 className='text-3xl font-bold text-center mb-2'>
         Friend suggestions
       </h1>
-      <div className='flex flex-row gap-4 overflow-x-scroll'>
+      <div className='flex flex-row gap-4 overflow-x-auto'>
         {me.friendSuggestions.length > 0 ? (
           me.friendSuggestions.map((friend) => (
             <UserCard key={friend.userId} user={friend} />

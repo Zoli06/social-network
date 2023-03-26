@@ -10,6 +10,9 @@ const variablesToCheck = [
   'DB_NAME',
   'JWT_SECRET',
   'PORT',
+  'IMAGEKIT_PUBLIC_KEY',
+  'IMAGEKIT_PRIVATE_KEY',
+  'IMAGEKIT_URL_ENDPOINT',
 ];
 
 variablesToCheck.forEach((variable) => {
@@ -34,6 +37,7 @@ import getDynamicContext, { Context } from './graphql/context';
 import { fieldResolverMiddleware, resolvers } from './graphql/resolvers';
 import typeDefs from './graphql/typeDefs';
 import permissions from './graphql/permissions';
+import { graphqlUploadExpress } from 'graphql-upload-ts';
 
 let schema = applyMiddleware(
   makeExecutableSchema({ typeDefs, resolvers }),
@@ -75,6 +79,7 @@ const server = new ApolloServer({
 });
 
 server.start().then(() => {
+  app.use(graphqlUploadExpress({ maxFileSize: 10000000000, maxFiles: 10 }));
   app.use(
     '/graphql',
     cors(),
@@ -84,6 +89,7 @@ server.start().then(() => {
       context: getDynamicContext,
     })
   );
+
 
   const PORT = parseInt(process.env.PORT!);
   httpServer.listen(PORT, () => {

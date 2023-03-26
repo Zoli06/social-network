@@ -6,6 +6,7 @@ import { GroupQueryGQLData } from '../Group/Group';
 import { MessagesGQLData } from './Messages';
 import { SvgButton } from '../../utilities/SvgButton';
 import { EmojiButton } from '../../utilities/EmojiButton';
+import { cache } from '../..';
 
 const ADD_RESPONSE_MUTATION = gql`
   mutation AddResponseMutation($message: MessageInput!) {
@@ -98,23 +99,40 @@ export const MessageActions = ({
       ) => {
         if (!subscriptionData.data) return prev;
         const { messageVoted } = subscriptionData.data;
-        return {
-          ...prev,
-          group: {
-            ...prev.group,
-            messages: prev.group.messages.map((message: MessagesGQLData) => {
-              if (message.messageId === messageId) {
-                return {
-                  ...message,
-                  upVotes: messageVoted.upVotes,
-                  downVotes: messageVoted.downVotes,
-                };
-              } else {
-                return message;
-              }
-            }),
-          },
-        };
+
+        // this was the old code
+        // it only works in the group page
+
+        // return {
+        //   ...prev,
+        //   group: {
+        //     ...prev.group,
+        //     messages: prev.group.messages.map((message: MessagesGQLData) => {
+        //       if (message.messageId === messageId) {
+        //         return {
+        //           ...message,
+        //           upVotes: messageVoted.upVotes,
+        //           downVotes: messageVoted.downVotes,
+        //         };
+        //       } else {
+        //         return message;
+        //       }
+        //     }),
+        //   },
+        // };
+
+        // We don't know where the message is in the cache, so we have to find it in the prev object
+        cache.modify({
+          id: cache.identify({ __typename: 'Message', messageId }),
+          fields: {
+            upVotes: () => messageVoted.upVotes,
+            downVotes: () => messageVoted.downVotes,
+          }
+        })
+
+        // idk why it doesn't overwrite the cache
+        // and it not just works but it resolves a bug where the upvotes and downvotes don't update on the home page
+        return null;
       },
     });
 
@@ -129,22 +147,32 @@ export const MessageActions = ({
       ) => {
         if (!subscriptionData.data) return prev;
         const { messageReacted } = subscriptionData.data;
-        return {
-          ...prev,
-          group: {
-            ...prev.group,
-            messages: prev.group.messages.map((message: MessagesGQLData) => {
-              if (message.messageId === messageId) {
-                return {
-                  ...message,
-                  reactions: messageReacted,
-                };
-              } else {
-                return message;
-              }
-            }),
-          },
-        };
+
+        // return {
+        //   ...prev,
+        //   group: {
+        //     ...prev.group,
+        //     messages: prev.group.messages.map((message: MessagesGQLData) => {
+        //       if (message.messageId === messageId) {
+        //         return {
+        //           ...message,
+        //           reactions: messageReacted,
+        //         };
+        //       } else {
+        //         return message;
+        //       }
+        //     }),
+        //   },
+        // };
+
+        cache.modify({
+          id: cache.identify({ __typename: 'Message', messageId }),
+          fields: {
+            reactions: () => messageReacted,
+          }
+        })
+
+        return null;
       },
     });
   }, [subscribeToMore, messageId]);

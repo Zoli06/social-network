@@ -4,6 +4,7 @@ import {
   RelationshipWithGroupCategoryGQLData,
 } from './RelationshipWithGroupCategory';
 
+// BUG: group doesn't change category
 export const RelationshipsWithGroups = () => {
   const { data, loading, error } =
     useQuery<RelationshipsWithGroupsQueryGQLData>(
