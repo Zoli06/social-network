@@ -5,7 +5,6 @@ import {
   ApolloClient,
   InMemoryCache,
   ApolloProvider,
-  createHttpLink,
   split,
 } from '@apollo/client';
 import { getMainDefinition } from '@apollo/client/utilities';

@@ -6,7 +6,6 @@ import {
   Textarea,
   Form,
   Avatar,
-  FileInput,
 } from 'react-daisyui';
 
 const EDIT_PROFILE_QUERY = gql`
