@@ -3,7 +3,6 @@ import { gql, useMutation } from '@apollo/client';
 import { v4 as uuidv4 } from 'uuid';
 import { openEditor } from '../Editor/Editor';
 import { GroupQueryGQLData } from '../Group/Group';
-import { MessagesGQLData } from './Messages';
 import { SvgButton } from '../../utilities/SvgButton';
 import { EmojiButton } from '../../utilities/EmojiButton';
 import { cache } from '../..';
@@ -147,23 +146,6 @@ export const MessageActions = ({
       ) => {
         if (!subscriptionData.data) return prev;
         const { messageReacted } = subscriptionData.data;
-
-        // return {
-        //   ...prev,
-        //   group: {
-        //     ...prev.group,
-        //     messages: prev.group.messages.map((message: MessagesGQLData) => {
-        //       if (message.messageId === messageId) {
-        //         return {
-        //           ...message,
-        //           reactions: messageReacted,
-        //         };
-        //       } else {
-        //         return message;
-        //       }
-        //     }),
-        //   },
-        // };
 
         cache.modify({
           id: cache.identify({ __typename: 'Message', messageId }),

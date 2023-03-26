@@ -77,5 +77,3 @@ export type EditorGQLData = {
   messageId: string;
   group: { groupId: string };
 };
-
-type EditorProps = {};
