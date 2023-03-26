@@ -1,5 +1,7 @@
 import { Context } from '../context';
 import { deleteMedia } from '../helpers/media';
+import { imagekit } from '../helpers/imagekit';
+import { v4 as uuidv4 } from 'uuid';
 
 const resolvers = {
   Media: {
@@ -35,16 +37,25 @@ const resolvers = {
   Mutation: {
     async createMedia(
       _: any,
-      { media: { url, caption } }: { media: { url: string; caption: string } },
+      { media: { file, caption } }: { media: { file: any; caption: string } },
       context: Context
     ) {
       const { user, connection } = context;
+      const { createReadStream, filename } = await file;
+      const stream = createReadStream();
+      // upload to imagekit
+      const { url } = await imagekit.upload({
+        file: stream,
+        fileName: uuidv4() + filename,
+      });
+
       const mediaId = (
         await connection.query(
           `INSERT INTO medias (user_id, url, caption) VALUES (?, ?, ?)`,
           [user.userId, url, caption]
         )
       )[0].insertId;
+
       return await resolvers.Query.media({}, { mediaId }, context);
     },
     async deleteMedia(

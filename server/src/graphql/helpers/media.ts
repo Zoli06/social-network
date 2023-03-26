@@ -1,3 +1,5 @@
+import { imagekit } from './imagekit';
+
 export const deleteMedia = async (mediaId: number, connection: any) => {
   await connection.query(`DELETE FROM message_medias WHERE media_id = ?`, [
     mediaId,
@@ -10,6 +12,8 @@ export const deleteMedia = async (mediaId: number, connection: any) => {
   await connection.query(`DELETE FROM medias WHERE media_id = ?`, [
     mediaId,
   ]);
+
+  await imagekit.deleteFile(mediaId.toString());
 };
 
 export const deleteUserMedias = async (userId: number, connection: any) => {

@@ -13,7 +13,7 @@ const UserGroupCategory = ({
   return (
     <div>
       <h1 className='text-xl font-bold'>{title}</h1>
-      <div className='max-w-xl flex gap-4 overflow-x-scroll'>
+      <div className='max-w-xl flex gap-4 overflow-x-auto'>
         {groups.length > 0 ? (
           groups.map(({ group }) => (
             <GroupCard group={group} key={group.groupId} />

@@ -166,13 +166,10 @@ export const GroupMemberModify = ({
               __typename: 'Group',
               groupId,
             }),
-            // bug here: ui doesn't update
-            // no idea why
-            // TODO: fix this
             fields: {
               members: (existingMembers = []) => {
                 return existingMembers.filter(
-                  (existingMember: any) => existingMember.userId !== userId
+                  (existingMember: any) => existingMember.userId === userId
                 );
               },
             },
@@ -344,7 +341,10 @@ export const GroupMemberModify = ({
       onClick: banUser,
       key: 'ban',
       // admins can ban everyone except other admins and the group creator. admins can be banned by the group creator
-      condition: (isLoggedInUserGroupCreator || !isEditedUserAdmin)  && !isEditedUserBanned && !isEditedUserGroupCreator,
+      condition:
+        (isLoggedInUserGroupCreator || !isEditedUserAdmin) &&
+        !isEditedUserBanned &&
+        !isEditedUserGroupCreator,
     },
     {
       text: 'Unban',

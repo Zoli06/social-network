@@ -21,11 +21,13 @@ import { SearchPage } from './pages/SearchPage';
 import { CreateGroupPage } from './pages/CreateGroupPage';
 import { RelationshipsWithUsersPage } from './pages/RelationshipsWithUsersPage';
 import { RelationshipsWithGroupsPage } from './pages/RelationshipsWithGroupsPage';
+import { NotificationsPage } from './pages/NotificationsPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 import { useQuery, gql } from '@apollo/client';
 import { Editor } from './components/Editor/Editor';
 import { Header, HeaderGQLData } from './components/Header/Header';
-import { Notifications } from './components/Notifications/Notifications';
 import { Theme } from 'react-daisyui';
+import { Notification } from './utilities/Notification';
 
 // This context stores the user ID of the current user
 export const UserContext = createContext<MeQueryGQLData['me'] | undefined>(
@@ -56,6 +58,7 @@ export function App() {
     ) {
       return (
         <Theme dataTheme={isDark ? 'dark' : 'light'}>
+          <Notification />
           <Router>
             <div className='flex flex-col items-center p-8'>
               <Routes>
@@ -77,6 +80,7 @@ export function App() {
 
   return (
     <Theme dataTheme={isDark ? 'dark' : 'light'}>
+      <Notification />
       <Router>
         <UserContext.Provider value={me}>
           <Editor />
@@ -89,20 +93,21 @@ export function App() {
                 path='/group/:groupId/message/:messageId'
                 element={<GroupPage />}
               />
-              <Route path='group/:groupId/info' element={<GroupInfoPage />} />
+              <Route path='/group/:groupId/info' element={<GroupInfoPage />} />
               <Route
-                path='group/:groupId/admin'
+                path='/group/:groupId/admin'
                 element={<GroupAdministrationPage />}
               />
               <Route path='/create-group' element={<CreateGroupPage />} />
               <Route path='/user/:userId' element={<UserPage />} />
-              <Route path='/edit-profile' element={<EditProfilePage />} />
+              {/* TODO: replace this /me/edit */}
               <Route path='/login' element={<LoginPage />} />
               <Route path='/register' element={<RegisterPage />} />
               <Route
                 path='/me'
                 element={<Navigate to={`/user/${me.userId}`} />}
               />
+              <Route path='/me/edit' element={<EditProfilePage />} />
               <Route
                 path='/relationships-with-users'
                 element={<RelationshipsWithUsersPage />}
@@ -111,14 +116,16 @@ export function App() {
                 path='/relationships-with-groups'
                 element={<RelationshipsWithGroupsPage />}
               />
-              
+
               <Route path='/logout' element={<LogoutPage />} />
 
-              <Route path='/notifications' element={<Notifications />} />
+              <Route path='/notifications' element={<NotificationsPage />} />
 
               <Route path='/search' element={<SearchPage />} />
 
-              <Route path='*' element={<HomePage />} />
+              <Route index element={<HomePage />} />
+
+              <Route path='*' element={<NotFoundPage />} />
             </Routes>
           </div>
         </UserContext.Provider>

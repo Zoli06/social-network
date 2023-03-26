@@ -161,15 +161,15 @@ const resolvers = {
           SET first_name = ?, last_name = ?, middle_name = ?, user_name = ?, mobile_number = ?, email = ?, password = ?, updated_at = DEFAULT, intro = ?, profile_image_media_id = ?
           WHERE user_id = ?`,
         [
-          firstName || _user.first_name,
-          lastName || _user.last_name,
-          middleName || _user.middle_name,
-          userName || _user.user_name,
-          mobileNumber || _user.mobile_number,
-          email || _user.email,
+          firstName,
+          lastName,
+          middleName,
+          userName,
+          mobileNumber,
+          email,
           password ? await bcrypt.hash(password, 10) : _user.password,
-          intro || _user.intro,
-          profileImageMediaId || _user.profile_image_media_id,
+          intro,
+          profileImageMediaId,
           user.userId,
         ]
       );

@@ -303,7 +303,7 @@ const resolvers = {
           `SELECT DISTINCT m.*, SUM(v.type = 'up') - SUM(v.type = 'down') AS votes
           FROM messages AS m
           LEFT JOIN votes AS v
-            ON m.message_id = v.message_id AND v.created_at > DATE_SUB(NOW(), INTERVAL 1 DAY)
+            ON m.message_id = v.message_id
           JOIN group_user_relationships AS gur
             ON gur.group_id = m.group_id
           JOIN \`groups\` AS g
@@ -316,6 +316,7 @@ const resolvers = {
               OR g.created_by_user_id = :userId
               OR gur.type = 'admin'
               OR gur.type = 'member')
+            AND v.created_at > DATE_SUB(NOW(), INTERVAL 1 DAY)
           GROUP BY m.message_id
           ORDER BY votes DESC, m.message_id
           LIMIT :limit

@@ -28,7 +28,7 @@ export const Message = ({
     return null;
   }
 
-  const isBanned = message.group.myRelationshipWithGroup.type === 'banned';  
+  const isBanned = message.group.myRelationshipWithGroup.type === 'banned';
 
   return (
     <div
@@ -41,7 +41,15 @@ export const Message = ({
           <MessageAuthor user={message.author} />
           <MessageModify message={message} />
         </div>
-        <MessageText message={message} />
+        {renderAsLink ? (
+          <a
+            href={`/group/${message.group.groupId}/message/${message.messageId}`}
+          >
+            <MessageText message={message} />
+          </a>
+        ) : (
+          <MessageText message={message} />
+        )}
         {!isBanned && (
           <MessageActions message={message} subscribeToMore={subscribeToMore} />
         )}

@@ -85,12 +85,12 @@ input UserInput {
 }
 
 input UserUpdateInput {
-  firstName: String
-  lastName: String
+  firstName: String!
+  lastName: String!
   middleName: String
-  userName: String
+  userName: String!
   mobileNumber: String
-  email: String
+  email: String!
   intro: String
   password: String
   profileImageMediaId: ID

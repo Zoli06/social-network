@@ -1,6 +1,16 @@
 import { gql, useQuery } from '@apollo/client';
+import { ReactNode } from 'react';
 import { GroupHeader, GroupHeaderGQLData } from '../Group/GroupHeader';
 import { UserListElement, UserListElementGQLData } from '../User/UserListElement';
+
+const GroupInfoElement = ({ title, child }: { title: string, child: ReactNode }) => {
+  return (
+    <>
+      <h1 className='text-xl font-bold'>{title}</h1>
+      {child}
+    </>
+  );
+};
 
 export const GroupInfo = ({ groupId }: GroupInfoProps) => {
   const { data, loading, error } = useQuery<GroupInfoQueryGQLData>(
@@ -28,12 +38,9 @@ export const GroupInfo = ({ groupId }: GroupInfoProps) => {
       <GroupHeader group={data!.group} />
       <div className='flex flex-col gap-2'>
         {/* TODO: remove reapeating code here */}
-        <h1 className='text-xl font-bold'>Description</h1>
-        <p>{description}</p>
-        <h1 className='text-xl font-bold'>Creator user</h1>
-        <UserListElement user={data!.group.creatorUser} />
-        <h1 className='text-xl font-bold'>Created at</h1>
-        <p>
+        <GroupInfoElement title='Description' child={<p>{description}</p>} />
+        <GroupInfoElement title='Creator user' child={<UserListElement user={data!.group.creatorUser} />} />
+        <GroupInfoElement title='Created at' child={<p>
           {new Date(createdAt).toLocaleDateString('en-us', {
             weekday: 'long',
             year: 'numeric',
@@ -41,11 +48,22 @@ export const GroupInfo = ({ groupId }: GroupInfoProps) => {
             day: 'numeric',
           })}
         </p>
-        <p className='font-bold'>
+        } />
+
+        {/* <p className='font-bold'>
           {visibility === 'hidden'
             ? 'This group is visible to members only'
             : 'This group is visible to everyone'}
+        </p> */}
+
+        <GroupInfoElement title='Visibility' child={<p className='font-bold'>
+          {visibility === 'hidden'
+            ? 'This group is visible to members only'
+            : visibility === 'visible'
+              ? 'This group is visible to everyone'
+              : 'This group is open to everyone'}
         </p>
+        } />
       </div>
     </div>
   );
@@ -76,7 +94,7 @@ type GroupInfoQueryGQLData = {
     description: string;
     creatorUser: UserListElementGQLData;
     createdAt: string;
-    visibility: 'visible' | 'hidden';
+    visibility: 'visible' | 'hidden' | 'open';
   } & GroupHeaderGQLData;
 };
 

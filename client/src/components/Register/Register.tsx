@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { gql, useMutation } from '@apollo/client';
 import { Input, Button, Textarea, Link } from 'react-daisyui';
+import { showNotification } from '../../utilities/Notification';
 
 const REGISTER_MUTATION = gql`
   mutation Register($user: UserInput!) {
@@ -60,14 +61,17 @@ export const Register = () => {
             intro,
           },
         },
+        onError: (err) => {
+          console.error(err);
+          showNotification({
+            title: 'Error',
+            description: 'An error occurred while registering',
+            backgroundColor: '#ff0000',
+            textColor: '#fff',
+            borderColor: '#ff0000',
+          });
+        },
       });
-
-      // check if registration was successful
-      if (!data) {
-        // TODO: make a toast
-        alert('Registration failed');
-        return;
-      }
 
       // store the token in local storage
       localStorage.setItem('token', data!.register.token);

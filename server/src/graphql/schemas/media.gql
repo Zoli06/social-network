@@ -8,7 +8,8 @@ type Media {
 }
 
 input MediaInput {
-  url: String!
+  # url: String!
+  file: Upload!
   caption: String
 }
 

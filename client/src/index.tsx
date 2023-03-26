@@ -13,13 +13,14 @@ import { setContext } from '@apollo/client/link/context';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
 import './index.scss';
+import { createUploadLink } from 'apollo-upload-client';
 
 const getAuthToken = () => {
   const token = localStorage.getItem('token');
   return token;
 };
 
-const httpLink = createHttpLink({
+const httpLink = createUploadLink({
   uri: `http://${window.location.hostname}:8000/graphql`,
 });
 
@@ -28,6 +29,7 @@ const wsLink = new GraphQLWsLink(
     url: `ws://${window.location.hostname}:8000/graphql`,
     connectionParams: {
       Authorization: `Bearer ${getAuthToken()}`,
+      'Apollo-Require-Preflight': 'true'
     },
   })
 );
