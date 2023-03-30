@@ -14,21 +14,29 @@ import { createClient } from 'graphql-ws';
 import './index.scss';
 import { createUploadLink } from 'apollo-upload-client';
 
+const VARIABLES_TO_CHECK = ['REACT_APP_API_URL', 'REACT_APP_WS_URL', 'REACT_APP_DEBUG_VERSION'];
+
+VARIABLES_TO_CHECK.forEach((variable) => {
+  if (!process.env[variable]) {
+    throw new Error(`Environment variable ${variable} is not defined`);
+  }
+});
+
 const getAuthToken = () => {
   const token = localStorage.getItem('token');
   return token;
 };
 
 const httpLink = createUploadLink({
-  uri: `http://${window.location.hostname}:8000/graphql`,
+  uri: process.env.REACT_APP_API_URL,
 });
 
 const wsLink = new GraphQLWsLink(
   createClient({
-    url: `ws://${window.location.hostname}:8000/graphql`,
+    url: process.env.REACT_APP_WS_URL!,
     connectionParams: {
       Authorization: `Bearer ${getAuthToken()}`,
-      'Apollo-Require-Preflight': 'true'
+      'Apollo-Require-Preflight': 'true',
     },
   })
 );
@@ -149,7 +157,7 @@ export const cache = new InMemoryCache({
         myPrivateMessagesWithUser: {
           merge(_existing, incoming) {
             return incoming;
-          }
+          },
         },
       },
     },
@@ -176,7 +184,8 @@ const root = ReactDOM.createRoot(
 root.render(
   <StrictMode>
     <ApolloProvider client={client}>
-        <App />
+      <App />
+      <p className='fixed bottom-0 right-0 text-xs text-gray-500'>{process.env.REACT_APP_DEBUG_VERSION}</p>
     </ApolloProvider>
   </StrictMode>
 );

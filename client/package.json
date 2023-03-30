@@ -25,6 +25,7 @@
     "rehype-sanitize": "^5.0.1",
     "remark-gfm": "^3.0.1",
     "sass": "^1.52.1",
+    "serve": "^14.2.0",
     "ts-invariant": "^0.10.3",
     "uuid": "^8.3.2",
     "uuidv4": "^6.2.13",
@@ -34,7 +35,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "serve": "serve -s build -l 8010"
   },
   "eslintConfig": {
     "extends": [
