@@ -27,7 +27,8 @@ ProfileImage.fragments = {
 };
 
 export type ProfileImageGQLData = {
-  profileImage: {
+  userId: string;
+  profileImage?: {
     mediaId: string;
     url: string;
   };
