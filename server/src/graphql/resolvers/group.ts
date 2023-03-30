@@ -260,7 +260,7 @@ const resolvers = {
         await connection.query(
           `SELECT * FROM \`groups\`
         JOIN medias
-        ON index_image_media_id = media_id
+        ON banner_image_media_id = media_id
         WHERE group_id = ?`,
           [group_id]
         )
@@ -345,10 +345,22 @@ const resolvers = {
     async updateGroup(
       _: any,
       {
-        group: { name, visibility, description },
+        group: {
+          name,
+          visibility,
+          description,
+          indexImageMediaId,
+          bannerImageMediaId,
+        },
         groupId,
       }: {
-        group: { name: string; visibility: string; description: string };
+        group: {
+          name: string;
+          visibility: string;
+          description: string;
+          indexImageMediaId: number;
+          bannerImageMediaId: number;
+        };
         groupId: number;
       },
       context: Context
@@ -356,9 +368,22 @@ const resolvers = {
       const { connection } = context;
       await connection.query(
         `UPDATE \`groups\`
-          SET name = ?, visibility = ?, description = ?, updated_at = DEFAULT
+          SET
+            name = ?,
+            visibility = ?,
+            description = ?,
+            updated_at = DEFAULT,
+            index_image_media_id = ?,
+            banner_image_media_id = ?
           WHERE group_id = ?`,
-        [name, visibility, description, groupId]
+        [
+          name,
+          visibility,
+          description,
+          indexImageMediaId,
+          bannerImageMediaId,
+          groupId,
+        ]
       );
       return await resolvers.Query.group({}, { groupId }, context);
     },

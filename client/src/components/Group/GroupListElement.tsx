@@ -7,7 +7,7 @@ export const GroupListElement = ({
   return (
     <a className='flex gap-4' href={`/group/${groupId}`}>
       <Avatar
-        src={indexImage?.url || '/images/default-group-index-image.png'}
+        src={indexImage?.url || '/assets/images/blank-group-index-image.webp'}
         shape='circle'
         size='sm'
       />

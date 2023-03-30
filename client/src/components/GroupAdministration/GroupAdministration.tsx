@@ -29,7 +29,7 @@ export const GroupAdministration = ({ groupId }: GroupAdministrationProps) => {
   }
 
   return (
-    <div>
+    <div className='max-w-2xl'>
       <div className='mb-2'>
         <a href={`/group/${groupId}`}>
           <Button>Back to group</Button>
@@ -42,9 +42,7 @@ export const GroupAdministration = ({ groupId }: GroupAdministrationProps) => {
       <div className='bg-black/20 p-4 rounded-md min-w-0 md:min-w-[30rem]'>
         <h1 className='text-2xl font-bold text-center'>Group Administration</h1>
         <h2 className='text-2xl font-bold text-center'>{data!.group.name}</h2>
-        <h2 className='text-xl font-bold text-center'>Permissions</h2>
         <GroupMembersAdministration group={data!.group} />
-        <h2 className='text-xl font-bold text-center mt-4'>Settings</h2>
         <GroupSettings group={data!.group} />
       </div>
     </div>

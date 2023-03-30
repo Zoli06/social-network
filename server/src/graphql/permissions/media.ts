@@ -5,7 +5,7 @@ export default {
   // TODO: When media is fully implemented, add permissions for media
   // Maybe I will need to add new columns to the 'medias' table
   Query: {
-    media: isAuthenticated,
+    media: and(isAuthenticated, isMediaOwner),
   },
   Mutation: {
     createMedia: isAuthenticated,

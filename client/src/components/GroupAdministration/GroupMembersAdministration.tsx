@@ -23,6 +23,8 @@ export const GroupMembersAdministration = ({
   );
 
   return (
+    <div>
+      <h1 className='text-xl font-bold text-center'>Permissions</h1>
     <div className='flex flex-row gap-4'>
       <div className='w-full'>
         <GroupMemberCategoryAsAdmin
@@ -73,6 +75,7 @@ export const GroupMembersAdministration = ({
           title='Other users'
           noUserDescription='No other users'
         />
+      </div>
       </div>
     </div>
   );

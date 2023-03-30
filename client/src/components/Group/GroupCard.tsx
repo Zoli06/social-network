@@ -5,13 +5,13 @@ export const GroupCard = ({
   group: {
     groupId,
     name,
-    indexImage: { url: indexImageUrl },
+    indexImage,
   },
 }: GroupCardProps) => {
   return (
     <a href={`/group/${groupId}`}>
       <Artboard className='rounded-md cursor-pointer p-4 flex gap-2 w-48'>
-        <Avatar src={indexImageUrl} shape='circle' />
+        <Avatar src={indexImage?.url || '/assets/images/blank-group-index-image.webp'} shape='circle' />
         <h1 className='text-xl font-bold'>{name}</h1>
       </Artboard>
     </a>
@@ -39,7 +39,7 @@ GroupCard.fragments = {
 export type GroupCardGQLData = {
   groupId: number;
   name: string;
-  indexImage: {
+  indexImage?: {
     mediaId: number;
     url: string;
   };
