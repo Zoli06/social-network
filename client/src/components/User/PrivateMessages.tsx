@@ -55,7 +55,7 @@ export const PrivateMessages = ({
           id: cache.identify(user),
           fields: {
             myPrivateMessagesWithUser(existingPrivateMessages = []) {
-              return [...existingPrivateMessages, data!.privateMessage];
+              return [...existingPrivateMessages, data.privateMessage];
             },
           },
         });

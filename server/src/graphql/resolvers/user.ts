@@ -237,7 +237,11 @@ const resolvers = {
       );
       return true;
     },
-    async checkAllNotifications(_: any, __: any, { user, connection }: Context) {
+    async checkAllNotifications(
+      _: any,
+      __: any,
+      { user, connection }: Context
+    ) {
       await connection.query(
         `UPDATE notifications as n
         JOIN user_notifications as nuc
@@ -517,7 +521,7 @@ const resolvers = {
     ) {
       const { user, connection } = context;
 
-      return (
+      const privateMessages = (
         await connection.query(
           `SELECT * FROM private_messages
           WHERE (sender_user_id = ? AND receiver_user_id = ?) OR (sender_user_id = ? AND receiver_user_id = ?)
@@ -525,6 +529,11 @@ const resolvers = {
           [user.userId, user_id, user_id, user.userId]
         )
       )[0];
+
+      return privateMessages.map((privateMessage: any) => ({
+        ...privateMessage,
+        text: privateMessage.is_deleted ? '' : privateMessage.text,
+      }));
     },
     async groupRelationships(
       { user_id }: { user_id: number },
