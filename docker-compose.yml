@@ -4,17 +4,16 @@ services:
   client: # Name of our service
     build: ./client # path to dockerfile
     ports: # Port binding to host from docker container
-      - "8010:8010" # Bind port 3000 of host to 3000 of container
+      - '8010:8010' # Bind port 8010 of host to 8010 of container
     container_name: client
     restart: always # What to do if container crashes
     links:
       - server
   # Create server container
   server:
-    # Create server container  
     build: ./server
     ports:
-      - "8000:8000"
+      - '8000:8000'
     container_name: server
     restart: always
     links:
@@ -23,14 +22,16 @@ services:
   db:
     image: mysql
     ports:
-    - "3306:3306"
+      - '3306:8306'
     container_name: database
     restart: always
-    # volumes:
-    # - ./db.sql:/docker-entrypoint-initdb.d/dump.sql
+    volumes:
+      - ./database/db.sql:/docker-entrypoint-initdb.d/dump.sql
     # Set environment variables
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: social_network
-      MYSQL_USER: social_network_backend
-      MYSQL_PASSWORD: social_network_backend
+    # environment:
+    #   MYSQL_ROOT_PASSWORD: root
+    #   MYSQL_DATABASE: social_network
+    #   MYSQL_USER: social_network_backend
+    #   MYSQL_PASSWORD: social_network_backend
+    env_file:
+      - ./database/.env

@@ -13,4 +13,4 @@ COPY . .
 # Expose port to access server
 EXPOSE 8000
 # Command to run our app
-CMD [ "npm", "run", "live"]
+CMD [ "npm", "start" ]

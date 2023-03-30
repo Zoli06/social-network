@@ -28,7 +28,8 @@
     "ws": "^8.12.0"
   },
   "scripts": {
-    "start": "node src/server.ts",
+    "dev": "ts-node dist/server.js",
+    "start": "ts-node --transpile-only src/server.ts",
     "live": "nodemon src/server.ts --ignore-watch node_modules"
   },
   "name": "server",

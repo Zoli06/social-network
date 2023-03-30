@@ -14,4 +14,5 @@ COPY . .
 # Expose port to access server
 EXPOSE 8010
 # Command to run our app
-CMD [ "npm", "start" ]
+# npm build then npm serve
+CMD [ "sh", "-c", "npm run build && npm run serve" ]
