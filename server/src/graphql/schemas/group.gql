@@ -55,6 +55,8 @@ input GroupInput {
   name: String!
   description: String
   visibility: Visibility!
+  indexImageMediaId: ID
+  bannerImageMediaId: ID
 }
 
 type Query {

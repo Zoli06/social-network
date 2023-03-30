@@ -23,8 +23,8 @@ export const GroupHeader = ({
   const isAdmin = myRelationShipWithGroupType === 'admin';
   const isCreator = creatorUser.userId === loggedInUserId;
 
-  const indexImageUrl = indexImage?.url || '/images/default-group-index-image.png';
-  const bannerImageUrl = bannerImage?.url || '/images/default-group-banner-image.png';
+  const indexImageUrl = indexImage?.url || '/assets/images/blank-group-index-image.webp';
+  const bannerImageUrl = bannerImage?.url || '/assets/images/blank-group-banner-image.webp';
 
   return (
     <div className='w-full'>
