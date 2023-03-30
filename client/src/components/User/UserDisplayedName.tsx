@@ -18,7 +18,7 @@ export const UserDisplayedName = ({
         {(() => {
           if (points > 0) return `+${points}`;
           // Negative sign already in the variable
-          if (points < 0) return `${points}`;
+          if (points < 0) return points;
           return `0`;
         })()}
       </span>
