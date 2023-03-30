@@ -2,6 +2,7 @@ import { useContext } from 'react';
 import { gql, useMutation } from '@apollo/client';
 import { openEditor } from '../Editor/Editor';
 import { UserContext } from '../../App';
+import { SvgButton } from '../../utilities/SvgButton';
 
 const EDIT_PRIVATE_MESSAGE_MUTATION = gql`
   mutation EditPrivateMessageMutation(
@@ -10,7 +11,9 @@ const EDIT_PRIVATE_MESSAGE_MUTATION = gql`
     editPrivateMessage(privateMessage: $privateMessage) {
       privateMessageId
       text
+      isDeleted
       createdAt
+      updatedAt
     }
   }
 `;
@@ -32,21 +35,23 @@ export const PrivateMessageActions = ({
           text() {
             return editedPrivateMessage.text;
           },
+          updatedAt() {
+            return editedPrivateMessage.updatedAt;
+          },
         },
       });
     },
   });
   const [deletePrivateMessage] = useMutation(DELETE_PRIVATE_MESSAGE_MUTATION, {
     update(cache) {
-      // set isDeleted to true
       cache.modify({
         id: cache.identify(privateMessage),
         fields: {
           isDeleted() {
             return true;
           }
-        }
-      })
+        },
+      });
     },
   });
 
@@ -54,26 +59,10 @@ export const PrivateMessageActions = ({
 
   // TODO: show icons instead text
   return (
-    <div>
+    <div className='flex gap-2'>
       {privateMessage.senderUser.userId === userId && (
         <>
-          <button
-            onClick={() => {
-              openEditor((text: string) => {
-                editPrivateMessage({
-                  variables: {
-                    privateMessage: {
-                      privateMessageId: privateMessage.privateMessageId,
-                      text,
-                    },
-                  },
-                });
-              }, privateMessage.text);
-            }}
-          >
-            Edit
-          </button>
-          <button
+          <SvgButton
             onClick={() => {
               deletePrivateMessage({
                 variables: {
@@ -81,9 +70,29 @@ export const PrivateMessageActions = ({
                 },
               });
             }}
-          >
-            Delete
-          </button>
+            icon='delete'
+            customClass='!h-5 !w-5'
+          />
+          <SvgButton
+            onClick={() => {
+              openEditor(
+                (text: string) => {
+                  editPrivateMessage({
+                    variables: {
+                      privateMessage: {
+                        privateMessageId: privateMessage.privateMessageId,
+                        text,
+                      },
+                    },
+                  });
+                },
+                privateMessage.text,
+                false
+              );
+            }}
+            icon='edit'
+            customClass='!h-5 !w-5'
+          />
         </>
       )}
     </div>
@@ -95,6 +104,7 @@ PrivateMessageActions.fragments = {
     fragment PrivateMessageActions on PrivateMessage {
       privateMessageId
       text
+      isDeleted
       senderUser {
         userId
       }
@@ -105,6 +115,7 @@ PrivateMessageActions.fragments = {
 export type PrivateMessageActionsGQLData = {
   privateMessageId: string;
   text: string;
+  isDeleted: boolean;
   senderUser: {
     userId: string;
   };

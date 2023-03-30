@@ -31,7 +31,7 @@ export const resolvers = {
           [privateMessageId]
         )
       )[0][0];
-      return privateMessage;
+      return { ...privateMessage, text: privateMessage.is_deleted ? '' : privateMessage.text };
     },
   },
   Mutation: {
@@ -87,8 +87,9 @@ export const resolvers = {
     ) => {
       const { connection, pubsub } = context;
 
+      // TODO: move updated_at to mysql event
       await connection.query(
-        'UPDATE private_messages SET text = ? WHERE private_message_id = ?',
+        'UPDATE private_messages SET text = ?, updated_at = default WHERE private_message_id = ?',
         [text, privateMessageId]
       );
 

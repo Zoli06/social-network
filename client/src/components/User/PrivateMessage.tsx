@@ -4,7 +4,7 @@ import { ChatBubble } from 'react-daisyui';
 import { UserContext } from '../../App';
 import {
   PrivateMessageActions,
-  PrivateMessageActionsGQLData
+  PrivateMessageActionsGQLData,
 } from './PrivateMessageActions';
 
 export const PrivateMessage = ({
@@ -22,42 +22,43 @@ export const PrivateMessage = ({
           '/assets/images/blank-profile-image.webp'
         }
       />
-      <ChatBubble.Message color={isMe ? 'primary' : undefined} className='max-w-md'>
-        {isDeleted ?
-          <i>Message deleted</i> :
-          text
-        }
-      </ChatBubble.Message>
-      <div className='flex justify-end'>
-        <PrivateMessageActions privateMessage={privateMessage} />
+      <div className='flex items-center gap-2'>
+        <div className={isMe ? '' : 'hidden'}>
+          <PrivateMessageActions privateMessage={privateMessage} />
+        </div>
+        <ChatBubble.Message
+          color={isMe ? 'primary' : undefined}
+          className='max-w-md'
+        >
+          {isDeleted ? <i>Message deleted</i> : text}
+        </ChatBubble.Message>
       </div>
-      <ChatBubble.Footer>
-        {
-          (() => {
-            const date = new Date(createdAt);
-            const dateNow = new Date();
-            const diff = dateNow.getTime() - date.getTime();
-            const diffDays = Math.floor(diff / (1000 * 3600 * 24));
-            const diffHours = Math.floor(diff / (1000 * 3600));
-            const diffMinutes = Math.floor(diff / (1000 * 60));
-            const diffSeconds = Math.floor(diff / 1000);
+      <ChatBubble.Time>
+        {(() => {
+          const date = new Date(createdAt);
+          const dateNow = new Date();
+          const diff = dateNow.getTime() - date.getTime();
+          const diffDays = Math.floor(diff / (1000 * 3600 * 24));
+          const diffHours = Math.floor(diff / (1000 * 3600));
+          const diffMinutes = Math.floor(diff / (1000 * 60));
+          const diffSeconds = Math.floor(diff / 1000);
 
-            if (diffDays > 0) {
-              return `${diffDays} days ago`;
-            }
-            if (diffHours > 0) {
-              return `${diffHours} hours ago`;
-            }
-            if (diffMinutes > 0) {
-              return `${diffMinutes} minutes ago`;
-            }
-            if (diffSeconds > 0) {
-              return `${diffSeconds} seconds ago`;
-            }
-          })()
-        }
+          if (diffDays > 0) {
+            return `${diffDays} day(s) ago`;
+          }
+          if (diffHours > 0) {
+            return `${diffHours} hour(s) ago`;
+          }
+          if (diffMinutes > 0) {
+            return `${diffMinutes} minute(s) ago`;
+          }
+          if (diffSeconds > 0) {
+            return `${diffSeconds} second(s) ago`;
+          }
+          return 'Now';
+        })()}
         {updatedAt > createdAt && ' (edited)'}
-      </ChatBubble.Footer>
+      </ChatBubble.Time>
     </ChatBubble>
   );
 };
