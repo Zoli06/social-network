@@ -108,7 +108,7 @@ export const UserActions = ({ isMe, user }: UserActionsProps) => {
         </a>
       )}
       {!isMe && (
-        <div className='flex flex-col gap-2'>
+        <div className='flex flex-col gap-2 items-center'>
           <>
             {relationshipType === 'none' && (
               <>
@@ -141,11 +141,9 @@ export const UserActions = ({ isMe, user }: UserActionsProps) => {
             {relationshipType === 'outgoing_blocking' && (
               <Button onClick={handleCancelBlocking}>Cancel Blocking</Button>
             )}
-            {relationshipType === 'incoming_blocking' &&
-              {
-                /* Logged in user is blocked by the user */
-                /* TODO: display some text informing the user that they are blocked */
-              }}
+            {relationshipType === 'incoming_blocking' && (
+              <p>You are blocked by this user</p>
+            )}
           </>
         </div>
       )}
