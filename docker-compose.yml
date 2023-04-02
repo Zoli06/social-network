@@ -43,7 +43,7 @@ services:
       - ./database/.env
     healthcheck:
       # runs on port 8306
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-P", "8306"]
+      test: mysql --user=$$MYSQL_USER --password=$$MYSQL_PASSWORD --port=$$MYSQL_TCP_PORT -e 'SHOW DATABASES;'
       interval: 30s
       timeout: 10s
       retries: 3
