@@ -1,0 +1,39 @@
+version: '3'
+services:
+  client:
+    image: sn_client_dev
+    build:
+      dockerfile: Dockerfile.dev
+    container_name: sn_client_dev
+    volumes:
+      - ./client:/client
+      - client_node_modules:/client/node_modules
+    env_file:
+      - ./client/.env.development
+    ports:
+      - '8010:80'
+
+  server:
+    image: sn_server_dev
+    build:
+      dockerfile: Dockerfile.dev
+    container_name: sn_server_dev
+    volumes:
+      - ./server:/server
+      - server_node_modules:/server/node_modules
+    env_file:
+      - ./server/.dev.env
+    ports:
+      - '8000:80'
+
+  db:
+    container_name: sn_db_dev
+    env_file:
+      - ./database/.dev.env
+    volumes:
+      - database_dev:/var/lib/mysql
+
+volumes:
+  client_node_modules:
+  server_node_modules:
+  database_dev:
