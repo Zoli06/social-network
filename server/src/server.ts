@@ -81,7 +81,7 @@ const server = new ApolloServer({
 server.start().then(() => {
   app.use(graphqlUploadExpress({ maxFileSize: 10000000000, maxFiles: 10 }));
   app.use(
-    '/graphql',
+    '',
     cors(),
     json(),
     expressMiddleware(server, {
@@ -93,6 +93,6 @@ server.start().then(() => {
 
   const PORT = parseInt(process.env.PORT!);
   httpServer.listen(PORT, () => {
-    console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
+    console.log(`🚀 Server ready at http://localhost:${PORT}/`);
   });
 });

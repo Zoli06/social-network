@@ -1,1 +1,10 @@
-node_modules/
+.git
+.vscode
+.dockerignore
+.gitignore
+.env
+build
+node_modules
+Dockerfile
+Dockerfile.dev
+Dockerfile.prod

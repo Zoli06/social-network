@@ -1,0 +1,31 @@
+version: '3'
+services:
+  client:
+    image: sn_client_prod
+    build:
+      dockerfile: Dockerfile.prod
+    container_name: sn_client_prod
+    env_file:
+      - ./client/.env.production
+    ports:
+      - "8010:80"
+
+  server:
+    image: sn_server_prod
+    build:
+      dockerfile: Dockerfile.prod
+    container_name: sn_server_prod
+    env_file:
+      - ./server/.prod.env
+    ports:
+      - '8000:80'
+
+  db:
+    container_name: sn_db_prod
+    env_file:
+      - ./database/.prod.env
+    volumes:
+      - database_prod:/var/lib/mysql
+
+volumes:
+  database_prod:

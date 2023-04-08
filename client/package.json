@@ -34,7 +34,7 @@
     "build": "node --max_old_space_size=512 node_modules/.bin/react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "serve": "serve -s build -l 8010"
+    "serve": "serve -s build -l 80"
   },
   "eslintConfig": {
     "extends": [
