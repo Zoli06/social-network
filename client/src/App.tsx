@@ -100,7 +100,6 @@ export function App() {
               />
               <Route path='/create-group' element={<CreateGroupPage />} />
               <Route path='/user/:userId' element={<UserPage />} />
-              {/* TODO: replace this /me/edit */}
               <Route path='/login' element={<LoginPage />} />
               <Route path='/register' element={<RegisterPage />} />
               <Route
