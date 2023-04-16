@@ -1,5 +1,6 @@
 #!/bin/bash
-if [[ $1 = "prod" || $1 = "dev" ]] && [[ $2 = "down" || $2 = "up" ]]; then
+if [[ $1 = "prod" || $1 = "dev" ]] && [[ $2 = "down" || $2 = "up" || $2 = "build" ]]
+then
     cd ..
     fileEnv="docker-compose.${1}.yml"
     downOrUp=$2
@@ -7,5 +8,5 @@ if [[ $1 = "prod" || $1 = "dev" ]] && [[ $2 = "down" || $2 = "up" ]]; then
     echo "Running sudo docker compose -f docker-compose.yml -f $fileEnv $downOrUp $extraArgs"
     sudo docker compose -f docker-compose.yml -f $fileEnv $downOrUp $extraArgs
 else
-    echo 'Need to follow format ./deploy prod|dev down|up'
+    echo 'Need to follow format ./deploy prod|dev down|up|build'
 fi

@@ -56,10 +56,10 @@ export const Notifications = () => {
   if (error) return <div>Error</div>;
 
   return (
-    <div className='overflow-x-auto max-w-xl flex justify-center flex-col items-center pb-2 bg-black/20 p-4 rounded-md relative'>
-      <h1 className='text-2xl font-bold mb-4'>Notifications</h1>
+    <div className='overflow-x-auto max-w-xl flex justify-center flex-col items-center pb-2 bg-black/20 p-4 rounded-md relative min-w-0 md:min-w-[30rem]'>
+      <h1 className='text-2xl font-bold md:mb-4'>Notifications</h1>
       <Button
-        className='md:absolute top-4 right-4 self-start'
+        className='md:absolute md:top-4 md:right-4 md:self-start md:w-auto md:mt-0 md:mb-0 w-full mt-2 mb-2 max-w-xs'
         onClick={() => checkAllNotifications()}
       >
         Check all

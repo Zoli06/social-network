@@ -1,6 +1,7 @@
 version: '3'
 services:
   client:
+    platform: linux/arm64/v8
     image: sn_client_prod
     build:
       dockerfile: Dockerfile.prod
@@ -11,6 +12,7 @@ services:
       - "8010:80"
 
   server:
+    platform: linux/arm64/v8
     image: sn_server_prod
     build:
       dockerfile: Dockerfile.prod
@@ -21,6 +23,7 @@ services:
       - '8000:80'
 
   db:
+    platform: linux/arm64/v8
     container_name: sn_db_prod
     env_file:
       - ./database/.prod.env

@@ -30,55 +30,42 @@ export const Register = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (
-      email.length > 0 &&
-      password.length > 0 &&
-      confirmPassword.length > 0 &&
-      firstName.length > 0 &&
-      lastName.length > 0 &&
-      middleName.length > 0 &&
-      phone.length > 0 &&
-      userName.length > 0 //&&
-      // not necessary
-      // intro.length > 0
-    ) {
-      if (password !== confirmPassword) {
-        alert('Passwords do not match');
-        return;
-      }
-
-      // get the token from the server
-      const { data } = await register({
-        variables: {
-          user: {
-            email,
-            password,
-            firstName,
-            lastName,
-            userName,
-            middleName,
-            mobileNumber: phone,
-            intro,
-          },
-        },
-        onError: (err) => {
-          console.error(err);
-          showNotification({
-            title: 'Error',
-            description: 'An error occurred while registering',
-            backgroundColor: '#ff0000',
-            textColor: '#fff',
-            borderColor: '#ff0000',
-          });
-        },
-      });
-
-      // store the token in local storage
-      localStorage.setItem('token', data!.register.token);
-
-      // redirect to the home page
-      window.location.href = '/';
+    if (password !== confirmPassword) {
+      alert('Passwords do not match');
+      return;
     }
+
+    // get the token from the server
+    const { data } = await register({
+      variables: {
+        user: {
+          email,
+          password,
+          firstName,
+          lastName,
+          userName,
+          middleName,
+          mobileNumber: phone,
+          intro,
+        },
+      },
+      onError: (err) => {
+        console.error(err);
+        showNotification({
+          title: 'Error',
+          description: 'An error occurred while registering',
+          backgroundColor: '#ff0000',
+          textColor: '#fff',
+          borderColor: '#ff0000',
+        });
+      },
+    });
+
+    // store the token in local storage
+    localStorage.setItem('token', data!.register.token);
+
+    // redirect to the home page
+    window.location.href = '/';
   };
 
   return (

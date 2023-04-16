@@ -21,31 +21,29 @@ export const Login = () => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (typeof email === 'string' && typeof password === 'string') {
-      // get the token from the server
-      const { data } = await login({
-        variables: {
-          email,
-          password,
-        },
-        onError: (err) => {
-          console.error(err);
-          showNotification({
-            title: 'Error',
-            description: 'An error occurred while logging in',
-            backgroundColor: '#ff0000',
-            textColor: '#fff',
-            borderColor: '#ff0000',
-          });
-        }
-      });
+    // get the token from the server
+    const { data } = await login({
+      variables: {
+        email,
+        password,
+      },
+      onError: (err) => {
+        console.error(err);
+        showNotification({
+          title: 'Error',
+          description: 'An error occurred while logging in',
+          backgroundColor: '#ff0000',
+          textColor: '#fff',
+          borderColor: '#ff0000',
+        });
+      },
+    });
 
-      // store the token in local storage
-      localStorage.setItem('token', data!.login.token);
+    // store the token in local storage
+    localStorage.setItem('token', data!.login.token);
 
-      // redirect to the home page
-      window.location.href = '/';
-    }
+    // redirect to the home page
+    window.location.href = '/';
   };
 
   return (
