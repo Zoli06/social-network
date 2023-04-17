@@ -221,10 +221,10 @@ CREATE TABLE `notifications` (
   `title` varchar(256) NOT NULL,
   `description` text,
   `url_path` text NOT NULL,
-  `created_at` datetime NOT NULL DEFAULT (now()),
-  `updated_at` datetime NOT NULL DEFAULT (now()),
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`notification_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=237 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=237 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -249,15 +249,15 @@ CREATE TABLE `private_messages` (
   `sender_user_id` int NOT NULL,
   `receiver_user_id` int NOT NULL,
   `text` text NOT NULL,
-  `created_at` datetime NOT NULL DEFAULT (now()),
-  `updated_at` datetime NOT NULL DEFAULT (now()),
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `is_deleted` tinyint(1) NOT NULL DEFAULT (false),
   PRIMARY KEY (`private_message_id`),
   KEY `fk_private_messages_users` (`sender_user_id`),
   KEY `fk_private_messages_users_0` (`receiver_user_id`),
   CONSTRAINT `fk_private_messages_users` FOREIGN KEY (`sender_user_id`) REFERENCES `users` (`user_id`),
   CONSTRAINT `fk_private_messages_users_0` FOREIGN KEY (`receiver_user_id`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -316,7 +316,7 @@ CREATE TABLE `user_notifications` (
   KEY `fk_notification_user_connections_0` (`user_id`),
   CONSTRAINT `fk_notification_user_connections` FOREIGN KEY (`notification_id`) REFERENCES `notifications` (`notification_id`),
   CONSTRAINT `fk_notification_user_connections_0` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
