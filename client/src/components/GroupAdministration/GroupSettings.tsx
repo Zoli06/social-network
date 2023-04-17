@@ -78,7 +78,7 @@ export const GroupSettings = ({
           description,
           visibility,
           indexImageMediaId: indexImage?.mediaId,
-          bannerImage: bannerImage?.mediaId,
+          bannerImageMediaId: bannerImage?.mediaId,
         },
       },
     });
@@ -93,7 +93,7 @@ export const GroupSettings = ({
           description,
           visibility,
           indexImageMediaId: indexImage?.mediaId,
-          bannerImage: bannerImage?.mediaId,
+          bannerImageMediaId: bannerImage?.mediaId,
         },
       },
     });
@@ -193,7 +193,7 @@ export const GroupSettings = ({
         </div>
         <div>
           <SvgButton
-            onClick={() => openEditor(handleEditName, name)}
+            onClick={() => openEditor(handleEditName, name, false)}
             icon='edit'
           />
         </div>
