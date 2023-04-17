@@ -8,7 +8,7 @@ import { PopupWrapper } from '../../utilities/PopupWrapper';
 export let openEditor = (
   _onSubmit: OnSubmit,
   _textValue?: string,
-  markdown?: boolean
+  _markdown?: boolean
 ) => {};
 
 export const Editor = () => {
@@ -17,12 +17,12 @@ export const Editor = () => {
   const [onSubmit, setOnSubmit] = useState<OnSubmit>(() => () => {});
   const [displayEditor, setDisplayEditor] = useState(false);
 
-  openEditor = (_onSubmit, _textValue = '', markdown = true) => {
+  openEditor = (_onSubmit, _textValue = '', _markdown = true) => {
     setTextValue(_textValue);
     // Bit of hack
     // https://medium.com/swlh/how-to-store-a-function-with-the-usestate-hook-in-react-8a88dd4eede1
     setOnSubmit(() => (textValue: string) => _onSubmit(textValue));
-    setMarkdown(markdown);
+    setMarkdown(_markdown);
     setDisplayEditor(true);
   };
 
@@ -60,7 +60,7 @@ export const Editor = () => {
             />
           )}
         </div>
-        <div className={`md:w-3/4 w-full grid md:grid-cols-2 grid-cols-1 gap-4 ${markdown ? '' : 'max-w-md'}`}>
+        <div className={`md:w-3/4 w-full grid md:grid-cols-2 grid-cols-1 gap-4 ${markdown ? 'max-w-2xl' : 'max-w-md'}`}>
           <Button onClick={handleClose} className='btn-secondary'>
             Cancel
           </Button>
