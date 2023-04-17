@@ -310,7 +310,7 @@ export const EditProfile = () => {
             <Button
               type='button'
               color='secondary'
-              className='flex-grow'
+              className={`flex-grow ${profileImageRef.current?.value ? '' : 'hidden'}`}
               onClick={() => {
                 profileImageRef.current?.value &&
                   (profileImageRef.current.value = '');
