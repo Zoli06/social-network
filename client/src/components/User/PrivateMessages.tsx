@@ -141,7 +141,7 @@ export const PrivateMessages = ({
       {user.myPrivateMessagesWithUser.length > 0 && (
         <div>
           <h1 className='text-xl font-bold text-center'>Private Messages</h1>
-          <div className='flex flex-col'>
+          <div className='flex flex-col max-h-[60rem] overflow-y-scroll pr-2'>
             {user.myPrivateMessagesWithUser.map((privateMessage) => (
               <div key={privateMessage.privateMessageId}>
                 <PrivateMessage privateMessage={privateMessage} />
