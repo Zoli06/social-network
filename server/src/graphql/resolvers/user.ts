@@ -79,7 +79,7 @@ const resolvers = {
             lastName,
             middleName,
             userName,
-            mobileNumber,
+            mobileNumber || null,
             email,
             await bcrypt.hash(password, 10),
             intro,
@@ -165,7 +165,7 @@ const resolvers = {
           lastName,
           middleName,
           userName,
-          mobileNumber,
+          mobileNumber || null,
           email,
           password ? await bcrypt.hash(password, 10) : _user.password,
           intro,
@@ -229,9 +229,9 @@ const resolvers = {
       // TODO: auto update updated_at in database
       await connection.query(
         `UPDATE notifications as n
-        JOIN user_notifications as nuc
-        ON nuc.notification_id = n.notification_id
-        SET nuc.seen_at = NOW(), n.updated_at = DEFAULT
+        JOIN user_notifications as un
+        ON un.notification_id = n.notification_id
+        SET un.seen_at = NOW(), n.updated_at = DEFAULT
         WHERE n.notification_id = ?`,
         [notificationId]
       );
@@ -244,10 +244,10 @@ const resolvers = {
     ) {
       await connection.query(
         `UPDATE notifications as n
-        JOIN user_notifications as nuc
-        ON nuc.notification_id = n.notification_id
-        SET nuc.seen_at = NOW(), updated_at = DEFAULT
-        WHERE nuc.user_id = ?`,
+        JOIN user_notifications as un
+        ON un.notification_id = n.notification_id
+        SET un.seen_at = NOW(), n.updated_at = DEFAULT
+        WHERE un.user_id = ?`,
         [user.userId]
       );
       return true;

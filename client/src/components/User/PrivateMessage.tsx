@@ -23,7 +23,7 @@ export const PrivateMessage = ({
         }
       />
       <div className='flex items-center gap-2'>
-        <div className={isMe ? '' : 'hidden'}>
+        <div className={isMe && !isDeleted ? '' : 'hidden'}>
           <PrivateMessageActions privateMessage={privateMessage} />
         </div>
         <ChatBubble.Message
