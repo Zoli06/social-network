@@ -27,11 +27,14 @@ export const resolvers = {
     ) => {
       const privateMessage = (
         await connection.query(
-          'SELECT * FROM private_messages WHERE private_message_id = ?',
+          `SELECT * FROM private_messages WHERE private_message_id = ?`,
           [privateMessageId]
         )
       )[0][0];
-      return { ...privateMessage, text: privateMessage.is_deleted ? '' : privateMessage.text };
+      return {
+        ...privateMessage,
+        text: privateMessage.is_deleted ? '' : privateMessage.text,
+      };
     },
   },
   Mutation: {
@@ -45,21 +48,15 @@ export const resolvers = {
       const { user, connection, pubsub, sendNotifications } = context;
       const privateMessageId = (
         await connection.query(
-          'INSERT INTO private_messages (sender_user_id, receiver_user_id, text) VALUES (?, ?, ?)',
+          `INSERT INTO private_messages (sender_user_id, receiver_user_id, text) VALUES (?, ?, ?)`,
           [user.userId, receiverUserId, text]
         )
       )[0].insertId;
 
-      const privateMessage = await resolvers.Query.privateMessage(
-        _,
-        { privateMessageId },
-        context
-      );
-
       pubsub.publish(
         `PRIVATE_MESSAGE_ADDED_FROM_${user.userId}_TO_${receiverUserId}`,
         {
-          privateMessageAdded: privateMessage.private_message_id,
+          privateMessageAdded: privateMessageId,
         }
       );
 
@@ -76,7 +73,11 @@ export const resolvers = {
         urlPath: `/user/${user.userId}`,
       });
 
-      return privateMessage;
+      return await resolvers.Query.privateMessage(
+        _,
+        { privateMessageId },
+        context
+      );
     },
     editPrivateMessage: async (
       _: any,
@@ -89,7 +90,7 @@ export const resolvers = {
 
       // TODO: move updated_at to mysql event
       await connection.query(
-        'UPDATE private_messages SET text = ?, updated_at = default WHERE private_message_id = ?',
+        `UPDATE private_messages SET text = ?, updated_at = DEFAULT WHERE private_message_id = ?`,
         [text, privateMessageId]
       );
 
@@ -115,13 +116,13 @@ export const resolvers = {
     ) => {
       const privateMessage = (
         await connection.query(
-          'SELECT * FROM private_messages WHERE private_message_id = ?',
+          `SELECT * FROM private_messages WHERE private_message_id = ?`,
           [privateMessageId]
         )
       )[0][0];
 
       await connection.query(
-        'UPDATE private_messages SET text = "", is_deleted = 1 WHERE private_message_id = ?',
+        `UPDATE private_messages SET text = "", is_deleted = 1 WHERE private_message_id = ?`,
         [privateMessageId]
       );
 
