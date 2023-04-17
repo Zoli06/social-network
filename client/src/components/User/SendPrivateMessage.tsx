@@ -43,7 +43,7 @@ export const SendPrivateMessage = ({ user }: SendPrivateMessageProps) => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (text.length < 0) {
+    if (text.length > 0) {
       await sendPrivateMessage({
         variables: {
           privateMessage: {
