@@ -30,6 +30,8 @@ services:
     container_name: sn_db_dev
     env_file:
       - ./database/.dev.env
+    ports:
+      - 3306:3306
     volumes:
       - database_dev:/var/lib/mysql
 
