@@ -23,8 +23,27 @@ enum PermissionToMessageEnum {
 }
 
 export const MessageModify = ({ message: { messageId, text, myPermissionToMessage } }: MessageModifyProps) => {
-  const [deleteMessage] = useMutation(DELETE_MESSAGE_MUTATION);
-  const [editMessage] = useMutation(EDIT_MESSAGE_MUTATION);
+  const [deleteMessage] = useMutation(DELETE_MESSAGE_MUTATION, {
+    update(cache) {
+      cache.evict({ id: cache.identify({ __typename: "Message", messageId }) });
+      return null;
+    },
+  });
+  const [editMessage] = useMutation(EDIT_MESSAGE_MUTATION, {
+    update(cache, { data: { editMessage } }) {
+      cache.modify({
+        id: cache.identify({
+          __typename: "Message",
+          messageId,
+        }),
+        fields: {
+          text: () => editMessage.text,
+        },
+      });
+
+      return null;
+    },
+  });
 
   const handleEditMessage = (text: string) => {
     editMessage({
