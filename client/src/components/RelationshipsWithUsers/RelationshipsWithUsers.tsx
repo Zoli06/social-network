@@ -19,12 +19,17 @@ export const RelationshipsWithUsers = () => {
     return <p>Error</p>;
   }
 
-  const { incomingFriendRequests, outgoingFriendRequests, blockedUsers } =
+  const { incomingFriendRequests, outgoingFriendRequests, blockedUsers, friends } =
     data!.me;
 
   return (
     <div className='bg-black/20 rounded-md p-4 flex flex-col gap-4'>
       <h1 className='text-3xl font-bold text-center'>My relationships with users</h1>
+      <RelationshipWithUserCategory
+        title='Friends'
+        users={friends.map(({ targetUser }) => targetUser)}
+        noUsersMessage='No friends'
+      />
       <RelationshipWithUserCategory
         title='Incoming friend requests'
         users={incomingFriendRequests.map(({ targetUser }) => targetUser)}
@@ -49,6 +54,13 @@ const RELATIONSHIPS_WITH_USERS_QUERY = gql`
   query RelationshipsWithUsers {
     me {
       userId
+
+      friends {
+        targetUser {
+          userId
+          ...RelationshipWithUserCategory
+        }
+      }
 
       incomingFriendRequests {
         targetUser {
@@ -78,6 +90,11 @@ const RELATIONSHIPS_WITH_USERS_QUERY = gql`
 
 type RelationshipsWithUsersQueryGQLData = {
   me: {
+    friends: {
+      targetUser: {
+        userId: string;
+      } & RelationshipWithUserCategoryGQLData;
+    }[];
     incomingFriendRequests: {
       targetUser: {
         userId: string;
