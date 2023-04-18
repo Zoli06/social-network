@@ -44,9 +44,6 @@ export const HomeMessages = ({
   const [fetchMoreTopMessages] = useLazyQuery(FetchMoreTopMessages);
   const [fetchMoreTrendingMessages] = useLazyQuery(FetchMoreTrendingMessages);
 
-  const [noMoreTopMessages, setNoMoreTopMessages] = useState(false);
-  const [noMoreTrendingMessages, setNoMoreTrendingMessages] = useState(false);
-
   const [topMessagesPage, setTopMessagesPage] = useState(1);
   const [trendingMessagesPage, setTrendingMessagesPage] = useState(1);
 
@@ -92,21 +89,15 @@ export const HomeMessages = ({
                 );
               });
 
-              if (newMessages.length === 0) {
-                setNoMoreTopMessages(true);
-              }
-
               setIsFetching(false);
               return [...existingMessages, ...newMessages];
             },
           },
         });
-
       },
     });
   }, [
     fetchMoreTopMessages,
-    noMoreTopMessages,
     topMessagesLimit,
     topMessagesOffset,
     topMessagesPage,
@@ -132,21 +123,15 @@ export const HomeMessages = ({
                 }
               );
 
-              if (newMessages.length === 0) {
-                setNoMoreTrendingMessages(true);
-              }
-
               setIsFetching(false);
               return [...existingMessages, ...newMessages];
             },
           },
         });
-
       },
     });
   }, [
     fetchMoreTrendingMessages,
-    noMoreTrendingMessages,
     trendingMessagesLimit,
     trendingMessagesOffset,
     trendingMessagesPage,
@@ -165,16 +150,38 @@ export const HomeMessages = ({
         setIsFetching(true);
 
         if (activeTab === 0) {
-          setTopMessagesPage(topMessagesPage + 1);
+          if (
+            topMessagesPage * topMessagesLimit + topMessagesOffset <=
+            topMessages.length
+          ) {
+            setTopMessagesPage(topMessagesPage + 1);
+          }
         } else {
-          setTrendingMessagesPage(trendingMessagesPage + 1);
+          if (
+            trendingMessagesPage * trendingMessagesLimit +
+              trendingMessagesOffset <=
+            topMessages.length
+          ) {
+            setTrendingMessagesPage(trendingMessagesPage + 1);
+          }
         }
       }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [activeTab, fetchWhenScrollingTo, isFetching, topMessagesPage, trendingMessagesPage]);
+  }, [
+    activeTab,
+    fetchWhenScrollingTo,
+    isFetching,
+    topMessages.length,
+    topMessagesLimit,
+    topMessagesOffset,
+    topMessagesPage,
+    trendingMessagesLimit,
+    trendingMessagesOffset,
+    trendingMessagesPage,
+  ]);
 
   return (
     <>
