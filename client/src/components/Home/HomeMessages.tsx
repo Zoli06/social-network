@@ -3,6 +3,7 @@ import { Messages, MessagesGQLData } from '../Messages/Messages';
 import { useEffect, useState } from 'react';
 import { Tabs } from 'react-daisyui';
 import { cache } from '../../index';
+import { HOME_QUERY } from './Home';
 
 const HomeMessagesCategory = ({
   title,
@@ -79,21 +80,31 @@ export const HomeMessages = ({
         limit: topMessagesLimit,
       },
       onCompleted: (data) => {
-        cache.modify({
-          fields: {
-            topMessages(existingMessages = []) {
-              const newMessages = data.topMessages.filter((newMessage: any) => {
-                return !existingMessages.some(
-                  (existingMessage: any) =>
-                    existingMessage.messageId === newMessage.messageId
-                );
-              });
-
-              setIsFetching(false);
-              return [...existingMessages, ...newMessages];
+        cache.updateQuery(
+          {
+            query: HOME_QUERY,
+            variables: {
+              topMessagesLimit,
+              topMessagesOffset,
+              trendingMessagesLimit,
+              trendingMessagesOffset,
             },
           },
-        });
+          (existingData: any) => {
+            const newMessages = data.topMessages.filter((newMessage: any) => {
+              return !existingData.topMessages.some(
+                (existingMessage: any) =>
+                  existingMessage.messageId === newMessage.messageId
+              );
+            });
+
+            setIsFetching(false);
+            return {
+              ...existingData,
+              topMessages: [...existingData.topMessages, ...newMessages],
+            };
+          }
+        );
       },
     });
   }, [
@@ -101,6 +112,8 @@ export const HomeMessages = ({
     topMessagesLimit,
     topMessagesOffset,
     topMessagesPage,
+    trendingMessagesLimit,
+    trendingMessagesOffset,
   ]);
 
   useEffect(() => {
@@ -111,27 +124,42 @@ export const HomeMessages = ({
         limit: trendingMessagesLimit,
       },
       onCompleted: (data) => {
-        cache.modify({
-          fields: {
-            trendingMessages(existingMessages = []) {
-              const newMessages = data.trendingMessages.filter(
-                (newMessage: any) => {
-                  return !existingMessages.some(
-                    (existingMessage: any) =>
-                      existingMessage.messageId === newMessage.messageId
-                  );
-                }
-              );
-
-              setIsFetching(false);
-              return [...existingMessages, ...newMessages];
+        cache.updateQuery(
+          {
+            query: HOME_QUERY,
+            variables: {
+              topMessagesLimit,
+              topMessagesOffset,
+              trendingMessagesLimit,
+              trendingMessagesOffset,
             },
           },
-        });
+          (existingData: any) => {
+            const newMessages = data.trendingMessages.filter(
+              (newMessage: any) => {
+                return !existingData.trendingMessages.some(
+                  (existingMessage: any) =>
+                    existingMessage.messageId === newMessage.messageId
+                );
+              }
+            );
+
+            setIsFetching(false);
+            return {
+              ...existingData,
+              trendingMessages: [
+                ...existingData.trendingMessages,
+                ...newMessages,
+              ],
+            };
+          }
+        );
       },
     });
   }, [
     fetchMoreTrendingMessages,
+    topMessagesLimit,
+    topMessagesOffset,
     trendingMessagesLimit,
     trendingMessagesOffset,
     trendingMessagesPage,
@@ -147,21 +175,21 @@ export const HomeMessages = ({
       const scrollPercentage = scrollPosition / scrollHeight;
 
       if (scrollPercentage > fetchWhenScrollingTo && !isFetching) {
-        setIsFetching(true);
-
         if (activeTab === 0) {
           if (
             topMessagesPage * topMessagesLimit + topMessagesOffset <=
             topMessages.length
           ) {
+            setIsFetching(true);
             setTopMessagesPage(topMessagesPage + 1);
           }
         } else {
           if (
             trendingMessagesPage * trendingMessagesLimit +
               trendingMessagesOffset <=
-            topMessages.length
+            trendingMessages.length
           ) {
+            setIsFetching(true);
             setTrendingMessagesPage(trendingMessagesPage + 1);
           }
         }
@@ -178,6 +206,7 @@ export const HomeMessages = ({
     topMessagesLimit,
     topMessagesOffset,
     topMessagesPage,
+    trendingMessages.length,
     trendingMessagesLimit,
     trendingMessagesOffset,
     trendingMessagesPage,

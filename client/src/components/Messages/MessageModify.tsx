@@ -1,6 +1,6 @@
-import { gql, useMutation } from "@apollo/client";
-import { SvgButton } from "../../utilities/SvgButton";
-import { openEditor } from "../Editor/Editor";
+import { gql, useMutation } from '@apollo/client';
+import { SvgButton } from '../../utilities/SvgButton';
+import { openEditor } from '../Editor/Editor';
 
 const DELETE_MESSAGE_MUTATION = gql`
   mutation DeleteMessage($messageId: ID!) {
@@ -12,34 +12,44 @@ const EDIT_MESSAGE_MUTATION = gql`
   mutation EditMessageMutation($message: MessageEditInput!) {
     editMessage(message: $message) {
       messageId
+      text
     }
   }
 `;
 
 enum PermissionToMessageEnum {
-  AUTHOR = "AUTHOR",
-  ADMIN = "ADMIN",
-  NONE = "NONE",
+  AUTHOR = 'AUTHOR',
+  ADMIN = 'ADMIN',
+  NONE = 'NONE',
 }
 
-export const MessageModify = ({ message: { messageId, text, myPermissionToMessage } }: MessageModifyProps) => {
+export const MessageModify = ({
+  message: { messageId, text, myPermissionToMessage },
+}: MessageModifyProps) => {
   const [deleteMessage] = useMutation(DELETE_MESSAGE_MUTATION, {
     update(cache) {
-      cache.evict({ id: cache.identify({ __typename: "Message", messageId }) });
+      cache.evict({ id: cache.identify({ __typename: 'Message', messageId }) });
       return null;
     },
   });
   const [editMessage] = useMutation(EDIT_MESSAGE_MUTATION, {
     update(cache, { data: { editMessage } }) {
-      cache.modify({
-        id: cache.identify({
-          __typename: "Message",
-          messageId,
-        }),
-        fields: {
-          text: () => editMessage.text,
+      cache.updateFragment(
+        {
+          id: cache.identify({ __typename: 'Message', messageId }),
+          fragment: gql`
+            fragment EditedMessage on Message {
+              text
+            }
+          `,
         },
-      });
+        (data) => {
+          return {
+            ...data,
+            text: editMessage.text,
+          };
+        }
+      );
 
       return null;
     },
@@ -58,7 +68,7 @@ export const MessageModify = ({ message: { messageId, text, myPermissionToMessag
 
   const myPermissionToMessageAsEnum =
     myPermissionToMessage.toUpperCase() as PermissionToMessageEnum;
-  
+
   return (
     <div className='flex gap-4'>
       {myPermissionToMessageAsEnum === PermissionToMessageEnum.AUTHOR && (
@@ -77,7 +87,11 @@ export const MessageModify = ({ message: { messageId, text, myPermissionToMessag
         <SvgButton
           icon='delete'
           onClick={() => deleteMessage({ variables: { messageId } })}
-          customClass={`${myPermissionToMessageAsEnum === PermissionToMessageEnum.ADMIN ? '!fill-red-500' : ''}`}
+          customClass={`${
+            myPermissionToMessageAsEnum === PermissionToMessageEnum.ADMIN
+              ? '!fill-red-500'
+              : ''
+          }`}
         />
       )}
     </div>
