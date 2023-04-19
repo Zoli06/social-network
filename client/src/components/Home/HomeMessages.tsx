@@ -3,6 +3,7 @@ import { Messages, MessagesGQLData } from '../Messages/Messages';
 import { useEffect, useState } from 'react';
 import { Tabs } from 'react-daisyui';
 import { cache } from '../../index';
+import { HOME_QUERY } from './Home';
 
 const HomeMessagesCategory = ({
   title,
@@ -44,9 +45,6 @@ export const HomeMessages = ({
   const [fetchMoreTopMessages] = useLazyQuery(FetchMoreTopMessages);
   const [fetchMoreTrendingMessages] = useLazyQuery(FetchMoreTrendingMessages);
 
-  const [noMoreTopMessages, setNoMoreTopMessages] = useState(false);
-  const [noMoreTrendingMessages, setNoMoreTrendingMessages] = useState(false);
-
   const [topMessagesPage, setTopMessagesPage] = useState(1);
   const [trendingMessagesPage, setTrendingMessagesPage] = useState(1);
 
@@ -82,34 +80,40 @@ export const HomeMessages = ({
         limit: topMessagesLimit,
       },
       onCompleted: (data) => {
-        cache.modify({
-          fields: {
-            topMessages(existingMessages = []) {
-              const newMessages = data.topMessages.filter((newMessage: any) => {
-                return !existingMessages.some(
-                  (existingMessage: any) =>
-                    existingMessage.messageId === newMessage.messageId
-                );
-              });
-
-              if (newMessages.length === 0) {
-                setNoMoreTopMessages(true);
-              }
-
-              setIsFetching(false);
-              return [...existingMessages, ...newMessages];
+        cache.updateQuery(
+          {
+            query: HOME_QUERY,
+            variables: {
+              topMessagesLimit,
+              topMessagesOffset,
+              trendingMessagesLimit,
+              trendingMessagesOffset,
             },
           },
-        });
+          (existingData: any) => {
+            const newMessages = data.topMessages.filter((newMessage: any) => {
+              return !existingData.topMessages.some(
+                (existingMessage: any) =>
+                  existingMessage.messageId === newMessage.messageId
+              );
+            });
 
+            setIsFetching(false);
+            return {
+              ...existingData,
+              topMessages: [...existingData.topMessages, ...newMessages],
+            };
+          }
+        );
       },
     });
   }, [
     fetchMoreTopMessages,
-    noMoreTopMessages,
     topMessagesLimit,
     topMessagesOffset,
     topMessagesPage,
+    trendingMessagesLimit,
+    trendingMessagesOffset,
   ]);
 
   useEffect(() => {
@@ -120,33 +124,42 @@ export const HomeMessages = ({
         limit: trendingMessagesLimit,
       },
       onCompleted: (data) => {
-        cache.modify({
-          fields: {
-            trendingMessages(existingMessages = []) {
-              const newMessages = data.trendingMessages.filter(
-                (newMessage: any) => {
-                  return !existingMessages.some(
-                    (existingMessage: any) =>
-                      existingMessage.messageId === newMessage.messageId
-                  );
-                }
-              );
-
-              if (newMessages.length === 0) {
-                setNoMoreTrendingMessages(true);
-              }
-
-              setIsFetching(false);
-              return [...existingMessages, ...newMessages];
+        cache.updateQuery(
+          {
+            query: HOME_QUERY,
+            variables: {
+              topMessagesLimit,
+              topMessagesOffset,
+              trendingMessagesLimit,
+              trendingMessagesOffset,
             },
           },
-        });
+          (existingData: any) => {
+            const newMessages = data.trendingMessages.filter(
+              (newMessage: any) => {
+                return !existingData.trendingMessages.some(
+                  (existingMessage: any) =>
+                    existingMessage.messageId === newMessage.messageId
+                );
+              }
+            );
 
+            setIsFetching(false);
+            return {
+              ...existingData,
+              trendingMessages: [
+                ...existingData.trendingMessages,
+                ...newMessages,
+              ],
+            };
+          }
+        );
       },
     });
   }, [
     fetchMoreTrendingMessages,
-    noMoreTrendingMessages,
+    topMessagesLimit,
+    topMessagesOffset,
     trendingMessagesLimit,
     trendingMessagesOffset,
     trendingMessagesPage,
@@ -162,19 +175,42 @@ export const HomeMessages = ({
       const scrollPercentage = scrollPosition / scrollHeight;
 
       if (scrollPercentage > fetchWhenScrollingTo && !isFetching) {
-        setIsFetching(true);
-
         if (activeTab === 0) {
-          setTopMessagesPage(topMessagesPage + 1);
+          if (
+            topMessagesPage * topMessagesLimit + topMessagesOffset <=
+            topMessages.length
+          ) {
+            setIsFetching(true);
+            setTopMessagesPage(topMessagesPage + 1);
+          }
         } else {
-          setTrendingMessagesPage(trendingMessagesPage + 1);
+          if (
+            trendingMessagesPage * trendingMessagesLimit +
+              trendingMessagesOffset <=
+            trendingMessages.length
+          ) {
+            setIsFetching(true);
+            setTrendingMessagesPage(trendingMessagesPage + 1);
+          }
         }
       }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [activeTab, fetchWhenScrollingTo, isFetching, topMessagesPage, trendingMessagesPage]);
+  }, [
+    activeTab,
+    fetchWhenScrollingTo,
+    isFetching,
+    topMessages.length,
+    topMessagesLimit,
+    topMessagesOffset,
+    topMessagesPage,
+    trendingMessages.length,
+    trendingMessagesLimit,
+    trendingMessagesOffset,
+    trendingMessagesPage,
+  ]);
 
   return (
     <>

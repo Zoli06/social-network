@@ -286,6 +286,7 @@ const resolvers = {
               OR gur.type = 'admin'
               OR gur.type = 'member')
           GROUP BY m.message_id
+          HAVING votes > 0
           ORDER BY votes DESC, m.message_id
           LIMIT :limit
           OFFSET :offset`,
@@ -298,7 +299,7 @@ const resolvers = {
       { limit = 10, offset = 0 }: { limit: number; offset: number },
       { connection, user }: Context
     ) {
-      return (
+      const result = (
         await connection.query(
           `SELECT DISTINCT m.*, SUM(v.type = 'up') - SUM(v.type = 'down') AS votes
           FROM messages AS m
@@ -318,12 +319,17 @@ const resolvers = {
               OR gur.type = 'member')
             AND v.created_at > DATE_SUB(NOW(), INTERVAL 1 DAY)
           GROUP BY m.message_id
+          HAVING votes > 0
           ORDER BY votes DESC, m.message_id
           LIMIT :limit
           OFFSET :offset`,
           { limit, offset, userId: user.userId }
         )
       )[0];
+
+      console.log(result);
+
+      return result;
     }
   },
   Mutation: {

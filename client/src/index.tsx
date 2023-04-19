@@ -95,6 +95,20 @@ export const cache = new InMemoryCache({
     }
   },
   typePolicies: {
+    Query: {
+      fields: {
+        topMessages: {
+          merge(_existing, incoming) {
+            return incoming;
+          },
+        },
+        trendingMessages: {
+          merge(_existing, incoming) {
+            return incoming;
+          },
+        },
+      },
+    },
     PrivateMessage: {
       keyFields: ['privateMessageId'],
     },

@@ -46,7 +46,7 @@ export const Home = () => {
   );
 };
 
-const HOME_QUERY = gql`
+export const HOME_QUERY = gql`
   query HomeQuery(
     $topMessagesLimit: Int!
     $topMessagesOffset: Int!
