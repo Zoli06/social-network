@@ -40,7 +40,7 @@ export const GroupHeader = ({
               <Avatar
                 src={indexImageUrl}
                 shape='circle'
-                className='rounded-full border-4 border-white'
+                className='rounded-full border-2 border-white md:[&>div]:h-24 md:[&>div]:w-24 [&>div]:h-14 [&>div]:w-14'
               />
             </a>
             <h1 className='text-2xl font-bold'>{name}</h1>
